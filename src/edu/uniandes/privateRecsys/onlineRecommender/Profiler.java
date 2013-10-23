@@ -49,7 +49,7 @@ public class Profiler extends Observable{
 			
 			
 			//System.out.println(numEvents.intValue());
-			if(numEvents.incrementAndGet()%100000==0){
+			if(numEvents.incrementAndGet()%1000000==0){
 				printStats();
 			}
 		

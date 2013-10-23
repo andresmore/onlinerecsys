@@ -49,8 +49,8 @@ public class GridSearchParameter {
 	
 	public GridSearchParameter(RSDataset data) throws IOException{
 		
-		setAlphaLimits(1,10);
-		setInitialGammaLimits(0.01,0.9);
+		setAlphaLimits(1e-6,1);
+		setInitialGammaLimits(0.01,0.5);
 		setDimensionLimits(5,15);
 		
 		updateParamVectors();

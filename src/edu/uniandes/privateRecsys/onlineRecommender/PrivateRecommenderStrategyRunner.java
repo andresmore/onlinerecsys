@@ -19,21 +19,21 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 	private UserTrainEvent event;
 	private FactorUserItemRepresentation userItemRep;
 	private PrivateRecommenderParallelTrainer trainer;
-	private LearningRateStrategy lambda;
+	private double gamma;
 	
 	private final static Logger LOG = Logger.getLogger(PrivateRecommenderStrategyRunner.class
 		      .getName());
 
 	public PrivateRecommenderStrategyRunner(FactorUserItemRepresentation userItemRep, IUserProfileUpdater userUpdater,
 			IUserItemAggregator userAggregator,
-			IItemProfileUpdater itemProfileUpdater, UserTrainEvent event, PrivateRecommenderParallelTrainer privateRecommenderParallelTrainer, LearningRateStrategy lambda) {
+			IItemProfileUpdater itemProfileUpdater, UserTrainEvent event, PrivateRecommenderParallelTrainer privateRecommenderParallelTrainer, LearningRateStrategy gamma) {
 		this.userItemRep=userItemRep;
 		this.userUpdater=userUpdater;
 		this.userAggregator=userAggregator;
 		this.itemProfileUpdater=itemProfileUpdater;
 		this.event=event;
 		this.trainer=privateRecommenderParallelTrainer;
-		this.lambda=lambda;
+		this.gamma=gamma.getGammaForTime(event.getTime());
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				
 				
 				try {
-					user = userUpdater.processEvent(event,userItemRep,lambda);
+					user = userUpdater.processEvent(event,userItemRep,gamma);
 					if(user==null)
 						ok=false;
 					trainer.updateState(Thread.currentThread().getId(), event,"LOCK-USERUPDATED");
@@ -90,7 +90,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			
 			try {
 				if(ok){
-					itemProfileUpdater.processEvent(event,userItemRep,lambda,user);
+					itemProfileUpdater.processEvent(event,userItemRep,gamma,user);
 					trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
 				}
 			} catch (Exception e) {

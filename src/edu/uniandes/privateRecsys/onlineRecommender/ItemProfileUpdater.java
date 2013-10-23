@@ -17,6 +17,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	private final static Logger LOG = Logger.getLogger(ItemProfileUpdater.class
 		      .getName());
 	
+	private static double REGULARIZATION_CONSTANT=0.02;
 
 	public ItemProfileUpdater() {
 		
@@ -27,7 +28,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	 */
 	@Override
 	public void processEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep, LearningRateStrategy strategy, UserProfile oldUserProfile) throws TasteException {
+			FactorUserItemRepresentation userItemRep, double gamma, UserProfile oldUserProfile) throws TasteException {
 		
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
@@ -37,35 +38,36 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		Vector itemVector = itemProfile.getVector();
-		//UserProfile user=userItemRep.getPublicUserProfile(userId);
+		
 		
 		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
 		
-		int numTrains=userItemRep.getNumberTrainsItem(itemId)+1;
+		//int numTrains=userItemRep.getNumberTrainsItem(itemId)+1;
 		//double lambda=(double)1/(double)numTrains*0.75;
-		double lambda=strategy.getGammaForTime(event.getTimestamp());
+		//double gamma=strategy.getGammaForTime(event.getTimestamp());
 		
 		
 		String[] ratingScale=userItemRep.getRatingScale().getScale();
 		double sum= 0;
 		double sumProb= 0;
-		/*for (int i = 0; i < ratingScale.length; i++) {
+		for (int i = 0; i < ratingScale.length; i++) {
 			Vector userVector = oldUserProfile
 					.getProfileForScale(ratingScale[i]);
 			int prob = ratingScale[i].equals(rating) ? 1 : 0;
 
 			double dotProd = itemVector.dot(userVector);
 			sumProb += dotProd;
-			sum += (prob - dotProd);
+			sum += Math.abs((prob - dotProd));
 
 		}
-		*/
+		
 		
 		Vector userVectorO=oldUserProfile.getProfileForScale(rating);
-		sum+=(1-itemVector.dot(userVectorO));
-		Vector mult=userVectorO.times(sum).times(lambda);
+		//sum+=(1-itemVector.dot(userVectorO));
+		//Vector regularizedVector=userVectorO.times(REGULARIZATION_CONSTANT).times(gamma);
+		Vector mult=userVectorO.times(sum).times(gamma);
 		
-		itemVector = itemVector.plus(mult);
+		itemVector = itemVector.plus(mult);//.minus(regularizedVector);
 		
 		
 		itemVector = VectorProjector

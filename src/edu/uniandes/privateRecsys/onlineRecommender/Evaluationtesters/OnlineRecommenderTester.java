@@ -52,34 +52,35 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 10).startRecommendations();
 			
 			LinkedList<String> results= new LinkedList<>();
-			//String trainSet="data/ml-10M100K/rb.train.sorted";
-			String trainSet="data/netflix/rb.train.sorted";
-			//String testSet="data/ml-10M100K/rb.test.test";
-			String testSet="data/netflix/rb.test.test";
-			//String testCV="data/ml-10M100K/rb.test.cv";
-			String testCV="data/netflix/rb.test.CV";
+			String trainSet="data/ml-10M100K/rb.train.sorted";
+			//String trainSet="data/netflix/rb.train.sorted";
+			String testSet="data/ml-10M100K/rb.test.test";
+			//String testSet="data/netflix/rb.test.test";
+			String testCV="data/ml-10M100K/rb.test.cv";
+			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
-			RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
-			//RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
+			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
+			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
 			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			//AverageDataModel model= new AverageDataModel(new File(trainSet));
 			double delta=0.1;
 			
 			
-			LearningRateStrategy tsCreator=LearningRateStrategy.createWithConstantRate(delta);
+			//LearningRateStrategy tsCreator=LearningRateStrategy.createWithConstantRate(delta);
+			LearningRateStrategy tsCreator=LearningRateStrategy.createDecreasingRate(1e-6, 0.1);
 			int dimensions=5;
 			
 				
 				
 				
 			
-				FactorUserItemRepresentation denseModel= new IncrementalDBFactorUserItemRepresentation(scale, dimensions, false);
+				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
 				UserProfileUpdater userUp= new UserProfileUpdater();
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
-				ErrorReport result=rest.startExperiment(1);
+				ErrorReport result=rest.startExperiment(10);
 				results.add(result.toString());
 			
 			for (String string : results) {

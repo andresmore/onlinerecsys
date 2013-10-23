@@ -21,7 +21,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 	 */
 	@Override
 	public UserProfile processEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep,LearningRateStrategy strategy) throws TasteException {
+			FactorUserItemRepresentation userItemRep,double gamma) throws TasteException {
 		
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
@@ -36,7 +36,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		if(oldUserPrivate!=null){
 	    int numTrains=userItemRep.getNumberTrainsUser(userId)+1;
 	   
-		double lambda=strategy.getGammaForTime(event.getTime());
+		//double gamma=strategy.getGammaForTime(event.getTime());
 		
 		String[] ratingScale=userItemRep.getRatingScale().getScale();
 		HashMap<String, Vector> trainedProfiles= new HashMap<>();
@@ -45,7 +45,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 			int prob=ratingScale[i].equals(rating)?1:0;
 			
 			double dotProd=privateVector.dot(itemVector);
-			dotProd=lambda*(prob-dotProd);
+			dotProd=gamma*(prob-dotProd);
 			Vector privateVectorMult=itemVector.times(dotProd);
 			privateVector=privateVector.plus(privateVectorMult);
 			
