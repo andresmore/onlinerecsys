@@ -27,6 +27,7 @@ public class DenseFactorUserItemRepresentation implements
 	private int fDimensions;
 	private DenseMatrix itemFactors;
 	private DenseMatrix[] privateUserFactors;
+	private DenseMatrix privateUserBias;
 	private DenseMatrix[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -35,6 +36,7 @@ public class DenseFactorUserItemRepresentation implements
 	private ConcurrentHashMap <Long, Long> userId_userPos= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, Long> itemId_itemPos= new ConcurrentHashMap <>();
 	private HashSet<Long> restrictedUserIds;
+	
 
 	public DenseFactorUserItemRepresentation(AverageDataModel model,
 			RatingScale scale, int fDimensions) throws TasteException {
@@ -63,7 +65,7 @@ public class DenseFactorUserItemRepresentation implements
 		 
 		
 	}
-
+//TODO:Init private bias
 	private void createDenseRatingModel(int fDimensions) throws TasteException {
 		int ratingSize=this.ratingScale.getRatingSize();
 		int numUsers= model.getNumUsers();
@@ -73,16 +75,26 @@ public class DenseFactorUserItemRepresentation implements
 		
 		this.privateUserFactors= new DenseMatrix[ratingSize];
 		this.publicUserFactors= new DenseMatrix[ratingSize];
+		this.privateUserBias= new DenseMatrix(numUsers, fDimensions);
+		
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i]= new DenseMatrix(numUsers, fDimensions);
 			PrivateRandomUtils.randomizeMatrix(privateUserFactors[i],false);
 			
 		}
+		
 		VectorProjector.projectUserProfileMatricesIntoSimplex(privateUserFactors,ratingScale, fDimensions);
 		for (int i = 0; i < publicUserFactors.length; i++) {
 			publicUserFactors[i]=(DenseMatrix) privateUserFactors[i].clone();
 			
+		}
+		
+		for (int i = 0; i < privateUserBias.numRows(); i++) {
+			Vector row=privateUserBias.viewRow(i);
+			row=row.assign(1);
+			row=VectorProjector.projectVectorIntoSimplex(row);
+			privateUserBias.assignRow(i,row);
 		}
 		
 		
@@ -105,7 +117,7 @@ public class DenseFactorUserItemRepresentation implements
 			privateVectors.add(mat.viewRow(userPos));
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale);
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateUserBias.viewRow(userPos));
 		return profile;
 	}
 
@@ -124,8 +136,10 @@ public class DenseFactorUserItemRepresentation implements
 			publicVectors.add(mat.viewRow(userPos));
 		
 		}
-		
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale);
+		Vector row=privateUserBias.viewRow(0);
+		row=row.assign(1);
+		row=VectorProjector.projectVectorIntoSimplex(row);
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,row);
 		return profile;
 	}
 	
@@ -170,29 +184,25 @@ public class DenseFactorUserItemRepresentation implements
 	}
 
 	@Override
-	   public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles) throws TasteException {
-        
-			AtomicInteger trains = this.numTrainsUser.get(userId);
+	public void updatePrivateTrainedProfile(long userId,
+			HashMap<String, Vector> trainedProfiles, Vector bias) throws TasteException {
 
-    		if (trains == null)
-    			numTrainsUser.put(userId, new AtomicInteger(1));
-    		else
-    			trains.incrementAndGet();
-		
-		
-    		
-    			int userPos = (int) getUserPosition(userId);
+		AtomicInteger trains = this.numTrainsUser.get(userId);
 
-			for (int i = 0; i < this.privateUserFactors.length; i++) {
-				String rating = this.ratingScale.getScale()[i];
-				Vector toReplace = trainedProfiles.get(rating);
-				//synchronized (privateUserFactors[i]) {	
-					privateUserFactors[i].assignRow(userPos, toReplace);
-				//}
-			
-			}
+		if (trains == null)
+			numTrainsUser.put(userId, new AtomicInteger(1));
+		else
+			trains.incrementAndGet();
 
+		int userPos = (int) getUserPosition(userId);
+
+		for (int i = 0; i < this.privateUserFactors.length; i++) {
+			String rating = this.ratingScale.getScale()[i];
+			Vector toReplace = trainedProfiles.get(rating);
+
+			privateUserFactors[i].assignRow(userPos, toReplace);
+
+		}
 
 		// System.out.println("Updated "+userId+" "+(trains+1));
 	}

@@ -10,24 +10,33 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 public class UserProfile {
 
 	private HashMap<String, Vector> userProfiles= new HashMap<>();
+	private Vector userBias;
 	
 	private UserProfile(){
 		
+		
 	}
-	//CAMBIAR PARA NO RECIBIR MATRICES!
+	
 	
 	public static UserProfile buildDenseProfile(
-			LinkedList<Vector> userVectors, RatingScale ratingScale) {
+			LinkedList<Vector> userVectors, RatingScale ratingScale, Vector userBiasVector) {
 		UserProfile prof= new UserProfile();
 		
 		for (int i = 0; i < userVectors.size(); i++) {
 			prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
+			
 		}
+		prof.serBias(userBiasVector);
 		return prof;
 	}
 	
 	
 	
+	private void serBias(Vector bias) {
+		userBias=bias;
+	}
+
+
 	public HashMap<String, Vector> getUserProfiles() {
 		return userProfiles;
 	}
@@ -40,6 +49,10 @@ public class UserProfile {
 	public Vector getProfileForScale(String key) {
 		
 		return userProfiles.get(key);
+	}
+	
+	public Vector getUserBias(){
+		return userBias;
 	}
 
 	

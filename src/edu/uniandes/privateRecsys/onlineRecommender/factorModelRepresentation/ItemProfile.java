@@ -1,6 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Vector;
 
 public class ItemProfile {

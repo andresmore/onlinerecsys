@@ -24,6 +24,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	
 	private ConcurrentHashMap<Long, Vector> itemFactors;
 	private ConcurrentHashMap<Long, Vector>[] privateUserFactors;
+	private ConcurrentHashMap<Long, Vector> privateUserBias;
 	private ConcurrentHashMap<Long, Vector>[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -41,6 +42,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		this.itemFactors= new ConcurrentHashMap<>();
 		this.hasPrivateInfo=hasPrivateStrategy;
 		this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+		privateUserBias= new ConcurrentHashMap<>();
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i]= new ConcurrentHashMap<>();
@@ -68,13 +70,14 @@ public class IncrementalFactorUserItemRepresentation implements
 			userVectors.add(this.privateUserFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale);
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId));
 		}
 		return null;
 	}
 	
 	private void insertUser(long userId) {
 		String[] scale= this.ratingScale.getScale();
+		
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			Vector vec= new DenseVector(this.fDimensions);
@@ -82,25 +85,36 @@ public class IncrementalFactorUserItemRepresentation implements
 			userProfile.put(scale[i],vec);
 		}
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
+		Vector userBiasVector= new DenseVector(this.ratingScale.getRatingSize());
+		userBiasVector=userBiasVector.assign(1);
+		userBiasVector=VectorProjector.projectVectorIntoSimplex(userBiasVector);
+		this.privateUserBias.put(userId, userBiasVector);
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
-			publicUserFactors[i].put(userId, userProfile.get(scale[i]));
+			if(this.hasPrivateInfo){
+				publicUserFactors[i].put(userId, userProfile.get(scale[i]));
+			}
 		}
 		
 	}
 
 	@Override
 	public UserProfile getPublicUserProfile(long userId) throws TasteException {
-		if(isAllowed(userId)){
-		if(!publicUserFactors[0].containsKey(userId))
-			insertUser(userId);
-		
-		LinkedList<Vector> userVectors= new LinkedList<>();
-		for (int i = 0; i < this.publicUserFactors.length; i++) {
-			userVectors.add(this.publicUserFactors[i].get(userId));
-		}
-		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale);
+		if (isAllowed(userId)) {
+			if (!publicUserFactors[0].containsKey(userId))
+				insertUser(userId);
+
+			LinkedList<Vector> userVectors = new LinkedList<>();
+			for (int i = 0; i < this.publicUserFactors.length; i++) {
+				userVectors.add(this.publicUserFactors[i].get(userId));
+			}
+			Vector userBiasVector = new DenseVector(
+					this.ratingScale.getRatingSize());
+			userBiasVector = userBiasVector.assign(1);
+			userBiasVector = VectorProjector
+					.projectVectorIntoSimplex(userBiasVector);
+			return UserProfile.buildDenseProfile(userVectors, ratingScale,
+					userBiasVector);
 		}
 		return null;
 	}
@@ -149,20 +163,21 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles) throws TasteException {
+			HashMap<String, Vector> trainedProfiles,Vector userBias) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
 			numTrainsUser.put(userId, new AtomicInteger(1));
 		else
 			trains.incrementAndGet();
+		
 		String[] scale= this.ratingScale.getScale();
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
 			publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
 		}
-		
+		privateUserBias.put(userId, userBias);
 
 	}
 

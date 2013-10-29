@@ -19,8 +19,13 @@ import edu.uniandes.privateRecsys.onlineRecommender.postgresdb.PosgresDAO;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
-
-
+/**
+ * Class that manages a incremental factor model backed on a DB on posgresDAO 
+ * @deprecated ignores user bias
+ * @author Andres M
+ *
+ */
+@Deprecated 
 public class IncrementalDBFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {
 
@@ -75,7 +80,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 					insertUser(userId);
 
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale);
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale, new DenseVector(ratingScale.getRatingSize()));
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -160,7 +165,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, Vector bias) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)

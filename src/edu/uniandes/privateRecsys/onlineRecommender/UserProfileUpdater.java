@@ -26,35 +26,43 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
 		String rating=event.getRating();
-		long time=event.getTime();
+		
 		
 		
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		Vector itemVector = itemProfile.getVector();
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
-		double initPrediction=calculatePrediction(itemVector,oldUserPrivate.getUserProfiles(),userItemRep.getRatingScale().getScale());
+		
+		Vector biasVector=oldUserPrivate.getUserBias();
 		if(oldUserPrivate!=null){
+			double initPrediction=calculatePrediction(itemVector,oldUserPrivate.getUserProfiles(),userItemRep.getRatingScale().getScale(),biasVector);
 	    int numTrains=userItemRep.getNumberTrainsUser(userId)+1;
 	   
-		//double gamma=strategy.getGammaForTime(event.getTime());
+		
 		
 		String[] ratingScale=userItemRep.getRatingScale().getScale();
 		HashMap<String, Vector> trainedProfiles= new HashMap<>();
+		
+		Vector updatedBiasVector=biasVector.clone();
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector privateVector=oldUserPrivate.getProfileForScale(ratingScale[i]);
 			int prob=ratingScale[i].equals(rating)?1:0;
 			
-			double dotProd=privateVector.dot(itemVector);
-			dotProd=gamma*(prob-dotProd);
-			Vector privateVectorMult=itemVector.times(dotProd);
+			double dotProb=privateVector.dot(itemVector);
+			double modelPrediction=dotProb*biasVector.getQuick(i);
+			double error=prob-modelPrediction;
+			modelPrediction=gamma*(error);
+			Vector privateVectorMult=itemVector.times(modelPrediction);
 			privateVector=privateVector.plus(privateVectorMult);
 			
 			trainedProfiles.put(ratingScale[i], privateVector);
+			updatedBiasVector.setQuick(i, gamma*error*dotProb);
 			
-		} 
+		}
+		updatedBiasVector=VectorProjector.projectVectorIntoSimplex(updatedBiasVector);
 		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles,ratingScale, itemVector.size());
-		userItemRep.updatePrivateTrainedProfile(userId,trainedProfiles);
-		double endPrediction=calculatePrediction(itemVector,trainedProfiles,userItemRep.getRatingScale().getScale());
+		userItemRep.updatePrivateTrainedProfile(userId,trainedProfiles,updatedBiasVector);
+		double endPrediction=calculatePrediction(itemVector,trainedProfiles,userItemRep.getRatingScale().getScale(),updatedBiasVector);
 		//System.out.println("UserUpdater: Train was "+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
 		LOG.fine("UserUpdater: Train was"+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
 		
@@ -65,18 +73,19 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		
 		
 	}
-	public double calculatePrediction(Vector itemVector,HashMap<String, Vector> trainedProfiles, String[] ratingScale ){
+	public double calculatePrediction(Vector itemVector,HashMap<String, Vector> trainedProfiles, String[] ratingScale, Vector userBias ){
 		double prediction=0;
 	
 		
-		
+		double sumProb=0;
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector userVector = trainedProfiles.get(ratingScale[i]);
-			double dot = userVector.dot(itemVector);
-			
+			double dot = userBias.getQuick(i);//userVector.dot(itemVector);//*
+			sumProb+=dot;
 			prediction += dot * Double.parseDouble(ratingScale[i]);
 			
 		}
+		System.out.println(sumProb);
 		return prediction;
 	}
 }

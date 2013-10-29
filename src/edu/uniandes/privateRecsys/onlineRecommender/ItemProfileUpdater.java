@@ -41,11 +41,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		
 		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
-		
-		//int numTrains=userItemRep.getNumberTrainsItem(itemId)+1;
-		//double lambda=(double)1/(double)numTrains*0.75;
-		//double gamma=strategy.getGammaForTime(event.getTimestamp());
-		
+	
 		
 		String[] ratingScale=userItemRep.getRatingScale().getScale();
 		double sum= 0;
