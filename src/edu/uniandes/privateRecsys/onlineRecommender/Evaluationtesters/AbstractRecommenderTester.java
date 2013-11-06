@@ -16,7 +16,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
@@ -33,7 +33,7 @@ public abstract class AbstractRecommenderTester  {
 	
 	//protected AverageDataModel model;
 	protected RSDataset rsDataset;
-	protected ModelPredictor predictor;
+	protected UserModelTrainerPredictor predictor;
 	private final static Logger LOG = Logger.getLogger(AbstractRecommenderTester.class
 		      .getName());
 
@@ -55,7 +55,7 @@ public abstract class AbstractRecommenderTester  {
 		this.itemProfileUpdater=profileUpdater;
 	}
 	
-	public void setModelPredictor(ModelPredictor pred){
+	public void setModelPredictor(UserModelTrainerPredictor pred){
 		this.predictor=pred;
 	}
 	/***

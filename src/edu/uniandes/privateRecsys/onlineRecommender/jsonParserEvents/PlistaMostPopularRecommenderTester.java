@@ -23,7 +23,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.AbstractRe
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.PlistaDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
@@ -149,11 +151,15 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		PlistaDataset dataset= new PlistaDataset("data/plista/usersCount.csv", "data/plista/filtered", trainPrefixes, scale);
 		try {
 			PlistaMostPopularRecommenderTester tester= new PlistaMostPopularRecommenderTester(dataset, 10, LearningRateStrategy.createWithConstantRate(0.2),true);
-			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false);
-			UserProfileUpdater userUpdater= new UserProfileUpdater();
+			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor.getHyperParametersSize());
+			modelTrainerPredictor.setModelRepresentation(representation);
+			
+			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
 			IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 			tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
+			tester.setModelPredictor(modelTrainerPredictor);
 			IRPrecisionError rr=(IRPrecisionError) tester.startExperiment(1);
 			long numUsers=representation.getNumUsers();
 			long numItems=representation.getNumItems();

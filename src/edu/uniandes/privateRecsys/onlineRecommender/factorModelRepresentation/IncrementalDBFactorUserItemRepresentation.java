@@ -22,7 +22,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 /**
  * Class that manages a incremental factor model backed on a DB on posgresDAO 
- * @deprecated ignores user bias
+ * @deprecated ignores user bias and hyperParams
  * @author Andres M
  *
  */
@@ -80,8 +80,9 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				if (!this.sqlDAO.containsUserKey(userId))
 					insertUser(userId);
 				LinkedList<BetaDistribution> bias= new LinkedList<>();
+				Vector emptyHyperParams= new DenseVector();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias);
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

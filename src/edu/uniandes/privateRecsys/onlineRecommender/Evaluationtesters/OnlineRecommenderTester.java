@@ -13,8 +13,10 @@ import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
@@ -61,14 +63,17 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 				
 				
-				
+				UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
 			
-				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false);
+				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
+				trainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
-				UserProfileUpdater userUp= new UserProfileUpdater();
+				
+				UserProfileUpdater userUp= new UserProfileUpdater(trainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
+				rest.setModelPredictor(trainerPredictor);
 				ErrorReport result=rest.startExperiment(10);
 				results.add(result.toString());
 			

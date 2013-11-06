@@ -28,23 +28,28 @@ public class IncrementalFactorUserItemRepresentation implements
 	private ConcurrentHashMap<Long, Vector>[] privateUserFactors;
 	private ConcurrentHashMap<Long, LinkedList<BetaDistribution>> privateUserBias;
 	private ConcurrentHashMap<Long, Vector>[] publicUserFactors;
+	private ConcurrentHashMap<Long, Vector> privateHyperParams;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, AtomicInteger> numTrainsItem= new ConcurrentHashMap <>();
 	private boolean hasPrivateInfo;
 	private HashSet<Long> restrictedUserIds;
+	private int hyperParamDimension;
 
 	public HashSet<Long> getRestrictedUserIds() {
 		return restrictedUserIds;
 	}
 
-	public IncrementalFactorUserItemRepresentation(RatingScale scale, int fDimensions, boolean hasPrivateStrategy){
+	@SuppressWarnings("unchecked")
+	public IncrementalFactorUserItemRepresentation(RatingScale scale, int fDimensions, boolean hasPrivateStrategy, int hyperParameterDimension){
 		this.ratingScale=scale;
 		this.fDimensions=fDimensions;
+		this.hyperParamDimension=hyperParameterDimension;
 		this.itemFactors= new ConcurrentHashMap<>();
 		this.hasPrivateInfo=hasPrivateStrategy;
 		this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
-		privateUserBias= new ConcurrentHashMap<>();
+		this.privateUserBias= new ConcurrentHashMap<>();
+		this.privateHyperParams= new ConcurrentHashMap<>();
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i]= new ConcurrentHashMap<>();
@@ -72,7 +77,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			userVectors.add(this.privateUserFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId));
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId));
 		}
 		return null;
 	}
@@ -80,6 +85,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	private void insertUser(long userId) {
 		String[] scale= this.ratingScale.getScale();
 		LinkedList<BetaDistribution> userPriors= new LinkedList<>();
+		
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			Vector vec= new DenseVector(this.fDimensions);
@@ -90,6 +96,10 @@ public class IncrementalFactorUserItemRepresentation implements
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
 		
 		this.privateUserBias.put(userId, userPriors);
+		Vector userHyperParams= new DenseVector(hyperParamDimension);
+		this.privateHyperParams.put(userId, userHyperParams);
+		
+		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
 			if(this.hasPrivateInfo){
@@ -113,9 +123,9 @@ public class IncrementalFactorUserItemRepresentation implements
 				userVectors.add(this.publicUserFactors[i].get(userId));
 				dist.add(new BetaDistributionImpl(1, 1));
 			}
-			
+			Vector emptyHyperParams= new DenseVector();
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					dist);
+					dist,emptyHyperParams);
 		}
 		return null;
 	}

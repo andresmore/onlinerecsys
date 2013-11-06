@@ -15,7 +15,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
@@ -218,13 +220,17 @@ public class GridSearchParameter {
 		
 		this.tsCreator= LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
 		int dimensions=(int) dim;
+		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data.getScale(), dimensions, false,modelTrainerPredictor.getHyperParametersSize());
+		modelTrainerPredictor.setModelRepresentation(denseModel);
 		
-		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data.getScale(), dimensions, false);
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
-		UserProfileUpdater userUp= new UserProfileUpdater();
+		
+		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();
 		IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 		rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
+		rest.setModelPredictor(modelTrainerPredictor);
 		ErrorReport result=rest.startExperiment(1);
 		denseModel=null;
 		return result.getErrorTest();

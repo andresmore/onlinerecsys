@@ -23,8 +23,10 @@ import edu.uniandes.privateRecsys.onlineRecommender.RMSE_Evaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -81,11 +83,14 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 				
 				
 				DifferentialPrivacyOnlineRecommenderTester rest=new DifferentialPrivacyOnlineRecommenderTester(data, dimensions, tsCreator);
-				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions);
-				UserProfileUpdater userUpdater= new UserProfileUpdater();
+				UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(representation);
+				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(0.69);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
+				rest.setModelPredictor(modelTrainerPredictor);
 				rest.setEventsReport(eventsReport);
 				RMSE_ErrorReport result=(RMSE_ErrorReport) rest.startExperiment(1);
 				results.add(result);

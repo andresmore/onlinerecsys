@@ -8,16 +8,16 @@ import java.util.Set;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
 public class TopNRecommenderFactorModel implements TopNRecommender {
 
 	
 	
-	private ModelPredictor predictor;
+	private UserModelTrainerPredictor predictor;
 	
-	public TopNRecommenderFactorModel(ModelPredictor predictor) {
+	public TopNRecommenderFactorModel(UserModelTrainerPredictor predictor) {
 		
 		this.predictor = predictor;
 	}

@@ -43,8 +43,8 @@ DenseFactorUserItemRepresentation {
 	
 
 	public DenseFactorUserItemRepresentationWithMetadata(AverageDataModel model,
-			RatingScale scale, int fDimensions, String matrixRepresentationFile, int numNeighbors, boolean spectralFile) throws TasteException, IOException {
-		super(model, scale, fDimensions);
+			RatingScale scale, int fDimensions, String matrixRepresentationFile, int numNeighbors, boolean spectralFile, int numHyperParams) throws TasteException, IOException {
+		super(model, scale, fDimensions, numHyperParams);
 		if(spectralFile)
 				this.metadataMatrix=SpectralDataLoader.loadSpectralRepresentation(matrixRepresentationFile);
 		else
@@ -192,11 +192,13 @@ DenseFactorUserItemRepresentation {
 		AverageDataModel testModel= new AverageDataModel(new File(dataset2.getTestSet()));
 		
 		AbstractRecommenderTester tester= new OnlineRecommenderTester(dataset2, 10, tsCreator);
-		DenseFactorUserItemRepresentationWithMetadata representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),5,true);
-		UserProfileUpdater userUpdater= new UserProfileUpdater();
+		DenseFactorUserItemRepresentationWithMetadata representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),5,true, 0);
+		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor(representation);
+		UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();
 		IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 		tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
+		tester.setModelPredictor(modelTrainerPredictor);
 		//tester.setEventsReport(100000);
 		ErrorReport rep=tester.startExperiment(1);
 		

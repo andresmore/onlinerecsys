@@ -17,7 +17,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
@@ -43,10 +43,10 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 	
 	private LinkedList<Double> partialEvaluations=new LinkedList<>();
-	private ModelPredictor predictor;
+	private UserModelTrainerPredictor predictor;
 
 	public PrivateRecommenderParallelTrainer(FactorUserItemRepresentation userItemRep,
-			ModelPredictor predictor,
+			UserModelTrainerPredictor predictor,
 			IUserProfileUpdater userUpdater,
 			IUserItemAggregator userAggregator,
 			IItemProfileUpdater itemProfileUpdater, RSDataset dataset, LearningRateStrategy lambda) {

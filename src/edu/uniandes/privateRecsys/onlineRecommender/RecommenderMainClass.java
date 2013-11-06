@@ -24,9 +24,11 @@ import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSMetadataDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentationWithMetadata;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -294,6 +296,9 @@ public class RecommenderMainClass {
 		String chosenRecommender=null;
 		AbstractRecommenderTester tester=null;
 		LearningRateStrategy tsCreator=null;
+		
+		//TODO: ModelTRainerPredictor choose as an option of
+		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 		if(constantLearningRate==-1)
 			tsCreator=LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
 		else
@@ -320,8 +325,9 @@ public class RecommenderMainClass {
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
 				tester= new ContinualDifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions);
-				UserProfileUpdater userUpdater= new UserProfileUpdater();
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(representation);
+				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -335,8 +341,9 @@ public class RecommenderMainClass {
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
 				tester= new DifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions);
-				UserProfileUpdater userUpdater= new UserProfileUpdater();
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(representation);
+				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -350,8 +357,9 @@ public class RecommenderMainClass {
 					averageModel=new AverageDataModel(new File(dataset.getTrainSet()));
 				}
 				tester= new OnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions);
-				UserProfileUpdater userUpdater= new UserProfileUpdater();
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(representation);
+				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -365,8 +373,9 @@ public class RecommenderMainClass {
 				RSMetadataDataset dataset2=(RSMetadataDataset) dataset;
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset2.getAllDataset()));
 				tester= new OnlineRecommenderTester(dataset2, dimensions, tsCreator);
-				FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), dimensions,dataset2.getSpectralDataFile(),numNeighbors,true);
-				UserProfileUpdater userUpdater= new UserProfileUpdater();
+				FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), dimensions,dataset2.getSpectralDataFile(),numNeighbors,true,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(representation);
+				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);

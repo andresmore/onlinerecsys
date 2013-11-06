@@ -9,6 +9,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -17,7 +18,12 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 
 	private final static Logger LOG = Logger.getLogger(UserProfileUpdater.class
 		      .getName());
+	private UserModelTrainerPredictor predictor;
 	
+	
+	public UserProfileUpdater(UserModelTrainerPredictor predictor){
+		this.predictor=predictor;
+	}
 	
 	/* (non-Javadoc)
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater#processEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
@@ -36,6 +42,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		Vector itemVector = itemProfile.getVector();
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> biasVector=oldUserPrivate.getUserBias();
+		Vector hyperParameterVector= oldUserPrivate.getHyperParameters();
 		
 		if (oldUserPrivate != null) {
 			double initPrediction = calculatePrediction(itemVector,
@@ -46,10 +53,10 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 			int numTrains = userItemRep.getNumberTrainsUser(userId) + 1;
 
 			String[] ratingScale = userItemRep.getRatingScale().getScale();
-			HashMap<String, Vector> trainedProfiles = updateProbabilityHypothesis(
+			HashMap<String, Vector> trainedProfiles = predictor.calculateProbabilityUpdate(
 					gamma, rating, itemVector, oldUserPrivate, ratingScale);
-			biasVector = updatePriors(event, biasVector, ratingScale);
-
+			biasVector = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
+			hyperParameterVector=predictor.calculatehyperParamsUpdate(event,trainedProfiles,biasVector,hyperParameterVector);
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
 					biasVector);
 			double endPrediction = calculatePrediction(itemVector,
@@ -57,7 +64,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 			double endDistance=Math.abs(Double.parseDouble(rating)-endPrediction);
 			
 			if(initDistance<endDistance)
-				LOG.info("WARN: distance incremented "+rating+ " "+initPrediction+" "+endPrediction);
+				LOG.fine("WARN: distance incremented "+rating+ " "+initPrediction+" "+endPrediction);
 			// System.out.println("UserUpdater: Train was "+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
 			LOG.fine("UserUpdater: Train was" + event.getRating()
 					+ ", initPrediction=" + initPrediction + ", endPrediction="

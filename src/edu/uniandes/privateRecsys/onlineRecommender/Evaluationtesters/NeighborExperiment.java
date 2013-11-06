@@ -14,8 +14,10 @@ import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentationWithMetadata;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
@@ -48,12 +50,15 @@ public class NeighborExperiment {
 		for (int i = 0; i < numNeighbors.length; i++) {
 			
 			tester= new OnlineRecommenderTester(dataset2, 10, tsCreator);
+			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 			//FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),numNeighbors[i],false);
-			FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),numNeighbors[i],true);
-			UserProfileUpdater userUpdater= new UserProfileUpdater();
+			FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),numNeighbors[i],true,modelTrainerPredictor.getHyperParametersSize());
+			modelTrainerPredictor.setModelRepresentation(representation);
+			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
 			IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 			tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
+			tester.setModelPredictor(modelTrainerPredictor);
 			//tester.setEventsReport(100000);
 			ErrorReport rep=tester.startExperiment(1);
 			System.out.println(rep.getErrorTest());

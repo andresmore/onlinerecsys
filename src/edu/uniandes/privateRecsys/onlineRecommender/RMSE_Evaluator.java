@@ -14,7 +14,7 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -39,7 +39,7 @@ public class RMSE_Evaluator implements Observer {
 
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
 
-	private ModelPredictor predictor;
+	private UserModelTrainerPredictor predictor;
 	
 
 	private final static Logger LOG = Logger.getLogger(RMSE_Evaluator.class
@@ -48,7 +48,7 @@ public class RMSE_Evaluator implements Observer {
 		return hybridEvals.get();
 	}
 
-	public RMSE_Evaluator(ModelPredictor predictor,RatingScale scale, int minTrains) {
+	public RMSE_Evaluator(UserModelTrainerPredictor predictor,RatingScale scale, int minTrains) {
 		this.predictor=predictor;
 		this.scale=scale;
 		this.minTrains=minTrains;

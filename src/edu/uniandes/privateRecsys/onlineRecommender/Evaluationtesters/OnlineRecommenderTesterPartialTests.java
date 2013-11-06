@@ -21,8 +21,10 @@ import edu.uniandes.privateRecsys.onlineRecommender.RMSE_Evaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -68,13 +70,16 @@ double delta=0.1;
 			int dimensions=5;
 			int eventsReport=100000;
 				
-						
-				DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(model, scale, dimensions);
+			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+				DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize());
+				modelTrainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTesterPartialTests rest=new OnlineRecommenderTesterPartialTests(data,dimensions,tsCreator,eventsReport);
-				UserProfileUpdater userUp= new UserProfileUpdater();
+				
+				UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
+				rest.setModelPredictor(modelTrainerPredictor);
 				RMSE_ErrorReport result=(RMSE_ErrorReport) rest.startExperiment(1);
 				results.add(result);
 				

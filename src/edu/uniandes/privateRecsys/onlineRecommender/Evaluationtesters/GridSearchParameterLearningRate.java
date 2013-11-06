@@ -15,7 +15,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 
 public class GridSearchParameterLearningRate {
@@ -191,12 +193,16 @@ public GridSearchParameterLearningRate(RSDataset data) throws IOException{
 	private double trainAndTestWithData(RSDataset data, double dimension, double learningRate) throws TasteException, IOException, PrivateRecsysException {
 		this.tsCreator=LearningRateStrategy.createWithConstantRate(learningRate);
 		int dimensions=(int) dimension;
-		DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(this.model, data.getScale(), dimensions);
+		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+		DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(this.model, data.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+		modelTrainerPredictor.setModelRepresentation(denseModel);
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
-		UserProfileUpdater userUp= new UserProfileUpdater();
+		
+		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();
 		IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 		rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
+		rest.setModelPredictor(modelTrainerPredictor);
 		ErrorReport result=rest.startExperiment(1);
 		denseModel=null;
 		return result.getErrorTest();

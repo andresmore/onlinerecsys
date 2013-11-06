@@ -30,6 +30,7 @@ public class DenseFactorUserItemRepresentation implements
 	private DenseMatrix itemFactors;
 	private DenseMatrix[] privateUserFactors;
 	private BetaDistribution[][] privateUserBias;
+	private DenseMatrix privateUserHyperParams;
 	private DenseMatrix[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -41,11 +42,12 @@ public class DenseFactorUserItemRepresentation implements
 	
 
 	public DenseFactorUserItemRepresentation(AverageDataModel model,
-			RatingScale scale, int fDimensions) throws TasteException {
+			RatingScale scale, int fDimensions, int numHyperParams) throws TasteException {
 		this.model=model;
 		this.ratingScale=scale;
 		this.fDimensions=fDimensions;
-		createDenseRatingModel(this.fDimensions);
+		
+		createDenseRatingModel(this.fDimensions,numHyperParams );
 		updateHashMapIds();
 		
 		
@@ -68,7 +70,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 	}
 //TODO:Init private bias
-	private void createDenseRatingModel(int fDimensions) throws TasteException {
+	private void createDenseRatingModel(int fDimensions, int numHyperParams) throws TasteException {
 		int ratingSize=this.ratingScale.getRatingSize();
 		int numUsers= model.getNumUsers();
 		int numItems=model.getNumItems();
@@ -78,7 +80,7 @@ public class DenseFactorUserItemRepresentation implements
 		this.privateUserFactors= new DenseMatrix[ratingSize];
 		this.publicUserFactors= new DenseMatrix[ratingSize];
 		this.privateUserBias= new BetaDistribution[numUsers][ratingSize];
-		
+		this.privateUserHyperParams= new DenseMatrix(numUsers, numHyperParams);
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i]= new DenseMatrix(numUsers, fDimensions);
@@ -119,7 +121,7 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(this.privateUserBias[userPos][i]);
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias);
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos));
 		return profile;
 	}
 
@@ -140,8 +142,8 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(new BetaDistributionImpl(1, 1));
 		
 		}
-	
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias);
+		Vector emptyHyperParms= new DenseVector();
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms);
 		return profile;
 	}
 	
