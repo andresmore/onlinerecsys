@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -27,7 +29,7 @@ public class DenseFactorUserItemRepresentation implements
 	private int fDimensions;
 	private DenseMatrix itemFactors;
 	private DenseMatrix[] privateUserFactors;
-	private DenseMatrix privateUserBias;
+	private BetaDistribution[][] privateUserBias;
 	private DenseMatrix[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -75,7 +77,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		this.privateUserFactors= new DenseMatrix[ratingSize];
 		this.publicUserFactors= new DenseMatrix[ratingSize];
-		this.privateUserBias= new DenseMatrix(numUsers, fDimensions);
+		this.privateUserBias= new BetaDistribution[numUsers][ratingSize];
 		
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
@@ -90,11 +92,10 @@ public class DenseFactorUserItemRepresentation implements
 			
 		}
 		
-		for (int i = 0; i < privateUserBias.numRows(); i++) {
-			Vector row=privateUserBias.viewRow(i);
-			row=row.assign(1);
-			row=VectorProjector.projectVectorIntoSimplex(row);
-			privateUserBias.assignRow(i,row);
+		for (int i = 0; i < privateUserBias.length; i++) {
+			for (int j = 0; j < privateUserBias[0].length; j++) {
+				privateUserBias[i][j]=new BetaDistributionImpl(1, 1);
+			}
 		}
 		
 		
@@ -108,16 +109,17 @@ public class DenseFactorUserItemRepresentation implements
 			throw new TasteException("User "+userId+" not found");
 		
 		LinkedList<Vector> privateVectors= new LinkedList<Vector>();
-		
+		LinkedList<BetaDistribution> privateBias= new LinkedList<>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 		
 			DenseMatrix mat=privateUserFactors[i];
-		
+			
 		
 			privateVectors.add(mat.viewRow(userPos));
+			privateBias.add(this.privateUserBias[userPos][i]);
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateUserBias.viewRow(userPos));
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias);
 		return profile;
 	}
 
@@ -127,6 +129,7 @@ public class DenseFactorUserItemRepresentation implements
 		if(userPos==-1)
 			throw new TasteException("User "+userId+" not found");
 		LinkedList<Vector> publicVectors= new LinkedList<Vector>();
+		LinkedList<BetaDistribution> privateBias= new LinkedList<>();
 		
 		for (int i = 0; i < publicUserFactors.length; i++) {
 		
@@ -134,12 +137,11 @@ public class DenseFactorUserItemRepresentation implements
 		
 		
 			publicVectors.add(mat.viewRow(userPos));
+			privateBias.add(new BetaDistributionImpl(1, 1));
 		
 		}
-		Vector row=privateUserBias.viewRow(0);
-		row=row.assign(1);
-		row=VectorProjector.projectVectorIntoSimplex(row);
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,row);
+	
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias);
 		return profile;
 	}
 	
@@ -185,7 +187,7 @@ public class DenseFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, Vector bias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException {
 
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
@@ -201,6 +203,7 @@ public class DenseFactorUserItemRepresentation implements
 			Vector toReplace = trainedProfiles.get(rating);
 
 			privateUserFactors[i].assignRow(userPos, toReplace);
+			privateUserBias[userPos][i]=bias.get(rating);
 
 		}
 
@@ -331,7 +334,7 @@ public class DenseFactorUserItemRepresentation implements
 			
 			
 		}
-		return Prediction.createNormalPrediction(userId,itemId,prediction);
+		return Prediction.createPrediction(userId,itemId,prediction);
 	}
 	
 	 protected Iterator<Long> getItemIds(){

@@ -16,7 +16,7 @@ public class Prediction implements Comparable<Prediction> {
 		this.isHybrid = isHybrid;
 	}
 	
-	public static Prediction createNormalPrediction(long userId, long itemId,double predictionValue){
+	public static Prediction createPrediction(long userId, long itemId,double predictionValue){
 		return new Prediction(userId, itemId, predictionValue, false, false);	
 		
 		

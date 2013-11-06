@@ -16,6 +16,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
@@ -32,6 +33,7 @@ public abstract class AbstractRecommenderTester  {
 	
 	//protected AverageDataModel model;
 	protected RSDataset rsDataset;
+	protected ModelPredictor predictor;
 	private final static Logger LOG = Logger.getLogger(AbstractRecommenderTester.class
 		      .getName());
 
@@ -39,6 +41,7 @@ public abstract class AbstractRecommenderTester  {
 		this.rsDataset=dataset;
 		this.fDimensions=fDimensions;
 		this.learningRateStrategy=learningRateStrategy;
+		
 		
 		
 	}
@@ -51,6 +54,10 @@ public abstract class AbstractRecommenderTester  {
 		this.userAggregator= agregator;
 		this.itemProfileUpdater=profileUpdater;
 	}
+	
+	public void setModelPredictor(ModelPredictor pred){
+		this.predictor=pred;
+	}
 	/***
 	 * 
 	 * @return The rmse of the experiment
@@ -60,7 +67,7 @@ public abstract class AbstractRecommenderTester  {
 	 */
 	public ErrorReport startExperiment(int numIterations) throws IOException, TasteException, PrivateRecsysException {
 		
-		if(userItemRep==null || userUpdater==null || userAggregator==null || itemProfileUpdater==null){
+		if(userItemRep==null || userUpdater==null || userAggregator==null || itemProfileUpdater==null||predictor==null ){
 			LOG.severe("Could not start experiment: Model and iterator not set");
 			throw new TasteException("Model and iterator not set");
 		}	
@@ -74,7 +81,7 @@ public abstract class AbstractRecommenderTester  {
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			
-			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep,this.predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
 			
 			FileEventCreator cec= new FileEventCreator(new File(rsDataset.getTrainSet()),this.eventsReport,this.numLimitEvents);
 			cec.addObserver(pstr);
@@ -93,9 +100,9 @@ public abstract class AbstractRecommenderTester  {
 					throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 				}
 				LOG.info("Finished training, measuring errors ");
-				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.userItemRep,10);
-				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.userItemRep,10);
-				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.userItemRep,10);
+				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,10);
+				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,10);
+				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,10);
 				//System.out.println("Error at iteration "+iteration+" is: Train: "+errorTrain+" CV:"+errorCV+" Test:"+error);
 				LOG.info("Iteration "+iteration+" errors: "+errorTrain+'\t'+errorCV+'\t'+error);
 				partialErrors.addAll(pstr.getPartialEvaluations());

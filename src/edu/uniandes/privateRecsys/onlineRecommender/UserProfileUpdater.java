@@ -3,6 +3,8 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
@@ -15,7 +17,8 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 
 	private final static Logger LOG = Logger.getLogger(UserProfileUpdater.class
 		      .getName());
-
+	
+	
 	/* (non-Javadoc)
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater#processEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
@@ -32,60 +35,95 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		Vector itemVector = itemProfile.getVector();
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
+		HashMap<String, BetaDistribution> biasVector=oldUserPrivate.getUserBias();
 		
-		Vector biasVector=oldUserPrivate.getUserBias();
-		if(oldUserPrivate!=null){
-			double initPrediction=calculatePrediction(itemVector,oldUserPrivate.getUserProfiles(),userItemRep.getRatingScale().getScale(),biasVector);
-	    int numTrains=userItemRep.getNumberTrainsUser(userId)+1;
-	   
-		
-		
-		String[] ratingScale=userItemRep.getRatingScale().getScale();
-		HashMap<String, Vector> trainedProfiles= new HashMap<>();
-		
-		Vector updatedBiasVector=biasVector.clone();
-		for (int i = 0; i < ratingScale.length; i++) {
-			Vector privateVector=oldUserPrivate.getProfileForScale(ratingScale[i]);
-			int prob=ratingScale[i].equals(rating)?1:0;
+		if (oldUserPrivate != null) {
+			double initPrediction = calculatePrediction(itemVector,
+					oldUserPrivate.getUserProfiles(), userItemRep
+							.getRatingScale().getScale());
 			
-			double dotProb=privateVector.dot(itemVector);
-			double modelPrediction=dotProb*biasVector.getQuick(i);
-			double error=prob-modelPrediction;
-			modelPrediction=gamma*(error);
-			Vector privateVectorMult=itemVector.times(modelPrediction);
-			privateVector=privateVector.plus(privateVectorMult);
+			double initDistance=Math.abs(Double.parseDouble(rating)-initPrediction);
+			int numTrains = userItemRep.getNumberTrainsUser(userId) + 1;
+
+			String[] ratingScale = userItemRep.getRatingScale().getScale();
+			HashMap<String, Vector> trainedProfiles = updateProbabilityHypothesis(
+					gamma, rating, itemVector, oldUserPrivate, ratingScale);
+			biasVector = updatePriors(event, biasVector, ratingScale);
+
+			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
+					biasVector);
+			double endPrediction = calculatePrediction(itemVector,
+					trainedProfiles, userItemRep.getRatingScale().getScale());
+			double endDistance=Math.abs(Double.parseDouble(rating)-endPrediction);
 			
-			trainedProfiles.put(ratingScale[i], privateVector);
-			updatedBiasVector.setQuick(i, gamma*error*dotProb);
-			
+			if(initDistance<endDistance)
+				LOG.info("WARN: distance incremented "+rating+ " "+initPrediction+" "+endPrediction);
+			// System.out.println("UserUpdater: Train was "+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
+			LOG.fine("UserUpdater: Train was" + event.getRating()
+					+ ", initPrediction=" + initPrediction + ", endPrediction="
+					+ endPrediction);
+
 		}
-		updatedBiasVector=VectorProjector.projectVectorIntoSimplex(updatedBiasVector);
-		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles,ratingScale, itemVector.size());
-		userItemRep.updatePrivateTrainedProfile(userId,trainedProfiles,updatedBiasVector);
-		double endPrediction=calculatePrediction(itemVector,trainedProfiles,userItemRep.getRatingScale().getScale(),updatedBiasVector);
-		//System.out.println("UserUpdater: Train was "+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
-		LOG.fine("UserUpdater: Train was"+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
-		
-		}
-		return oldUserPrivate; 
+		return oldUserPrivate;
 		
 		
 		
 		
 	}
-	public double calculatePrediction(Vector itemVector,HashMap<String, Vector> trainedProfiles, String[] ratingScale, Vector userBias ){
+	
+	private HashMap<String, BetaDistribution> updatePriors(
+			UserTrainEvent event, HashMap<String, BetaDistribution> biasVector,
+			String[] ratingScale) {
+		HashMap<String, BetaDistribution> ret= new HashMap<String, BetaDistribution>();
+		for (int i = 0; i < ratingScale.length; i++) {
+			BetaDistribution dist=biasVector.get(ratingScale[i]);
+			if(event.getRating().equals(ratingScale[i])){
+				ret.put(ratingScale[i], new BetaDistributionImpl(dist.getAlpha()+1, dist.getBeta()));
+			}else{
+				ret.put(ratingScale[i], new BetaDistributionImpl(dist.getAlpha(), dist.getBeta()+1));
+			}
+				
+		}
+		return ret;
+	}
+	private HashMap<String, Vector> updateProbabilityHypothesis(double gamma,
+			String rating, Vector itemVector, UserProfile oldUserPrivate,
+			String[] ratingScale) {
+		HashMap<String, Vector> trainedProfiles= new HashMap<>();
+		
+		
+		for (int i = 0; i < ratingScale.length; i++) {	
+			Vector privateVector=oldUserPrivate.getProfileForScale(ratingScale[i]);
+			int prob=ratingScale[i].equals(rating)?1:0;
+			
+			double dotProb=privateVector.dot(itemVector);
+			
+			double error=prob-dotProb;
+			double multiplicator=gamma*(error);
+			Vector privateVectorMult=itemVector.times(multiplicator);
+			Vector result=privateVector.plus(privateVectorMult);
+			
+			trainedProfiles.put(ratingScale[i], result);
+			
+			
+		}
+		
+		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles,ratingScale, itemVector.size());
+		return trainedProfiles;
+	}
+	public double calculatePrediction(Vector itemVector,HashMap<String, Vector> trainedProfiles, String[] ratingScale){
 		double prediction=0;
 	
 		
-		double sumProb=0;
+		
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector userVector = trainedProfiles.get(ratingScale[i]);
-			double dot = userBias.getQuick(i);//userVector.dot(itemVector);//*
-			sumProb+=dot;
+			double dot = userVector.dot(itemVector);
+		
 			prediction += dot * Double.parseDouble(ratingScale[i]);
 			
 		}
-		System.out.println(sumProb);
+		
 		return prediction;
 	}
 }

@@ -13,6 +13,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.PlistaData
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PListaEventCollector;
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PlistaJsonEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
@@ -26,13 +27,13 @@ public class ModelEvaluator {
 		      .getName()); 
 	
 	public static double evaluateModel(File testSet, RatingScale scale,
-			FactorUserItemRepresentation model,
+			ModelPredictor predictor,
 			int minTraining) throws IOException, PrivateRecsysException,
 			TasteException {
 		Log.info("Evaluating error for model with file " + testSet);
 		FileEventCreator testEv = new FileEventCreator(testSet, -1, -1);
 
-		RMSE_Evaluator rmseEval = new RMSE_Evaluator(model, scale, minTraining);
+		RMSE_Evaluator rmseEval = new RMSE_Evaluator(predictor, scale, minTraining);
 		testEv.addObserver(rmseEval);
 		testEv.startEvents();
 		rmseEval.shutdownThread();

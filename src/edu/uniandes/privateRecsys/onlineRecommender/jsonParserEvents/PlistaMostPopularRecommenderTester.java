@@ -85,7 +85,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 	 */
 	public ErrorReport startExperiment(int numIterations) throws IOException, TasteException, PrivateRecsysException {
 		
-		if(userItemRep==null || userUpdater==null || userAggregator==null || itemProfileUpdater==null){
+		if(userItemRep==null || userUpdater==null || userAggregator==null || itemProfileUpdater==null || predictor==null){
 			LOG.severe("Could not start experiment: Model and iterator not set");
 			throw new TasteException("Model and aggregator not set");
 		}	
@@ -97,7 +97,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			
-			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
 			PlistaJsonEventCreator plistaEventCreator=new PlistaJsonEventCreator(this.plistaDataset.getDirectory(), 1, 25, this.plistaDataset.getPrefixes());
 			plistaEventCreator.addObserver(pstr);
 			PopularityObserver popObserver= new PopularityObserver();

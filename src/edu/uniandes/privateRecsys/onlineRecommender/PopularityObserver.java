@@ -81,7 +81,7 @@ public class PopularityObserver implements Observer {
 				if(prediction==0)
 					toRemove.add(key);
 				else{
-					this.cachedQueue.add(Prediction.createNormalPrediction(-1, key, prediction));
+					this.cachedQueue.add(Prediction.createPrediction(-1, key, prediction));
 					if(this.cachedQueue.size()>QUEUE_SIZE)
 						this.cachedQueue.poll();
 				}

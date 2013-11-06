@@ -14,13 +14,14 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class RMSE_Evaluator implements Observer {
 
-	private FactorUserItemRepresentation userItemRepresentation;
+	
 	
 	private RunningAverage rmseAverage= new FullRunningAverage();
 	private RunningAverage maeAverage= new FullRunningAverage();
@@ -37,6 +38,8 @@ public class RMSE_Evaluator implements Observer {
 	private AtomicLong  hybridEvals=new AtomicLong(0);
 
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
+
+	private ModelPredictor predictor;
 	
 
 	private final static Logger LOG = Logger.getLogger(RMSE_Evaluator.class
@@ -45,8 +48,8 @@ public class RMSE_Evaluator implements Observer {
 		return hybridEvals.get();
 	}
 
-	public RMSE_Evaluator(FactorUserItemRepresentation userItemRep,RatingScale scale, int minTrains) {
-		this.userItemRepresentation=userItemRep;
+	public RMSE_Evaluator(ModelPredictor predictor,RatingScale scale, int minTrains) {
+		this.predictor=predictor;
 		this.scale=scale;
 		this.minTrains=minTrains;
 		LOG.info("RMSE evaluator asking for processors available");
@@ -60,7 +63,7 @@ public class RMSE_Evaluator implements Observer {
 	public void update(Observable o, Object arg) {
 
 		UserTrainEvent event = (UserTrainEvent) arg;
-		PredictionEvaluationRunnable run= new PredictionEvaluationRunnable(event,userItemRepresentation, scale, minTrains,this);
+		PredictionEvaluationRunnable run= new PredictionEvaluationRunnable(event,this.predictor,this.minTrains,this);
 		while(executor.getQueue().size()>400000){
 			//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
 			try {

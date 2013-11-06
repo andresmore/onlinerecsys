@@ -17,6 +17,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
@@ -42,13 +43,15 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 	
 	private LinkedList<Double> partialEvaluations=new LinkedList<>();
+	private ModelPredictor predictor;
 
-	public PrivateRecommenderParallelTrainer(
-			FactorUserItemRepresentation userItemRep,
+	public PrivateRecommenderParallelTrainer(FactorUserItemRepresentation userItemRep,
+			ModelPredictor predictor,
 			IUserProfileUpdater userUpdater,
 			IUserItemAggregator userAggregator,
 			IItemProfileUpdater itemProfileUpdater, RSDataset dataset, LearningRateStrategy lambda) {
-		this.userItemRep = userItemRep;
+		this.userItemRep=userItemRep;
+		this.predictor = predictor;
 		this.userUpdater = userUpdater;
 		this.userAggregator = userAggregator;
 		this.itemProfileUpdater = itemProfileUpdater;
@@ -106,7 +109,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 			countTries++;
 		}
 		if(countTries<PrivateRecommenderParallelTrainer.NUM_TRIES_EVALUATION){
-			double rmse=ModelEvaluator.evaluateModel(new File(dataset.getTestCV()), dataset.getScale(), this.userItemRep,10);
+			double rmse=ModelEvaluator.evaluateModel(new File(dataset.getTestCV()), dataset.getScale(), this.predictor,10);
 			partialEvaluations.add(rmse);
 		}else{
 			partialEvaluations.add(-1.0);

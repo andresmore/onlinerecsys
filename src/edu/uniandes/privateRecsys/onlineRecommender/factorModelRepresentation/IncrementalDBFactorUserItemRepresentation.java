@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -78,9 +79,9 @@ public class IncrementalDBFactorUserItemRepresentation implements
 			try {
 				if (!this.sqlDAO.containsUserKey(userId))
 					insertUser(userId);
-
+				LinkedList<BetaDistribution> bias= new LinkedList<>();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale, new DenseVector(ratingScale.getRatingSize()));
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -165,7 +166,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, Vector bias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
@@ -244,62 +245,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 		return trains;
 	}
 
-	@Override
-	public Prediction calculatePrediction(long itemId, long userId, int minTrains)
-			throws TasteException {
-		
-		double prediction=0;
-		UserProfile user = this
-				.getPublicUserProfile(userId);
-		ItemProfile item = this
-				.getPrivateItemProfile(itemId);
-		
-		int numTrainsItem=this.getNumberTrainsItem(itemId);
-		int numTrainsUser=this.getNumberTrainsUser(userId);
-		if (numTrainsUser < minTrains){
-		
-			return Prediction.createNoAblePrediction(userId,itemId);
-		}
-		else {
-			String[] ratingScale = this.ratingScale.getScale();
-			
-			double sumprob = 0;
-			if (item != null && user != null) {
-				Vector itemVector = item.getVector();
-				if(numTrainsItem<minTrains){
-					//Equiprobable vector
-						itemVector=itemVector.assign(1);
-						itemVector=VectorProjector.projectVectorIntoSimplex(itemVector);
-						
-				}
-					
-				Vector dotVector= new DenseVector(ratingScale.length);
-				for (int i = 0; i < ratingScale.length; i++) {
-					Vector userVector = user
-							.getProfileForScale(ratingScale[i]);
-					double dot = userVector.dot(itemVector);
-					sumprob += dot;
-					prediction += dot * Double.parseDouble(ratingScale[i]);
-					dotVector.setQuick(i, dot);
-				}
-				//System.out.println("RAting prediction should be: "+rating+", dots are: "+dotVector);
-				/*for (int i = 0; i < ratingScale.length; i++) {
-					Vector userVector = user
-							.getProfileForScale(ratingScale[i]);
-					double dot = userVector.dot(itemVector);
-					if(dot>sumprob){
-						sumprob = dot;
-						prediction = Double.parseDouble(ratingScale[i]);
-					}
-
-				}*/
-			}
-			
-			
-			
-		}
-		return Prediction.createNormalPrediction(userId,itemId,prediction);
-	}
+	
 
 	public long getNumUsers() {
 		// TODO Auto-generated method stub

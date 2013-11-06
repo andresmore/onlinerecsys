@@ -8,16 +8,18 @@ import java.util.Set;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
 public class TopNRecommenderFactorModel implements TopNRecommender {
 
 	
-	private FactorUserItemRepresentation userItemRep;
 	
-	public TopNRecommenderFactorModel(FactorUserItemRepresentation userItemRep) {
+	private ModelPredictor predictor;
+	
+	public TopNRecommenderFactorModel(ModelPredictor predictor) {
 		
-		this.userItemRep = userItemRep;
+		this.predictor = predictor;
 	}
 
 	/* (non-Javadoc)
@@ -29,7 +31,7 @@ public class TopNRecommenderFactorModel implements TopNRecommender {
 		
 		
 		for (Long itemId : ids) {
-			Prediction p=userItemRep.calculatePrediction(itemId, userID, 10);
+			Prediction p=predictor.calculatePrediction(itemId, userID, 10);
 			predictions.add(p);
 			if(predictions.size()>size){
 				predictions.poll();

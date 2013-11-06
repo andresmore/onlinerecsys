@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -24,7 +26,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	
 	private ConcurrentHashMap<Long, Vector> itemFactors;
 	private ConcurrentHashMap<Long, Vector>[] privateUserFactors;
-	private ConcurrentHashMap<Long, Vector> privateUserBias;
+	private ConcurrentHashMap<Long, LinkedList<BetaDistribution>> privateUserBias;
 	private ConcurrentHashMap<Long, Vector>[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -77,18 +79,17 @@ public class IncrementalFactorUserItemRepresentation implements
 	
 	private void insertUser(long userId) {
 		String[] scale= this.ratingScale.getScale();
-		
+		LinkedList<BetaDistribution> userPriors= new LinkedList<>();
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			Vector vec= new DenseVector(this.fDimensions);
 			vec=PrivateRandomUtils.normalRandom(0, 1, vec);
 			userProfile.put(scale[i],vec);
+			userPriors.add(new BetaDistributionImpl(1,1));
 		}
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
-		Vector userBiasVector= new DenseVector(this.ratingScale.getRatingSize());
-		userBiasVector=userBiasVector.assign(1);
-		userBiasVector=VectorProjector.projectVectorIntoSimplex(userBiasVector);
-		this.privateUserBias.put(userId, userBiasVector);
+		
+		this.privateUserBias.put(userId, userPriors);
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
 			if(this.hasPrivateInfo){
@@ -100,21 +101,21 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public UserProfile getPublicUserProfile(long userId) throws TasteException {
+		if(!hasPrivateInfo)
+			return getPrivateUserProfile(userId);
+		
 		if (isAllowed(userId)) {
 			if (!publicUserFactors[0].containsKey(userId))
 				insertUser(userId);
-
+			LinkedList<BetaDistribution> dist= new LinkedList<>();
 			LinkedList<Vector> userVectors = new LinkedList<>();
 			for (int i = 0; i < this.publicUserFactors.length; i++) {
 				userVectors.add(this.publicUserFactors[i].get(userId));
+				dist.add(new BetaDistributionImpl(1, 1));
 			}
-			Vector userBiasVector = new DenseVector(
-					this.ratingScale.getRatingSize());
-			userBiasVector = userBiasVector.assign(1);
-			userBiasVector = VectorProjector
-					.projectVectorIntoSimplex(userBiasVector);
+			
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					userBiasVector);
+					dist);
 		}
 		return null;
 	}
@@ -163,7 +164,7 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles,Vector userBias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles,HashMap<String, BetaDistribution> bias) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
@@ -172,12 +173,13 @@ public class IncrementalFactorUserItemRepresentation implements
 			trains.incrementAndGet();
 		
 		String[] scale= this.ratingScale.getScale();
-		
+		LinkedList<BetaDistribution> userPriors= new LinkedList<BetaDistribution>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
 			publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
+			userPriors.add(bias.get(scale[i]));
 		}
-		privateUserBias.put(userId, userBias);
+		privateUserBias.put(userId, userPriors);
 
 	}
 
@@ -248,62 +250,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		return trains;
 	}
 
-	@Override
-	public Prediction calculatePrediction(long itemId, long userId, int minTrains)
-			throws TasteException {
-		
-		double prediction=0;
-		UserProfile user = this
-				.getPublicUserProfile(userId);
-		ItemProfile item = this
-				.getPrivateItemProfile(itemId);
-		
-		int numTrainsItem=this.getNumberTrainsItem(itemId);
-		int numTrainsUser=this.getNumberTrainsUser(userId);
-		if (numTrainsUser < minTrains){
-			//System.err.println("Not enough trains for (user,item) ("+userId+","+itemId+")");rn 0;
-			return Prediction.createNoAblePrediction(userId,itemId);
-		}
-		else {
-			String[] ratingScale = this.ratingScale.getScale();
-			
-			double sumprob = 0;
-			if (item != null && user != null) {
-				Vector itemVector = item.getVector();
-				if(numTrainsItem<minTrains){
-					//Equiprobable vector
-						itemVector=itemVector.assign(1);
-						itemVector=VectorProjector.projectVectorIntoSimplex(itemVector);
-						
-				}
-					
-				Vector dotVector= new DenseVector(ratingScale.length);
-				for (int i = 0; i < ratingScale.length; i++) {
-					Vector userVector = user
-							.getProfileForScale(ratingScale[i]);
-					double dot = userVector.dot(itemVector);
-					sumprob += dot;
-					prediction += dot * Double.parseDouble(ratingScale[i]);
-					dotVector.setQuick(i, dot);
-				}
-				//System.out.println("RAting prediction should be: "+rating+", dots are: "+dotVector);
-				/*for (int i = 0; i < ratingScale.length; i++) {
-					Vector userVector = user
-							.getProfileForScale(ratingScale[i]);
-					double dot = userVector.dot(itemVector);
-					if(dot>sumprob){
-						sumprob = dot;
-						prediction = Double.parseDouble(ratingScale[i]);
-					}
-
-				}*/
-			}
-			
-			
-			
-		}
-		return Prediction.createNormalPrediction(userId,itemId,prediction);
-	}
+	
 
 	public long getNumUsers() {
 		// TODO Auto-generated method stub

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.math.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
@@ -23,7 +24,7 @@ public interface FactorUserItemRepresentation {
 	public int getNumberTrainsItem(long itemId);
 
 	void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, Vector bias) throws TasteException;
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException;
 
 	UserProfile getPublicUserProfile(long userId) throws TasteException;
 
@@ -38,7 +39,6 @@ public interface FactorUserItemRepresentation {
 
 	Object blockItem(long itemId);
 
-	Prediction calculatePrediction(long itemId, long userId, int minTrains) throws TasteException;
 
 	void setRestrictUsers(HashSet<Long> restrictedUserIds);
 

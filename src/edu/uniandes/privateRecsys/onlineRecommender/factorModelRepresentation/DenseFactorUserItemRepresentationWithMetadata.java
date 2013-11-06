@@ -118,7 +118,7 @@ DenseFactorUserItemRepresentation {
 			
 		}
 		if(numTrainsItem>=minTrains){
-			return Prediction.createNormalPrediction(userId,itemId,prediction);
+			return Prediction.createPrediction(userId,itemId,prediction);
 		}
 		return Prediction.createHyrbidPrediction(userId,itemId,prediction);
 	}
