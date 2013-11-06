@@ -4,12 +4,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
 
 public interface FactorUserItemRepresentation {

@@ -1,6 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender.vo;
 
-import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 
 public class UserTrainEvent implements FileEvent{
 	

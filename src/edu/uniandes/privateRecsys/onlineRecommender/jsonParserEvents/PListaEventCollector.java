@@ -1,15 +1,10 @@
 package edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-
-import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 

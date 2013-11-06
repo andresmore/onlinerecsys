@@ -10,8 +10,8 @@ import org.apache.mahout.common.iterator.FileLineIterator;
 import com.google.common.base.Splitter;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ReportErrorEvent;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 

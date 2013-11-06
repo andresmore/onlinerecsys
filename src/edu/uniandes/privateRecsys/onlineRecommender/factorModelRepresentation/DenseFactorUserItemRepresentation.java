@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.math.distribution.BetaDistribution;
-import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -96,7 +95,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		for (int i = 0; i < privateUserBias.length; i++) {
 			for (int j = 0; j < privateUserBias[0].length; j++) {
-				privateUserBias[i][j]=new BetaDistributionImpl(1, 1);
+				privateUserBias[i][j]=new BetaDistribution(1, 1);
 			}
 		}
 		
@@ -139,7 +138,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		
 			publicVectors.add(mat.viewRow(userPos));
-			privateBias.add(new BetaDistributionImpl(1, 1));
+			privateBias.add(new BetaDistribution(1, 1));
 		
 		}
 		Vector emptyHyperParms= new DenseVector();

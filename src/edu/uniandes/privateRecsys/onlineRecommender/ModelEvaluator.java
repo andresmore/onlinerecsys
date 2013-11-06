@@ -13,7 +13,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.PlistaData
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PListaEventCollector;
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PlistaJsonEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;

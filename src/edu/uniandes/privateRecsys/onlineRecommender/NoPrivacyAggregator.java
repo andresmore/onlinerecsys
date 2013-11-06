@@ -7,7 +7,6 @@ import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class NoPrivacyAggregator implements IUserItemAggregator {

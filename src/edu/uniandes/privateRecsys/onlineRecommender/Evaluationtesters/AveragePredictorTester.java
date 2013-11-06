@@ -13,7 +13,6 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
-import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -42,10 +41,10 @@ public class AveragePredictorTester implements Observer {
 			double rmse=tester.startExperiment();
 			System.out.println("RMSE is "+rmse);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (PrivateRecsysException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -81,7 +80,7 @@ public class AveragePredictorTester implements Observer {
 				if(numPredictions%1000==0)
 					System.out.println("Making prediction #"+numPredictions);
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		

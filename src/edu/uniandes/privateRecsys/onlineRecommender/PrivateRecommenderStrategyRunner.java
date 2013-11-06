@@ -3,10 +3,6 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.jfree.util.Log;
-
-import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.OnlineRecommenderTester;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;

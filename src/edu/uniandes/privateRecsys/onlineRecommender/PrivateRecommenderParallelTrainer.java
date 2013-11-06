@@ -17,10 +17,9 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class PrivateRecommenderParallelTrainer implements Observer {
 
@@ -179,7 +178,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 	}
 
-	//TODO: THIS CHANGES SIZE IN PARALELL
+	
 	synchronized public void updateState(long threadId, UserTrainEvent event, String action)  {
 		int pos=-1;
 		

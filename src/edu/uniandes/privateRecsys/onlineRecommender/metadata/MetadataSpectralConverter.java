@@ -12,8 +12,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.spectral.common.AffinityMatrixInputJob;
 import org.apache.mahout.clustering.spectral.common.MatrixDiagonalizeJob;
 import org.apache.mahout.clustering.spectral.common.VectorMatrixMultiplicationJob;
-import org.apache.mahout.common.distance.CosineDistanceMeasure;
-import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -141,7 +139,7 @@ public class MetadataSpectralConverter {
 			}
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}finally{
 			if(pr!=null){
@@ -157,13 +155,13 @@ public class MetadataSpectralConverter {
 		try {
 			MetadataSpectralConverter.convertDataToSpectralRepresentation("data/ml-10M100K/metadata/mapFile.data", "data/ml-10M100K/metadata/spectral10",  10);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			// 
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		/*try {
@@ -172,7 +170,7 @@ public class MetadataSpectralConverter {
 			
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		}*/
 	}

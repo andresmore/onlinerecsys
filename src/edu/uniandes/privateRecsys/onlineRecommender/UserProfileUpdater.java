@@ -3,13 +3,12 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import org.apache.commons.math.distribution.BetaDistribution;
-import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
+
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -85,9 +84,9 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		for (int i = 0; i < ratingScale.length; i++) {
 			BetaDistribution dist=biasVector.get(ratingScale[i]);
 			if(event.getRating().equals(ratingScale[i])){
-				ret.put(ratingScale[i], new BetaDistributionImpl(dist.getAlpha()+1, dist.getBeta()));
+				ret.put(ratingScale[i], new BetaDistribution(dist.getAlpha()+1, dist.getBeta()));
 			}else{
-				ret.put(ratingScale[i], new BetaDistributionImpl(dist.getAlpha(), dist.getBeta()+1));
+				ret.put(ratingScale[i], new BetaDistribution(dist.getAlpha(), dist.getBeta()+1));
 			}
 				
 		}

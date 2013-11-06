@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -19,7 +19,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysExcep
 import edu.uniandes.privateRecsys.onlineRecommender.postgresdb.PosgresDAO;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 /**
  * Class that manages a incremental factor model backed on a DB on posgresDAO 
  * @deprecated ignores user bias and hyperParams
@@ -84,7 +83,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				return UserProfile.buildDenseProfile(
 						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}
@@ -130,7 +129,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 			
 			return ItemProfile.buildDenseProfile(sqlDAO.getItemFactors(itemId));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		
 			LOG.log(Level.SEVERE, "SQLException", e);
 			throw new TasteException(e.getMessage());
 		}
@@ -249,12 +248,12 @@ public class IncrementalDBFactorUserItemRepresentation implements
 	
 
 	public long getNumUsers() {
-		// TODO Auto-generated method stub
+		
 		return this.numTrainsUser.size();
 	}
 
 	public long getNumItems() {
-		// TODO Auto-generated method stub
+		
 		return this.numTrainsItem.size();
 	}
 	

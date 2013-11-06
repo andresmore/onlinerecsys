@@ -215,7 +215,7 @@ public class JsonImpressionClickMetadataConsolidator{
 			new JsonImpressionClickMetadataConsolidator("data/plista","clickedItemsKeywords2.map").createKeyworkdFile();
 			//new JsonImpressionClickMetadataConsolidator("data/plista","clickedItemsKeywords.map").processSingleFile(new File("data/plista/impression_2013-06-05.log"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch(RuntimeException e){
 			e.printStackTrace();

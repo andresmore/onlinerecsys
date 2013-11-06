@@ -5,15 +5,10 @@ import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
-import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -48,10 +43,10 @@ public class AveragePredictorTesterWithAvgModel implements Observer {
 			System.out.println("RMSE testset is "+rmse2);
 			System.out.println("RMSE cv is "+rmse3);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (PrivateRecsysException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -88,7 +83,7 @@ public class AveragePredictorTesterWithAvgModel implements Observer {
 					if(numPredictions%1000==0)
 						System.out.println("Making prediction #"+numPredictions);
 			} catch (PrivateRecsysException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			

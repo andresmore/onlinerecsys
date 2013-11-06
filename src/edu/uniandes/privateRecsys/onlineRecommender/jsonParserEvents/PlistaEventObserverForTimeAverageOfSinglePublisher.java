@@ -135,7 +135,7 @@ public class PlistaEventObserverForTimeAverageOfSinglePublisher implements Obser
 			
 			System.out.println(new Date());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

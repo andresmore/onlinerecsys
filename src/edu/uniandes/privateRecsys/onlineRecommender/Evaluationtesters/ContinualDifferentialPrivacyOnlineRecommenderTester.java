@@ -6,28 +6,20 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.jfree.util.Log;
 
+import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ContinualDifferentialPrivacyAggregator;
-import edu.uniandes.privateRecsys.onlineRecommender.DifferentialPrivacyAggregator;
-import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
-import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
-import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
-import edu.uniandes.privateRecsys.onlineRecommender.Profiler;
-import edu.uniandes.privateRecsys.onlineRecommender.RMSE_Evaluator;
+import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -116,13 +108,13 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 			//double result=rest.startRecommendations();
 			//System.out.println(result);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (PrivateRecsysException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

@@ -3,7 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;

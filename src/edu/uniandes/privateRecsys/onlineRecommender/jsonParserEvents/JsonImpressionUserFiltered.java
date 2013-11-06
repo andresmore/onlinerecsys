@@ -11,8 +11,6 @@ import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.management.RuntimeErrorException;
-
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ClickImpressionEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 

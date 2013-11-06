@@ -7,16 +7,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.math.distribution.BetaDistribution;
-import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
 public class IncrementalFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {
@@ -91,7 +88,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			Vector vec= new DenseVector(this.fDimensions);
 			vec=PrivateRandomUtils.normalRandom(0, 1, vec);
 			userProfile.put(scale[i],vec);
-			userPriors.add(new BetaDistributionImpl(1,1));
+			userPriors.add(new BetaDistribution(1,1));
 		}
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
 		
@@ -121,7 +118,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			LinkedList<Vector> userVectors = new LinkedList<>();
 			for (int i = 0; i < this.publicUserFactors.length; i++) {
 				userVectors.add(this.publicUserFactors[i].get(userId));
-				dist.add(new BetaDistributionImpl(1, 1));
+				dist.add(new BetaDistribution(1, 1));
 			}
 			Vector emptyHyperParams= new DenseVector();
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,

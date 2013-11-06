@@ -1,10 +1,8 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
