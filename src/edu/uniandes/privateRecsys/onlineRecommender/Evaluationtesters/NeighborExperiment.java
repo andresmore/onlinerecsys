@@ -3,6 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
@@ -37,8 +38,14 @@ public class NeighborExperiment {
 		String metadataSemanticMovielens="data/ml-10M100K/metadata/unitvectors/spectral-15";
 		//String metadataSemanticMovielens="data/ml-10M100K/metadata/mapFile.data";
 		String allSemanticMovielens="data/ml-10M100K/metadata/allSemantic.txt";
-		RatingScale scaleSemanticMovielens= new OrdinalRatingScale(new String[] {"0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"});
-		RSMetadataDataset dataset= new RSMetadataDataset(trainSetSemanticMovieLens,testSetSemanticMovielens,testSetSemanticMovielens,scaleSemanticMovielens,metadataSemanticMovielens,allSemanticMovielens);
+		 HashMap<String,String> translations=new HashMap<String,String>();
+		 translations.put("0.5", "1");
+		 translations.put("1.5", "2");
+		 translations.put("2.5", "3");
+		 translations.put("3.5", "4");
+		 translations.put("4.5", "5");
+		RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
+		RSMetadataDataset dataset= new RSMetadataDataset(trainSetSemanticMovieLens,testSetSemanticMovielens,testSetSemanticMovielens,scale,metadataSemanticMovielens,allSemanticMovielens);
 		
 		AbstractRecommenderTester tester=null;
 		double delta=0.1;

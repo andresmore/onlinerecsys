@@ -34,15 +34,19 @@ public class PredictionEvaluationRunnable implements Runnable {
 		String rating = event.getRating();
 		long time = event.getTime();
 		
+		long initialTime=System.nanoTime();
+		
 		try {
 			Prediction prediction = predictor.calculatePrediction(itemId, userId,minTrains);
 			rmse_Evaluator.notifyPrediction(event,prediction);
+			PredictionProfiler.getInstance().reportTimes(initialTime, System.nanoTime());
 
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error making prediction", e);
-			
+			PredictionProfiler.getInstance().reportFailure();
 			//e.printStackTrace();
 		}
+		
 		
 
 	}

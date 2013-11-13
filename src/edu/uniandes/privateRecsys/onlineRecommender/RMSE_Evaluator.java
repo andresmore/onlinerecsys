@@ -55,6 +55,7 @@ public class RMSE_Evaluator implements Observer {
 		LOG.info("Launching pool executor with "+numProcessors+" executors");
 		executor = new ThreadPoolExecutor(numProcessors, numProcessors, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		executor.prestartAllCoreThreads();
+		
 	}
 
 	@Override
@@ -65,8 +66,8 @@ public class RMSE_Evaluator implements Observer {
 		while(executor.getQueue().size()>400000){
 			//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
 			try {
-				Thread.sleep(50);
-				System.out.println("Waited, queue size is now "+executor.getQueue().size());
+				Thread.sleep(500);
+				
 			} catch (InterruptedException e) {
 				LOG.log(Level.SEVERE, "Interrupted exception", e);
 			}
@@ -74,6 +75,7 @@ public class RMSE_Evaluator implements Observer {
 		}
 		executor.submit(run);
 		numSubmitedTasks.incrementAndGet();
+		
 
 	}
 	public long getNumEvals() {
@@ -144,7 +146,7 @@ public class RMSE_Evaluator implements Observer {
 		rmseAverage.addDatum(diff * diff);
 		maeAverage.addDatum(Math.abs(diff));
 		numEvals.incrementAndGet();
-
+		
 		
 	}
 

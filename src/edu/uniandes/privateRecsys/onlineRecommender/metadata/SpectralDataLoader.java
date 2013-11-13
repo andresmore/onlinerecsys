@@ -74,7 +74,7 @@ public class SpectralDataLoader {
 			}
 			System.out.println(mat.numRows());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// 
 			e.printStackTrace();
 		}
 	}

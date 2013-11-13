@@ -65,10 +65,10 @@ public class FileEventCreator extends Observable{
 					notifyObservers(event2);
 				}
 
-				/*
-				 * if(numlines%100000==0)
-				 * System.out.println(numlines+" events created");
-				 */
+				
+				  if(numlines%100000==0)
+				  System.out.println(numlines+" events created");
+				 
 			}
 		} catch (IOException e) {
 

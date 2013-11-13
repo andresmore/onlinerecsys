@@ -11,14 +11,14 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 public class PrivateRandomUtils {
 
 	
-	private static XORShiftRNG genRand= new XORShiftRNG();;
+	private static UncommonsRandomGeneratorAdaptor genRand= new UncommonsRandomGeneratorAdaptor();
 	/**
 	 * Randomizes a Matrix based with values taken from a normal distribution between [0,1) using Rand.nextDouble()
 	 * @param matrix
 	 * @param projectRows 
 	 */
 	public static void randomizeMatrix(Matrix matrix, boolean projectRows) {
-		//TODO:Change with uncommon numbers random
+		
 		XORShiftRNG rand= new XORShiftRNG();
 		
 		//Random rand=RandomUtils.getRand000om();
@@ -72,6 +72,10 @@ public class PrivateRandomUtils {
 		return retVector;
 		
 		
+	}
+	
+	public static UncommonsRandomGeneratorAdaptor getCurrentRandomGenerator(){
+		return genRand;
 	}
 
 }

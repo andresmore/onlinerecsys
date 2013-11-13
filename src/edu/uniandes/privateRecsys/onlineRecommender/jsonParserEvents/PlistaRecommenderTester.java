@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -134,7 +135,7 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 		LinkedList<String> trainPrefixes= new LinkedList<>();
 		trainPrefixes.add("click");
 		trainPrefixes.add("impression");
-		RatingScale scale= new OrdinalRatingScale(new String[] {"0","1","2"});
+		RatingScale scale= new OrdinalRatingScale(new String[] {"0","1","2"}, new HashMap<String, String>());
 		PlistaDataset dataset= new PlistaDataset("data/plista/usersCount.csv", "data/plista/filtered", trainPrefixes, scale);
 		try {
 			PlistaRecommenderTester tester= new PlistaRecommenderTester(dataset, 10, LearningRateStrategy.createWithConstantRate(0.2));

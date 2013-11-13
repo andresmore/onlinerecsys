@@ -31,7 +31,7 @@ public class ModelEvaluator {
 			TasteException {
 		Log.info("Evaluating error for model with file " + testSet);
 		FileEventCreator testEv = new FileEventCreator(testSet, -1, -1);
-
+        PredictionProfiler.reset();
 		RMSE_Evaluator rmseEval = new RMSE_Evaluator(predictor, scale, minTraining);
 		testEv.addObserver(rmseEval);
 		testEv.startEvents();

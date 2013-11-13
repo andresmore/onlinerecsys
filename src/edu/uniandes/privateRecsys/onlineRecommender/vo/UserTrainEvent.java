@@ -30,6 +30,9 @@ public class UserTrainEvent implements FileEvent{
 		return time;
 	}
 	
+	public void updateRating(String rating){
+		this.rating=rating;
+	}
 	
 	@Override
 	public String getEventType() {

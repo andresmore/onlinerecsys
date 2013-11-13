@@ -136,9 +136,9 @@ public class DenseFactorUserItemRepresentation implements
 		
 			DenseMatrix mat=publicUserFactors[i];
 		
-		
+			 
 			publicVectors.add(mat.viewRow(userPos));
-			privateBias.add(new BetaDistribution(1, 1));
+			privateBias.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1, 1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 		
 		}
 		Vector emptyHyperParms= new DenseVector();

@@ -9,5 +9,6 @@ public interface RatingScale {
 	public int getRatingSize();
 	public String[] getScale();
 	public boolean hasScale(String rating);
+	public String getRatingAlias(String rating);
 
 }

@@ -1,17 +1,21 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.BayesAveragePredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -51,7 +55,13 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
-			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
+			 HashMap<String,String> translations=new HashMap<String,String>();
+			 translations.put("0.5", "1");
+			 translations.put("1.5", "2");
+			 translations.put("2.5", "3");
+			 translations.put("3.5", "4");
+			 translations.put("4.5", "5");
+			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
 			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			//AverageDataModel model= new AverageDataModel(new File(trainSet));
 			double delta=0.1;
@@ -63,8 +73,8 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 				
 				
+				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
 				UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
-			
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);

@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.apache.commons.cli.BasicParser;
@@ -88,7 +89,13 @@ public class RecommenderMainClass {
 		String trainSetMovieLens="data/ml-10M100K/rb.train.sorted";
 		String testSetMovielens="data/ml-10M100K/rb.test.test";
 		String testCVMovielens="data/ml-10M100K/rb.test.cv";
-		RatingScale scaleMovielens= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
+		 HashMap<String,String> translations=new HashMap<String,String>();
+		 translations.put("0.5", "1");
+		 translations.put("1.5", "2");
+		 translations.put("2.5", "3");
+		 translations.put("3.5", "4");
+		 translations.put("4.5", "5");
+		RatingScale scaleMovielens= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
 		this.datasetMovielens= new RSDataset(trainSetMovieLens,testSetMovielens,testCVMovielens,scaleMovielens);
 		
 		String trainSetSemanticMovieLens="data/ml-10M100K/metadata/trainSemantic.txt.sorted";
@@ -99,13 +106,13 @@ public class RecommenderMainClass {
 		String metadataSemanticMovielens="data/ml-10M100K/metadata/unitvectors/spectral-5";
 		//String metadataSemanticMovielens="data/ml-10M100K/metadata/mapFile.data";
 		String allSemanticMovielens="data/ml-10M100K/metadata/allSemantic.txt";
-		RatingScale scaleSemanticMovielens= new OrdinalRatingScale(new String[] {"0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"});
+		RatingScale scaleSemanticMovielens= new OrdinalRatingScale(new String[] {"0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"},translations);
 		this.datasetSemanticMovielens= new RSMetadataDataset(trainSetSemanticMovieLens,testSetSemanticMovielens,testSetSemanticMovielens,scaleSemanticMovielens,metadataSemanticMovielens,allSemanticMovielens);
 		
 		String trainSetNetflix="data/netflix/rb.train.sorted";
 		String testSetNetflix="data/netflix/rb.test.test";
 		String testCVNetflix="data/netflix/rb.test.CV";
-		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
+		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"}, new HashMap<String,String>());
 		this.datasetNetflix= new RSDataset(trainSetNetflix,testSetNetflix,testCVNetflix,scaleNetflix);
 		
 		
@@ -295,7 +302,7 @@ public class RecommenderMainClass {
 		AbstractRecommenderTester tester=null;
 		LearningRateStrategy tsCreator=null;
 		
-		//TODO: ModelTRainerPredictor choose as an option of
+		//TODO: ModelTRainerPredictor choose as an option of menu
 		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 		if(constantLearningRate==-1)
 			tsCreator=LearningRateStrategy.createDecreasingRate(alpha, initialGamma);

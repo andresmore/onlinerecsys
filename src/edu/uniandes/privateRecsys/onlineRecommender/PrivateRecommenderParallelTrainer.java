@@ -128,13 +128,15 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 				else
 					build.append("]");
 			}
-			//System.out.println(build.toString());
+			System.out.println(build.toString());
 			Thread.sleep(2000);
-			// System.out.println("Waited, queue size is now "+executor.getQueue().size());
+			System.out.println("Waited, submited is: "+numSubmitedTasks.get() +" queue size is now "+executor.getQueue().size());
 
 		}
 		RatingScale rs = userItemRep.getRatingScale();
+		
 		if (rs.hasScale(event.getRating())) {
+			event.updateRating(rs.getRatingAlias(event.getRating()));
 			PrivateRecommenderStrategyRunner runner = new PrivateRecommenderStrategyRunner(
 					this.userItemRep, this.userUpdater, this.userAggregator,
 					this.itemProfileUpdater, event, this, this.lambda);

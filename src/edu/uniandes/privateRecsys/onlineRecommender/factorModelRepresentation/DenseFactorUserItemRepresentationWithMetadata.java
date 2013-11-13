@@ -3,6 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -172,61 +173,6 @@ DenseFactorUserItemRepresentation {
 		return ret;
 	}
 	
-	public static void main(String[] args) throws TasteException, IOException, PrivateRecsysException {
-		
-		String trainSetSemanticMovieLens="data/ml-10M100K/metadata/trainSemantic.txt.sorted";
-		String testSetSemanticMovielens="data/ml-10M100K/metadata/testSemantic.txt";
-		//String trainSetSemanticMovieLens="data/ml-10M100K/metadata/ra.train.sorted";
-		//String testSetSemanticMovielens="data/ml-10M100K/metadata/ra.test";
-		String metadataSemanticMovielens="data/ml-10M100K/metadata/unitvectors/spectral-5";
-		//String metadataSemanticMovielens="data/ml-10M100K/metadata/mapFile.data";
-		String allSemanticMovielens="data/ml-10M100K/metadata/allSemantic.txt";
-		
-		
-		RatingScale scaleSemanticMovielens= new OrdinalRatingScale(new String[] {"0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"});
-		RSMetadataDataset dataset= new RSMetadataDataset(trainSetSemanticMovieLens,testSetSemanticMovielens,testSetSemanticMovielens,scaleSemanticMovielens,metadataSemanticMovielens,allSemanticMovielens);
-		double delta=0.1;
-		
-		
-		LearningRateStrategy tsCreator=LearningRateStrategy.createWithConstantRate(delta);
-		RSMetadataDataset dataset2=(RSMetadataDataset) dataset;
-		AverageDataModel averageModel= new AverageDataModel(new File(dataset2.getAllDataset()));
-		AverageDataModel testModel= new AverageDataModel(new File(dataset2.getTestSet()));
-		
-		AbstractRecommenderTester tester= new OnlineRecommenderTester(dataset2, 10, tsCreator);
-		DenseFactorUserItemRepresentationWithMetadata representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),5,true, 0);
-		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor(representation);
-		UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-		IUserItemAggregator agregator= new NoPrivacyAggregator();
-		IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
-		tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
-		tester.setModelPredictor(modelTrainerPredictor);
-		//tester.setEventsReport(100000);
-		ErrorReport rep=tester.startExperiment(1);
-		
-		Iterator<Long> itemIds=testModel.getItemIDs();
-		
-		while(itemIds.hasNext()){
-			long itemId=itemIds.next();
-			int numTrains=representation.getNumberTrainsItem(itemId);
-			System.out.println(itemId+" item has "+numTrains);
-			int[] numNeighbors={1,5,10,15,20,25,30,35,40,45,50};
-			for (int i = 0; i < numNeighbors.length; i++) {
-				representation.numNeighbors=numNeighbors[i];
-				System.out.println(numNeighbors+" "+representation.buildVectorFromSpectralData(itemId, 10));
-			}
-			
-			
-			
-			
-			
-		}
-		
-		
-		
-		
-		
-		
-	}
+	
 
 }

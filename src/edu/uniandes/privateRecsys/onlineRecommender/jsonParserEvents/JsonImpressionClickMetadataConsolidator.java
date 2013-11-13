@@ -203,7 +203,7 @@ public class JsonImpressionClickMetadataConsolidator{
 	*/
 	
 	private Map mergeMaps(Map mapKeywords, Map keywords) {
-		//TODO:FIX
+		
 		 mapKeywords.putAll(keywords);
 		return mapKeywords;
 	}

@@ -240,13 +240,19 @@ public class GridSearchParameter {
 		String trainSetMovieLens="data/ml-10M100K/rb.train.sorted";
 		String testSetMovielens="data/ml-10M100K/rb.test.test";
 		String testCVMovielens="data/ml-10M100K/rb.test.cv";
-		RatingScale scaleMovielens= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
-		RSDataset datasetMovielens= new RSDataset(trainSetMovieLens,testSetMovielens,testCVMovielens,scaleMovielens);
+		 HashMap<String,String> translations=new HashMap<String,String>();
+		 translations.put("0.5", "1");
+		 translations.put("1.5", "2");
+		 translations.put("2.5", "3");
+		 translations.put("3.5", "4");
+		 translations.put("4.5", "5");
+		RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
+		RSDataset datasetMovielens= new RSDataset(trainSetMovieLens,testSetMovielens,testCVMovielens,scale);
 		
 		String trainSetNetflix="data/netflix/rb.train.sorted";
 		String testSetNetflix="data/netflix/rb.test.test";
 		String testCVNetflix="data/netflix/rb.test.CV";
-		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
+		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"}, new HashMap<String,String>());
 		RSDataset datasetNetflix= new RSDataset(trainSetNetflix,testSetNetflix,testCVNetflix,scaleNetflix);
 		try {
 			new GridSearchParameter(datasetMovielens).startSearch(1);

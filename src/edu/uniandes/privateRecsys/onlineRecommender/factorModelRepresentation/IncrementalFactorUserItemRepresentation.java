@@ -93,9 +93,10 @@ public class IncrementalFactorUserItemRepresentation implements
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
 		
 		this.privateUserBias.put(userId, userPriors);
-		Vector userHyperParams= new DenseVector(hyperParamDimension);
-		this.privateHyperParams.put(userId, userHyperParams);
-		
+		if(hyperParamDimension>0){
+			Vector userHyperParams= new DenseVector(hyperParamDimension);
+			this.privateHyperParams.put(userId, userHyperParams);
+		}
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
@@ -118,7 +119,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			LinkedList<Vector> userVectors = new LinkedList<>();
 			for (int i = 0; i < this.publicUserFactors.length; i++) {
 				userVectors.add(this.publicUserFactors[i].get(userId));
-				dist.add(new BetaDistribution(1, 1));
+				dist.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1, 1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 			}
 			Vector emptyHyperParams= new DenseVector();
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,

@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
@@ -49,7 +50,13 @@ LinkedList<RMSE_ErrorReport> results= new LinkedList<>();
 			//String testSet="data/netflix/rb.test.test";
 			String testCV="data/ml-10M100K/rb.test.cv";
 			//String testCV="data/netflix/rb.test.CV";
-			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"});
+			 HashMap<String,String> translations=new HashMap<String,String>();
+			 translations.put("0.5", "1");
+			 translations.put("1.5", "2");
+			 translations.put("2.5", "3");
+			 translations.put("3.5", "4");
+			 translations.put("4.5", "5");
+			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
 			LOG.info("Loading model");
 			RSDataset data= new RSDataset(trainSet,testCV,testCV,scale);
