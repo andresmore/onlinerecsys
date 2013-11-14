@@ -46,7 +46,7 @@ public class Profiler extends Observable{
 			
 			
 			//System.out.println(numEvents.intValue());
-			if(numEvents.incrementAndGet()%1000000==0){
+			if(numEvents.incrementAndGet()%100000==0){
 				printStats();
 			}
 		
@@ -60,15 +60,15 @@ public class Profiler extends Observable{
 			}
 		}
 		long totalTime=System.nanoTime()-initialProfilerTime;
-		StringBuffer message= new StringBuffer();
-		message.append("NumEvents processed "+numEvents.get()+'\n');
-		message.append("NumEvents failed "+numFails.get()+'\n');
-		message.append("Time has passed (ns)"+totalTime+'\n');
-		message.append("Events per time (ms) "+((double)(numEvents.get())/(double)totalTime)*1e6 +'\n');
-		message.append("Total avg - stdev "+totalAverageTime.getAverage()+" - "+totalAverageTime.getStandardDeviation()+'\n');
-		message.append("UserUpdate avg - stdev "+userUpdatingAverageTime.getAverage()+" - "+userUpdatingAverageTime.getStandardDeviation()+'\n');
-		message.append("UserAgg avg - stdev "+userAggregatingAverageTime.getAverage()+" - "+userAggregatingAverageTime.getStandardDeviation()+'\n');
-		message.append("ItemUpdate avg - stdev "+itemUpdatingAverageTime.getAverage()+" - "+itemUpdatingAverageTime.getStandardDeviation()+'\n');
+		StringBuilder message= new StringBuilder();
+		message.append(new StringBuilder(new String("NumEvents processed ")).append(numEvents.get()).append('\n'));
+		message.append(new StringBuilder(new String("NumEvents failed ")).append(numFails.get()).append('\n'));
+		message.append(new StringBuilder(new String("Time has passed (ns)")).append(totalTime).append('\n'));
+		message.append(new StringBuilder(new String("Events per time (ms) ")).append(((double)(numEvents.get())/(double)totalTime)*1e6).append('\n'));
+		message.append(new StringBuilder(new String("Total avg - stdev ")).append(totalAverageTime.getAverage()).append(new String(" - ")).append(totalAverageTime.getStandardDeviation()).append('\n'));
+		message.append(new StringBuilder(new String("UserUpdate avg - stdev ")).append(userUpdatingAverageTime.getAverage()).append(new String(" - ")).append(userUpdatingAverageTime.getStandardDeviation()).append('\n'));
+		message.append(new StringBuilder(new String("UserAgg avg - stdev ")).append(userAggregatingAverageTime.getAverage()).append(new String(" - ")).append(userAggregatingAverageTime.getStandardDeviation()).append('\n'));
+		message.append(new StringBuilder(new String("ItemUpdate avg - stdev ")).append(itemUpdatingAverageTime.getAverage()).append(new String(" - ")).append(itemUpdatingAverageTime.getStandardDeviation()).append('\n'));
 		LOG.info(message.toString());
 	}
 	public void reportFailure() {

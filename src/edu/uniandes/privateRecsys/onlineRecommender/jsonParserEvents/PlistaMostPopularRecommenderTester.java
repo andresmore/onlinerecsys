@@ -97,6 +97,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		LOG.info("Starting experiment with params dim="+fDimensions+" learningRate= "+learningRateStrategy.toString()+" numIterations training "+numIterations );
 		
 		LinkedList<Double> partialErrors= new LinkedList<>();
+		
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			

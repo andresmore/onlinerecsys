@@ -2,9 +2,11 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,7 +34,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	
 	private final static Logger LOG = Logger
 			.getLogger(PrivateRecommenderParallelTrainer.class.getName());
-	private LinkedList<Long> threadIds= new LinkedList<Long>();
+	private ConcurrentLinkedQueue<Long> threadIds= new ConcurrentLinkedQueue<Long>();
 	private String[] states;
 	private RSDataset dataset;
 	private LearningRateStrategy lambda;
@@ -61,6 +63,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 		int numProcessors = Runtime.getRuntime().availableProcessors();
 		//int numProcessors=1;
 		LOG.info("Launching pool executor with " + numProcessors + " executors");
+		//TODO:Implement comparator for LinkedBlockingQueue to insure execution order
 		executor = new ThreadPoolExecutor(numProcessors, numProcessors, 0L,
 				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		executor.prestartAllCoreThreads();
@@ -103,7 +106,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	private void calculateModelError() throws InterruptedException, IOException, PrivateRecsysException, TasteException {
 		int countTries=0;
 		while(executor.getQueue().size()!=0&& countTries<PrivateRecommenderParallelTrainer.NUM_TRIES_EVALUATION){
-			System.out.println("Waiting finish train model for partial evaluation, queue is"+executor.getQueue().size());
+			//System.out.println("Waiting finish train model for partial evaluation, queue is"+executor.getQueue().size());
 			Thread.sleep(5000);
 			countTries++;
 		}
@@ -120,7 +123,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 			InterruptedException {
 
 		while (executor.getQueue().size() > 500000) {
-			StringBuilder build = new StringBuilder("[");
+		/*	StringBuilder build = new StringBuilder("[");
 			for (int i = 0; i < states.length; i++) {
 				build.append(states[i]);
 				if (i < states.length - 1)
@@ -128,9 +131,10 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 				else
 					build.append("]");
 			}
-			System.out.println(build.toString());
+		*/	
+			//System.out.println(build.toString());
 			Thread.sleep(2000);
-			System.out.println("Waited, submited is: "+numSubmitedTasks.get() +" queue size is now "+executor.getQueue().size());
+			//System.out.println("Waited, submited is: "+numSubmitedTasks.get() +" queue size is now "+executor.getQueue().size());
 
 		}
 		RatingScale rs = userItemRep.getRatingScale();
@@ -180,28 +184,32 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 	}
 
-	
-	synchronized public void updateState(long threadId, UserTrainEvent event, String action)  {
-		int pos=-1;
-		
-		for (int i = 0; i < threadIds.size(); i++) {
-			if(threadId==threadIds.get(i)){
-				pos=i;
-				i=threadIds.size();
-			}	
-		}
-		if(pos==-1){
-			pos=threadIds.size();
+	public void updateState(long threadId, UserTrainEvent event, String action) {
+		int pos = -1;
+		if(!threadIds.contains(threadId))
 			threadIds.add(threadId);
-		}			
-		
-		if(pos>=0&&pos<states.length){
-			states[pos] = "["+action+"]"+event.getUserId() + "-" + event.getItemId() + "-"
-				+ event.getTime();
-		}else{
-			throw new RuntimeException("Invalid state report whwn training");
+		int posi=0;
+		for (Iterator<Long> iterator = threadIds.iterator(); iterator.hasNext();) {
+			if (threadId == iterator.next()){
+				pos=posi;
+				
+			}	
+			
+			posi++;
 		}
 		
+		
+
+		if (pos >= 0 && pos < states.length) {
+			StringBuilder build = new StringBuilder();
+			states[pos] = build.append(new String("[")).append(action)
+					.append(new String("]")).append(event.getUserId())
+					.append(new String("-")).append(event.getItemId())
+					.append(new String("-")).append(event.getTime()).toString();
+		} else {
+			throw new RuntimeException("Invalid state report when training");
+		}
+
 	}
 	
 	public LinkedList<Double> getPartialEvaluations(){

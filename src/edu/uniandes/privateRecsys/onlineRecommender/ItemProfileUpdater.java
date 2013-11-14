@@ -18,7 +18,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	private static double REGULARIZATION_CONSTANT=0.02;
 
 	public ItemProfileUpdater() {
-		
+		//TODO:CREATE regularizaiton item profile updater
 	}
 
 	/* (non-Javadoc)
@@ -43,25 +43,24 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		String[] ratingScale=userItemRep.getRatingScale().getScale();
 		double sum= 0;
-		double sumProb= 0;
+		
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector userVector = oldUserProfile
 					.getProfileForScale(ratingScale[i]);
 			int prob = ratingScale[i].equals(rating) ? 1 : 0;
 
 			double dotProd = itemVector.dot(userVector);
-			sumProb += dotProd;
-			sum += Math.abs((prob - dotProd));
+			
+			sum += Math.abs(prob - dotProd);
 
 		}
 		
 		
 		Vector userVectorO=oldUserProfile.getProfileForScale(rating);
-		//sum+=(1-itemVector.dot(userVectorO));
-		//Vector regularizedVector=userVectorO.times(REGULARIZATION_CONSTANT).times(gamma);
+	
 		Vector mult=userVectorO.times(sum).times(gamma);
 		
-		itemVector = itemVector.plus(mult);//.minus(regularizedVector);
+		itemVector = itemVector.plus(mult);
 		
 		
 		itemVector = VectorProjector

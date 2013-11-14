@@ -7,15 +7,12 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.BayesAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
-import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
-import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.SingleVectorItemProfileUpdaterWithRegularization;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -47,21 +44,21 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 10).startRecommendations();
 			
 			LinkedList<String> results= new LinkedList<>();
-			String trainSet="data/ml-10M100K/rb.train.sorted";
+			String trainSet=new String("data/ml-10M100K/rb.train.sorted");
 			//String trainSet="data/netflix/rb.train.sorted";
-			String testSet="data/ml-10M100K/rb.test.test";
+			String testSet=new String("data/ml-10M100K/rb.test.test");
 			//String testSet="data/netflix/rb.test.test";
-			String testCV="data/ml-10M100K/rb.test.cv";
+			String testCV=new String("data/ml-10M100K/rb.test.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
 			 HashMap<String,String> translations=new HashMap<String,String>();
-			 translations.put("0.5", "1");
-			 translations.put("1.5", "2");
-			 translations.put("2.5", "3");
-			 translations.put("3.5", "4");
-			 translations.put("4.5", "5");
-			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
+			 translations.put(new String("0.5"), new String("1"));
+			 translations.put(new String("1.5"), new String("2"));
+			 translations.put(new String("2.5"), new String("3"));
+			 translations.put(new String("3.5"), new String("4"));
+			 translations.put(new String("4.5"), new String("5"));
+			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			//AverageDataModel model= new AverageDataModel(new File(trainSet));
 			double delta=0.1;
@@ -73,15 +70,15 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 				
 				
-				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
-				UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
 				
 				UserProfileUpdater userUp= new UserProfileUpdater(trainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new SingleVectorItemProfileUpdaterWithRegularization();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 				rest.setModelPredictor(trainerPredictor);
 				ErrorReport result=rest.startExperiment(10);

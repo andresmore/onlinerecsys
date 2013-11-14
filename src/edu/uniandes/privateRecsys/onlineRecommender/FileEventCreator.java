@@ -66,9 +66,9 @@ public class FileEventCreator extends Observable{
 				}
 
 				
-				  if(numlines%100000==0)
+				 /* if(numlines%100000==0)
 				  System.out.println(numlines+" events created");
-				 
+				 */
 			}
 		} catch (IOException e) {
 

@@ -3,6 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,11 +22,11 @@ public class IncrementalFactorUserItemRepresentation implements
 	private RatingScale ratingScale;
 	private int fDimensions;
 	
-	private ConcurrentHashMap<Long, Vector> itemFactors;
-	private ConcurrentHashMap<Long, Vector>[] privateUserFactors;
-	private ConcurrentHashMap<Long, LinkedList<BetaDistribution>> privateUserBias;
-	private ConcurrentHashMap<Long, Vector>[] publicUserFactors;
-	private ConcurrentHashMap<Long, Vector> privateHyperParams;
+	private Map<Long, Vector> itemFactors;
+	private Map<Long, Vector>[] privateUserFactors;
+	private Map<Long, LinkedList<BetaDistribution>> privateUserBias;
+	private Map<Long, Vector>[] publicUserFactors;
+	private Map<Long, Vector> privateHyperParams;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, AtomicInteger> numTrainsItem= new ConcurrentHashMap <>();
@@ -233,12 +234,20 @@ public class IncrementalFactorUserItemRepresentation implements
 	}
 
 	@Override
-	synchronized public Object blockUser(long userId) {
-		AtomicInteger trains = this.numTrainsUser.get(userId);
+	 public Object blockUser(long userId) {
+		AtomicInteger trains = null;
+		synchronized (numTrainsUser) {
+			trains = this.numTrainsUser.get(userId);	
+		}
+		
 
 		if (trains == null){
-			trains=new AtomicInteger(0);
-			numTrainsUser.put(userId, trains);
+			AtomicInteger newTrains=new AtomicInteger(0);
+			trains=numTrainsUser.putIfAbsent(userId, newTrains);
+			if(trains==null){
+				//put succeded
+				trains=newTrains;
+			}
 		}	
 		
 			
@@ -246,12 +255,18 @@ public class IncrementalFactorUserItemRepresentation implements
 	}
 
 	@Override
-	synchronized public Object blockItem(long itemId) {
-		AtomicInteger trains = this.numTrainsItem.get(itemId);
-
+	public Object blockItem(long itemId) {
+		AtomicInteger trains = null;
+		synchronized (numTrainsItem) {
+			trains = this.numTrainsItem.get(itemId);
+		}
 		if (trains == null){
-			trains=new AtomicInteger(0);
-			numTrainsItem.put(itemId, trains);
+			AtomicInteger newTrains=new AtomicInteger(0);
+			trains=numTrainsItem.putIfAbsent(itemId, newTrains);
+			if(trains==null){
+				//put succeded
+				trains=newTrains;
+			}
 		}	
 		
 			
