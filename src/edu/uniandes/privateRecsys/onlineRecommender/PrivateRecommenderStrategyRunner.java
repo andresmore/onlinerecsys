@@ -15,7 +15,8 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 	private UserTrainEvent event;
 	private FactorUserItemRepresentation userItemRep;
 	private PrivateRecommenderParallelTrainer trainer;
-	private double gamma;
+	//private double gamma;
+	private LearningRateStrategy gammaStrategy;
 	
 	private final static Logger LOG = Logger.getLogger(PrivateRecommenderStrategyRunner.class
 		      .getName());
@@ -29,15 +30,18 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 		this.itemProfileUpdater=itemProfileUpdater;
 		this.event=event;
 		this.trainer=privateRecommenderParallelTrainer;
-		this.gamma=gamma.getGammaForTime(event.getTime());
+		this.gammaStrategy=gamma;
+		
 	}
 
 	@Override
 	public void run() {
 		
+		//double gamma=gammaStrategy.getGammaForTime(event.getTime());
+		
 		LOG.finest(Thread.currentThread()+" started event "+event.getUserId()+","+event.getItemId());
 		
-		trainer.updateState(Thread.currentThread().getId(), event,"WAIT");
+		//trainer.updateState(Thread.currentThread().getId(), event,"WAIT");
 		
 			UserProfile user=null;
 			long initialTime=System.nanoTime();
@@ -45,11 +49,11 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			long userAggregation=0;
 			boolean ok=true;
 			synchronized (userItemRep.blockUser(event.getUserId())) {
-				trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
+				//trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
 				
-				
+				double userGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
 				try {
-					user = userUpdater.processEvent(event,userItemRep,gamma);
+					user = userUpdater.processEvent(event,userItemRep,userGamma);
 					if(user==null)
 						ok=false;
 					trainer.updateState(Thread.currentThread().getId(), event,"LOCK-USERUPDATED");
@@ -80,14 +84,15 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				userAggregation=System.nanoTime();
 				}
 			}
-			trainer.updateState(Thread.currentThread().getId(), event,"WAIT-ITEM");
+			//trainer.updateState(Thread.currentThread().getId(), event,"WAIT-ITEM");
 			synchronized (userItemRep.blockItem(event.getItemId())) {
 				
 			
 			try {
 				if(ok){
-					itemProfileUpdater.processEvent(event,userItemRep,gamma,user);
-					trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
+					double itemGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
+					itemProfileUpdater.processEvent(event,userItemRep,itemGamma,user);
+					//trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
 				}
 			} catch (Exception e) {
 				LOG.log(Level.SEVERE,"ERROR",e);
@@ -96,7 +101,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				ok=false;
 			}
 			}
-			trainer.updateState(Thread.currentThread().getId(), event,"LOCK-RELEASE");
+			//trainer.updateState(Thread.currentThread().getId(), event,"LOCK-RELEASE");
 			LOG.fine(Thread.currentThread()+" ended item update "+event.getUserId()+","+event.getItemId());
 			if(ok){
 				long itemUpdater=System.nanoTime();

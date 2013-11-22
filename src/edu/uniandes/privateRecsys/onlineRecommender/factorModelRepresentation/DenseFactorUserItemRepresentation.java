@@ -120,7 +120,7 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(this.privateUserBias[userPos][i]);
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos));
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos), this.numTrainsUser.get(userId).get());
 		return profile;
 	}
 
@@ -142,7 +142,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		}
 		Vector emptyHyperParms= new DenseVector();
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms);
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms,0);
 		return profile;
 	}
 	
@@ -188,7 +188,7 @@ public class DenseFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParamenters) throws TasteException {
 
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
@@ -198,7 +198,7 @@ public class DenseFactorUserItemRepresentation implements
 			trains.incrementAndGet();
 
 		int userPos = (int) getUserPosition(userId);
-
+		privateUserHyperParams.assignRow(userPos, hyperParamenters);
 		for (int i = 0; i < this.privateUserFactors.length; i++) {
 			String rating = this.ratingScale.getScale()[i];
 			Vector toReplace = trainedProfiles.get(rating);

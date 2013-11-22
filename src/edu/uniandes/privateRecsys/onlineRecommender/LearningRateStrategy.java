@@ -69,11 +69,17 @@ public class LearningRateStrategy {
     	
     	if(!this.hasConstantRate){
     		double timeSlot=getTimeslotForTime(time);
-    		return initialGamma*Math.pow(1+alpha*initialGamma*timeSlot, -C);
+    		return getGammaFromK(timeSlot);
     	}	
     	else
     		return this.learningRate;
     }
+
+
+
+	public double getGammaFromK(double k) {
+		return initialGamma*Math.pow(1+alpha*initialGamma*k, -C);
+	}
     
 	
 	

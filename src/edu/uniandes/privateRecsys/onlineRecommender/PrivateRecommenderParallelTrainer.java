@@ -65,7 +65,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 		LOG.info("Launching pool executor with " + numProcessors + " executors");
 		//TODO:Implement comparator for LinkedBlockingQueue to insure execution order
 		executor = new ThreadPoolExecutor(numProcessors, numProcessors, 0L,
-				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.DiscardPolicy());
 		executor.prestartAllCoreThreads();
 		int initPoolSize=executor.getPoolSize();
 		states = new String[initPoolSize];

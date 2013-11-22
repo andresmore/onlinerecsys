@@ -11,13 +11,15 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Us
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class ItemProfileUpdater implements IItemProfileUpdater {
-	private final static Logger LOG = Logger.getLogger(ItemProfileUpdater.class
+public class SingleVectorItemProfileUpdaterWithRegularization implements IItemProfileUpdater {
+	private final static Logger LOG = Logger.getLogger(SingleVectorItemProfileUpdaterWithRegularization.class
 		      .getName());
 	
-	private static final int TRIES=3;
+	//private static double REGULARIZATION_CONSTANT=0.02;
+	
+	
 
-	public ItemProfileUpdater() {
+	public SingleVectorItemProfileUpdaterWithRegularization() {
 		
 	}
 
@@ -27,56 +29,47 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	@Override
 	public void processEvent(UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep, double gamma, UserProfile oldUserProfile) throws TasteException {
-	
-		long itemId=event.getItemId();
 		
-		String rating=event.getRating();
-		
-		
-		
-		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
+		long itemId = event.getItemId();
+		long userId = event.getUserId();
+		String rating = event.getRating();
+
+		ItemProfile itemProfile = userItemRep.getPrivateItemProfile(itemId);
 		Vector itemVector = itemProfile.getVector();
-		
-		
-		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
-		//TODO: just checking, not a good idea if want to keep privacy
-		double loss=Double.parseDouble(rating)-initPrediction;
-		
-		
-		
-		String[] ratingScale=userItemRep.getRatingScale().getScale();
-		double sum= 0;
-		
-		for (int i = 0; i < ratingScale.length; i++) {
-			Vector userVector = oldUserProfile
-					.getProfileForScale(ratingScale[i]);
-			int prob = ratingScale[i].equals(rating) ? 1 : 0;
+
+		double initPrediction = calculatePrediction(itemVector, oldUserProfile,
+				userItemRep.getRatingScale().getScale());
+
+		double loss = Double.parseDouble(rating) - initPrediction;
+
+	
+
+			Vector userVector = oldUserProfile.getProfileForScale(event
+					.getRating());
+			int prob = 1;
 
 			double dotProd = itemVector.dot(userVector);
-			
-			sum += prob - dotProd;
 
-		}
-		
-		
-		Vector userVectorO=oldUserProfile.getProfileForScale(rating);
-	
-		Vector mult=userVectorO.times(sum).times(gamma);
-		
-		Vector toProject = itemVector.plus(mult);
-		
-		
-		Vector projected = VectorProjector
-				.projectVectorIntoSimplex(toProject);
-		
-		double endPrediction=calculatePrediction(projected,oldUserProfile,userItemRep.getRatingScale().getScale());
-		
-		double stepLoss=Double.parseDouble(rating)-endPrediction;
-		
-				userItemRep.updateItemVector(itemId,projected);
+			double error = prob - dotProd;
+
+			Vector mult = userVector.times(error);
 			
+			Vector toAdd=mult.times(gamma);
+
+			Vector toProject = itemVector.plus(toAdd);
+			
+			Vector projected =VectorProjector
+					.projectVectorIntoSimplex(toProject);
 		
-		
+			double errorStep=prob-itemVector.dot(projected);
+			double endPrediction = calculatePrediction(projected,
+					oldUserProfile, userItemRep.getRatingScale().getScale());
+			double stepLoss = Double.parseDouble(rating) - endPrediction;
+			
+				userItemRep.updateItemVector(itemId, projected);
+			
+
+	
 		
 		
 		

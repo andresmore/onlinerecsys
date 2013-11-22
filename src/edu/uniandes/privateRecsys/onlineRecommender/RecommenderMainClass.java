@@ -52,7 +52,9 @@ public class RecommenderMainClass {
 	private static final String PRIVACY_TIME_BUDGET="timeBudget";
 	private static final String ERROR_REPORT="numErrorReport";
 	private static final String NUM_NEIGHBORS="numNeighborsSemantic";
-	private static final String CONSTANT_RATE="learningRate"; 
+	private static final String CONSTANT_RATE="learningRate";
+	private static final String USER_HYPOTHESIS="userHypothesys";
+	
 	
 	
 	/**
@@ -72,6 +74,12 @@ public class RecommenderMainClass {
 	private static final String GRIDSEARCH="GridSearchParameter";
 	private static final String GRIDSEARCH_FIXEDLEARNINGRATE="GridSearchWLearningRate";
 	
+	/**
+	 * Available UserProfileUpdaters
+	 */
+	private static final String BASE_PROFILE_UPDATER="baseProfileUpdater";
+	private static final String AVERAGE_PROFILE_UPDATER="averageProfileUpdater";
+	private static final String BLENDED_PROFILE_UPDATER="blendedProfileUpdater";
 	
 	/**
 	 * Options recognized by main
@@ -136,6 +144,8 @@ public class RecommenderMainClass {
 				.hasArg(true).withDescription("number of neighbors to build vector from semantic information").isRequired(false).create(NUM_NEIGHBORS);
 		Option constantRateOption=OptionBuilder.withArgName(CONSTANT_RATE)
 				.hasArg(true).withDescription("provide a fixed learning rate for the experiment").isRequired(false).create(CONSTANT_RATE);
+		Option userProfileUpdater=OptionBuilder.withArgName(USER_HYPOTHESIS)
+				.hasArg(true).withDescription("User hypothesis for the experiment").isRequired(false).create(USER_HYPOTHESIS);
 		
 		
 		
@@ -150,6 +160,7 @@ public class RecommenderMainClass {
 		options.addOption(errorReportOption);
 		options.addOption(numNeighborsOption);
 		options.addOption(constantRateOption);
+		options.addOption(userProfileUpdater);
 		
 		
 	}
@@ -302,8 +313,31 @@ public class RecommenderMainClass {
 		AbstractRecommenderTester tester=null;
 		LearningRateStrategy tsCreator=null;
 		
-		//TODO: ModelTRainerPredictor choose as an option of menu
-		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+		
+		UserModelTrainerPredictor modelTrainerPredictor=null; 
+		
+		if(line.hasOption(USER_HYPOTHESIS)){
+			String chosenProfileUpdater=line.getOptionValue(USER_HYPOTHESIS);
+			if(chosenProfileUpdater.equals(BASE_PROFILE_UPDATER)){
+				
+				modelTrainerPredictor= new BaseModelPredictor();
+			}	
+			else if(chosenProfileUpdater.equals(AVERAGE_PROFILE_UPDATER)){
+				
+				modelTrainerPredictor= new BaseModelPredictor();
+			}
+			else if(chosenProfileUpdater.equals(BLENDED_PROFILE_UPDATER)){
+				
+				modelTrainerPredictor= new BlendedModelPredictor();
+			}
+			else{
+				throw new ParseException("User profileUpdater "+chosenProfileUpdater+" not found");
+			}
+		}else{
+			//Default trainer predictor
+			modelTrainerPredictor= new BaseModelPredictor();
+		}
+		
 		if(constantLearningRate==-1)
 			tsCreator=LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
 		else
@@ -312,8 +346,8 @@ public class RecommenderMainClass {
 		if(line.hasOption(RECOMMENDER)){
 			chosenRecommender=line.getOptionValue(RECOMMENDER);
 			if(chosenRecommender.equals(GRIDSEARCH)){
-				GridSearchParameter search= new GridSearchParameter(dataset);
-				//Iterations should be a param...
+				GridSearchParameter search= new GridSearchParameter(dataset,modelTrainerPredictor);
+				//TODO:Iterations should be a param...
 				search.startSearch(4);
 				return null;
 			}
@@ -332,7 +366,7 @@ public class RecommenderMainClass {
 				tester= new ContinualDifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
 				modelTrainerPredictor.setModelRepresentation(representation);
-				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
+				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -348,7 +382,7 @@ public class RecommenderMainClass {
 				tester= new DifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
 				modelTrainerPredictor.setModelRepresentation(representation);
-				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
+				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -364,7 +398,7 @@ public class RecommenderMainClass {
 				tester= new OnlineRecommenderTester(dataset, dimensions, tsCreator);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
 				modelTrainerPredictor.setModelRepresentation(representation);
-				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
+				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
@@ -380,7 +414,7 @@ public class RecommenderMainClass {
 				tester= new OnlineRecommenderTester(dataset2, dimensions, tsCreator);
 				FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), dimensions,dataset2.getSpectralDataFile(),numNeighbors,true,modelTrainerPredictor.getHyperParametersSize());
 				modelTrainerPredictor.setModelRepresentation(representation);
-				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
+				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);

@@ -2,11 +2,14 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Observable;
 
 import org.apache.mahout.common.iterator.FileLineIterator;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -18,8 +21,8 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public class FileEventCreator extends Observable{
 
 	
-	private Splitter splitter;
-	
+	//private Splitter splitter;
+	private HashSet<String> separators= new HashSet<String>();
 	private int numEventReport;
 	private int limitEvents;
 	private File file;
@@ -27,8 +30,9 @@ public class FileEventCreator extends Observable{
 	public FileEventCreator(File file, int numEventReport, int limitEvents) throws IOException {
 		this.file=file;
 		
-		this.splitter= Splitter.on(',');
-		
+		this.separators.add(":");
+		this.separators.add(",");
+				
 		this.numEventReport=numEventReport;
 		this.limitEvents=limitEvents;
 	}
@@ -49,7 +53,7 @@ public class FileEventCreator extends Observable{
 
 			while (iterator.hasNext()) {
 
-				String line = iterator.next();
+				String line = new String(iterator.next());
 				UserTrainEvent event = processLine(line);
 				setChanged();
 				notifyObservers(event);
@@ -83,17 +87,41 @@ public class FileEventCreator extends Observable{
 
 
 	private UserTrainEvent processLine(String line) {
-		Iterator<String> tokens=splitter.split(line).iterator();
+		Iterator<String> tokens=this.split(line);
 		
 	
-			 String userIDString = tokens.next();
-			 String itemIDString = tokens.next();
-			 String preferenceValueString = tokens.next();
+			 String userIDString = new String(tokens.next());
+			 String itemIDString = new String(tokens.next());
+			 String preferenceValueString = new String(tokens.next());
 			 boolean hasTimestamp = tokens.hasNext();
-			 String timestampString = hasTimestamp ? tokens.next() : null;
-	
+			 String timestampString = hasTimestamp ? new String(tokens.next()) : null;
+			 
 		
 		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString));
+	}
+
+
+	private Iterator<String> split(String line) {
+		LinkedList<String> list= new LinkedList<String>();
+		StringBuilder builder= new StringBuilder();
+		for (int i = 0; i < line.length(); i++) {
+			char at= line.charAt(i);
+			if( this.separators.contains(Character.toString(at))){
+				if(builder.length()>0)
+					list.add(builder.toString());
+				
+					builder= new StringBuilder();
+				
+			}
+			else{
+				builder.append(at);
+			}
+			
+		}
+		if(builder.length()>0)
+			list.add(builder.toString());
+		
+		return list.iterator();
 	}
 	
 	

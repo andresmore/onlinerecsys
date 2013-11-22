@@ -13,6 +13,7 @@ public class UserProfile {
 	private HashMap<String, Vector> userProfiles= new HashMap<>();
 	private HashMap<String, BetaDistribution> userBias= new HashMap<String, BetaDistribution>();
 	private Vector hyperParams;
+	private int numTrains;
 	
 	private UserProfile(){
 		
@@ -21,10 +22,11 @@ public class UserProfile {
 	
 	
 	public static UserProfile buildDenseProfile(
-			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams) {
+			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams,int numTrains) {
 		UserProfile prof= new UserProfile();
 		
 		prof.setHyperParams(userHyperParams);
+		prof.numTrains=numTrains;
 		for (int i = 0; i < userVectors.size(); i++) {
 			prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
 			prof.addBias(userBiasVector.get(i), ratingScale.getScale()[i]);
@@ -69,6 +71,12 @@ public class UserProfile {
 	public Vector getHyperParameters() {
 		
 		return this.hyperParams;
+	}
+
+
+	public int getNumTrains() {
+		// TODO Auto-generated method stub
+		return this.numTrains;
 	}
 
 	

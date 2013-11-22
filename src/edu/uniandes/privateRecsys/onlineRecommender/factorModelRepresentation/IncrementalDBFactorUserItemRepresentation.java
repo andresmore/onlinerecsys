@@ -81,7 +81,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				LinkedList<BetaDistribution> bias= new LinkedList<>();
 				Vector emptyHyperParams= new DenseVector();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams);
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, this.numTrainsUser.get(userId).get());
 			} catch (SQLException e) {
 				
 				e.printStackTrace();
@@ -166,7 +166,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParams) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)

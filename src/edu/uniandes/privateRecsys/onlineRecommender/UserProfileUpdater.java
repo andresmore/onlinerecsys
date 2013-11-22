@@ -49,12 +49,14 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 			
 
 			String[] ratingScale = userItemRep.getRatingScale().getScale();
+			
+			hyperParameterVector=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
 			HashMap<String, Vector> trainedProfiles = predictor.calculateProbabilityUpdate(
 					gamma, rating, itemVector, oldUserPrivate, ratingScale);
 			biasVector = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
-			hyperParameterVector=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, trainedProfiles,biasVector,hyperParameterVector);
+		
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
-					biasVector);
+					biasVector,hyperParameterVector);
 		
 			
 			

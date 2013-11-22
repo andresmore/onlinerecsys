@@ -41,6 +41,7 @@ public class GridSearchParameter {
 	private HashMap<String, Double> results= new HashMap<String, Double>();
 	private RSDataset data;
 	private LearningRateStrategy tsCreator=null;
+	private UserModelTrainerPredictor modelTrainerPredictor;
 	
 	
 	//(long) (1000*24*60*60*2); 
@@ -49,7 +50,7 @@ public class GridSearchParameter {
 	
 	
 	
-	public GridSearchParameter(RSDataset data) throws IOException{
+	public GridSearchParameter(RSDataset data, UserModelTrainerPredictor modelTrainerPredictor) throws IOException{
 		
 		setAlphaLimits(1e-6,1);
 		setInitialGammaLimits(0.01,0.5);
@@ -57,7 +58,7 @@ public class GridSearchParameter {
 		
 		updateParamVectors();
 		this.data=data;
-		
+		this.modelTrainerPredictor=modelTrainerPredictor;
 		
 			tsCreator=LearningRateStrategy.createDecreasingRate(this.alphaVect[0], this.initGammaVect[0]);
 		
@@ -220,7 +221,7 @@ public class GridSearchParameter {
 		
 		this.tsCreator= LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
 		int dimensions=(int) dim;
-		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+		
 		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data.getScale(), dimensions, false,modelTrainerPredictor.getHyperParametersSize());
 		modelTrainerPredictor.setModelRepresentation(denseModel);
 		
@@ -255,7 +256,7 @@ public class GridSearchParameter {
 		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"}, new HashMap<String,String>());
 		RSDataset datasetNetflix= new RSDataset(trainSetNetflix,testSetNetflix,testCVNetflix,scaleNetflix);
 		try {
-			new GridSearchParameter(datasetMovielens).startSearch(1);
+			new GridSearchParameter(datasetMovielens, new BaseModelPredictor()).startSearch(1);
 		} catch (IOException | TasteException | PrivateRecsysException e) {
 			
 			e.printStackTrace();

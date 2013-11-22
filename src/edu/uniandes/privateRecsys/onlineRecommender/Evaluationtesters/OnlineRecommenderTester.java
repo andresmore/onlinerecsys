@@ -7,9 +7,11 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
+import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.SingleVectorItemProfileUpdaterWithRegularization;
@@ -73,15 +75,16 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
 				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
+				//FactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(new AverageDataModel(new File(data.getTrainSet())), scale, dimensions, trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
 				
 				UserProfileUpdater userUp= new UserProfileUpdater(trainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new SingleVectorItemProfileUpdaterWithRegularization();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 				rest.setModelPredictor(trainerPredictor);
-				ErrorReport result=rest.startExperiment(10);
+				ErrorReport result=rest.startExperiment(1);
 				results.add(result.toString());
 			
 			for (String string : results) {

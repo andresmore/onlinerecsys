@@ -23,7 +23,7 @@ public interface FactorUserItemRepresentation {
 	public int getNumberTrainsItem(long itemId);
 
 	void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias) throws TasteException;
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParameters) throws TasteException;
 
 	UserProfile getPublicUserProfile(long userId) throws TasteException;
 

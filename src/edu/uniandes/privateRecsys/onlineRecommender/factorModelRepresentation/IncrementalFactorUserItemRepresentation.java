@@ -75,7 +75,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			userVectors.add(this.privateUserFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId));
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), this.numTrainsUser.get(userId).get());
 		}
 		return null;
 	}
@@ -124,7 +124,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			}
 			Vector emptyHyperParams= new DenseVector();
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					dist,emptyHyperParams);
+					dist,emptyHyperParams,0);
 		}
 		return null;
 	}
@@ -173,7 +173,7 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles,HashMap<String, BetaDistribution> bias) throws TasteException {
+			HashMap<String, Vector> trainedProfiles,HashMap<String, BetaDistribution> bias, Vector hyperParams) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
@@ -188,8 +188,13 @@ public class IncrementalFactorUserItemRepresentation implements
 			publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
 			userPriors.add(bias.get(scale[i]));
 		}
-		privateUserBias.put(userId, userPriors);
-
+		if(userPriors!=null ){
+			privateUserBias.put(userId, userPriors);
+			
+		}	
+		if(hyperParams!=null){
+			privateHyperParams.put(userId, hyperParams);
+		}
 	}
 
 	

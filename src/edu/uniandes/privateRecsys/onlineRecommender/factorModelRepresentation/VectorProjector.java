@@ -39,7 +39,7 @@ public class VectorProjector {
 	 * @return
 	 */
 	public static Vector projectVectorIntoSimplex(Vector toProject) {
-
+		Vector response=toProject.clone();
 		DoubleComparator comp = new DoubleComparator() {
 
 			@Override
@@ -49,8 +49,8 @@ public class VectorProjector {
 			}
 		};
 		
-		double[] toArray = copyToArray(toProject);
-		Sorting.quickSort(toArray, 0, toProject.size() , comp);
+		double[] toArray = copyToArray(response);
+		Sorting.quickSort(toArray, 0, response.size() , comp);
 		double tempSum=0;
 		double tMax=0;
 		boolean step5=false;
@@ -66,11 +66,11 @@ public class VectorProjector {
 			tMax=(tempSum+toArray[toArray.length-1]-1)/toArray.length;
 		
 		
-		toProject.assign(Functions.MINUS,tMax);
+		response.assign(Functions.MINUS,tMax);
 		//toProject.assign(VectorProjector.REPLACE_NEGATIVES,0.001);
-		toProject.assign(Functions.MAX, 0);
-		double[] array2=copyToArray(toProject);
-			return toProject;
+		response.assign(Functions.MAX, 0);
+		double[] array2=copyToArray(response);
+			return response;
 		
 	}
 
