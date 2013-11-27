@@ -8,11 +8,13 @@ import java.util.logging.Logger;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.BayesAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
+import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.SingleVectorItemProfileUpdaterWithRegularization;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
@@ -46,11 +48,11 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 10).startRecommendations();
 			
 			LinkedList<String> results= new LinkedList<>();
-			String trainSet=new String("data/ml-10M100K/rb.train.sorted");
+			String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
 			//String trainSet="data/netflix/rb.train.sorted";
-			String testSet=new String("data/ml-10M100K/rb.test.test");
+			String testSet=new String("data/ml-10M100K/rb.test.meta.test");
 			//String testSet="data/netflix/rb.test.test";
-			String testCV=new String("data/ml-10M100K/rb.test.cv");
+			String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
@@ -71,9 +73,10 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			int dimensions=5;
 			
 				
-				
-				UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
 				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				UserModelTrainerPredictor trainerPredictor= new MetadataPredictor();
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
 				//FactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(new AverageDataModel(new File(data.getTrainSet())), scale, dimensions, trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
@@ -84,7 +87,7 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 				rest.setModelPredictor(trainerPredictor);
-				ErrorReport result=rest.startExperiment(1);
+				ErrorReport result=rest.startExperiment(10);
 				results.add(result.toString());
 			
 			for (String string : results) {

@@ -140,5 +140,21 @@ public class BayesAveragePredictor implements UserModelTrainerPredictor {
 		
 		
 	}
+	
+	@Override
+	public String toString(){
+		return "BayesAveragePredictor";
+	}
+
+	
+
+	
+
+	@Override
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
+			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+		
+		return null;
+	}
 
 }

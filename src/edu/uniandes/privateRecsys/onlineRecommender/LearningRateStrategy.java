@@ -78,7 +78,11 @@ public class LearningRateStrategy {
 
 
 	public double getGammaFromK(double k) {
-		return initialGamma*Math.pow(1+alpha*initialGamma*k, -C);
+		if(!this.hasConstantRate){
+			return initialGamma*Math.pow(1+alpha*initialGamma*k, -C);
+		}
+		else
+    		return this.learningRate;
 	}
     
 	

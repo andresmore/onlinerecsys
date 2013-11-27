@@ -21,6 +21,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.In
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
 public class GridSearchParameter {
 	private final static Logger LOG = Logger.getLogger(GridSearchParameter.class
@@ -134,12 +135,12 @@ public class GridSearchParameter {
 					try {
 						String key=createKeyForParams(alphaVect[i],initGammaVect[j],dimensionsVect[k]);
 							if (results.get(key) == null) {
-								double rmse =trainAndTestWithData(
+								RMSE_ErrorReport rmse =(RMSE_ErrorReport) trainAndTestWithData(
 										alphaVect[i], initGammaVect[j],
 										dimensionsVect[k]);
-								results.put(key, rmse);
-								if (rmse < this.bestRMSESoFar) {
-									this.bestRMSESoFar = rmse;
+								results.put(key, rmse.getErrorCV());
+								if (rmse.getErrorCV() < this.bestRMSESoFar) {
+									this.bestRMSESoFar = rmse.getErrorCV();
 									this.bestParamsSoFar[0] = alphaVect[i];
 									this.bestParamsSoFar[1] = initGammaVect[j];
 									this.bestParamsSoFar[2] = dimensionsVect[k];
@@ -216,7 +217,7 @@ public class GridSearchParameter {
 	
 
 
-	private double trainAndTestWithData(double alpha, double initialGamma, double dim) throws IOException, TasteException, PrivateRecsysException {
+	private ErrorReport trainAndTestWithData(double alpha, double initialGamma, double dim) throws IOException, TasteException, PrivateRecsysException {
 		
 		
 		this.tsCreator= LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
@@ -234,7 +235,7 @@ public class GridSearchParameter {
 		rest.setModelPredictor(modelTrainerPredictor);
 		ErrorReport result=rest.startExperiment(1);
 		denseModel=null;
-		return result.getErrorTest();
+		return result;
 	}
 	
 	public static void main(String[] args) {

@@ -28,15 +28,15 @@ public class DifferentialPrivacyAggregator implements IUserItemAggregator {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public void aggregateEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep, UserProfile privateUserProfile) throws TasteException {
+	public UserProfile aggregateEvent(UserTrainEvent event,
+			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
 		String rating=event.getRating();
 		long time=event.getTime();
 		
-		
+		UserProfile privateUserProfile=userItemRep.getPrivateUserProfile(userId);
 		
 		
 		
@@ -52,6 +52,7 @@ public class DifferentialPrivacyAggregator implements IUserItemAggregator {
 		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles, userItemRep.getRatingScale().getScale(), userItemRep.getfDimensions());
 		userItemRep.updatePublicTrainedProfile(userId,trainedProfiles);
 		
+		return userItemRep.getPublicUserProfile(userId);
 		
 	}
 

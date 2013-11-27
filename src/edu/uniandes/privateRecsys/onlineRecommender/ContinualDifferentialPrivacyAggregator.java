@@ -31,8 +31,8 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public void aggregateEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep, UserProfile privateUserProfile) throws TasteException {
+	public UserProfile aggregateEvent(UserTrainEvent event,
+			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
@@ -43,6 +43,8 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 		int numNoises=(int) (Math.log(T)/Math.log(2));
 		
 		int numTrains=userItemRep.getNumberTrainsUser(userId)+1;
+		
+		UserProfile privateUserProfile=userItemRep.getPrivateUserProfile(userId);
 		if(numTrains>=T)
 			throw new TasteException("Privacy budget exeeded, not able to continue");
 		
@@ -61,7 +63,7 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 		} 
 		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles, userItemRep.getRatingScale().getScale(), userItemRep.getfDimensions());
 		userItemRep.updatePublicTrainedProfile(userId,trainedProfiles);
-		
+		return userItemRep.getPublicUserProfile(userId);
 		
 	}
 

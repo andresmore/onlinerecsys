@@ -15,6 +15,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.postgresdb.PosgresDAO;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
@@ -81,7 +82,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				LinkedList<BetaDistribution> bias= new LinkedList<>();
 				Vector emptyHyperParams= new DenseVector();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, this.numTrainsUser.get(userId).get());
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, null, null, this.numTrainsUser.get(userId).get());
 			} catch (SQLException e) {
 				
 				e.printStackTrace();
@@ -166,7 +167,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParams) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParams, UserMetadataInfo info) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
@@ -285,6 +286,18 @@ public class IncrementalDBFactorUserItemRepresentation implements
 	
 	public static void main(String[] args) {
 		
+	}
+
+	@Override
+	public boolean hasPrivateStrategy() {
+	
+		return false;
+	}
+
+	@Override
+	public double getNumberTrainsItems() {
+		
+		return 0;
 	}
 	
 

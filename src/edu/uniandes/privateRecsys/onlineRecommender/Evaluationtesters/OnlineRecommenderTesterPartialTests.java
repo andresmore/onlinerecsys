@@ -71,7 +71,7 @@ double delta=0.1;
 			int eventsReport=100000;
 				
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-				DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize());
+				DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTesterPartialTests rest=new OnlineRecommenderTesterPartialTests(data,dimensions,tsCreator,eventsReport);
 				

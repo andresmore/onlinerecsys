@@ -73,7 +73,7 @@ public abstract class AbstractRecommenderTester  {
 		}	
 		
 		
-		LOG.info("Starting experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" numIterations training "+numIterations );
+		LOG.info("Starting experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations );
 		double error=0;
 		double errorTrain=0;
 		double errorCV=0;
@@ -110,7 +110,7 @@ public abstract class AbstractRecommenderTester  {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 			}
 		}
-		LOG.info("Final error for experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" numIterations training "+numIterations +" is: train="+errorTrain+" cv="+errorCV+" test="+error);
+		LOG.info("Final error for experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: train="+errorTrain+" cv="+errorCV+" test="+error);
 		
 		
 		return new RMSE_ErrorReport(errorTrain, error, errorCV,partialErrors);//""+errorTrain+'\t'+errorCV+'\t'+error;

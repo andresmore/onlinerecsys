@@ -61,6 +61,7 @@ public class ModelEvaluator {
 //System.out.println("RMSE is :"+rmseEval.getRMSE());
 //System.out.println("NumEvals total "+rmseEval.getNumEvals());
 //System.out.println("RandomEvaluations total "+rmseEval.getRandEvals());
+		PredictionProfiler.getInstance().printStats();
 LOG.info("MAE Error for model with file "+testSet+" is "+rmseEval.getMAE()+" with "+rmseEval.getNumEvals()+" predictions (rand: "+rmseEval.getRandEvals()+", hybrid: "+rmseEval.getNumHybridEvals()+")");
 LOG.info("RMSE Error for model with file "+testSet+" is "+rmseEval.getRMSE()+" with "+rmseEval.getNumEvals()+" predictions (rand: "+rmseEval.getRandEvals()+", hybrid: "+rmseEval.getNumHybridEvals()+")");
 return rmseEval.getRMSE();

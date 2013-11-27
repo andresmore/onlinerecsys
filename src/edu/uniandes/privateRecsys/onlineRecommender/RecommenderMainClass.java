@@ -53,7 +53,7 @@ public class RecommenderMainClass {
 	private static final String ERROR_REPORT="numErrorReport";
 	private static final String NUM_NEIGHBORS="numNeighborsSemantic";
 	private static final String CONSTANT_RATE="learningRate";
-	private static final String USER_HYPOTHESIS="userHypothesys";
+	private static final String USER_HYPOTHESIS="userHypothesis";
 	
 	
 	
@@ -364,7 +364,7 @@ public class RecommenderMainClass {
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
 				tester= new ContinualDifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
@@ -380,7 +380,7 @@ public class RecommenderMainClass {
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
 				tester= new DifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
@@ -396,7 +396,7 @@ public class RecommenderMainClass {
 					averageModel=new AverageDataModel(new File(dataset.getTrainSet()));
 				}
 				tester= new OnlineRecommenderTester(dataset, dimensions, tsCreator);
-				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();

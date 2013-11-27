@@ -152,4 +152,13 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 		
 	}
 
+
+	@Override
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
+			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 }

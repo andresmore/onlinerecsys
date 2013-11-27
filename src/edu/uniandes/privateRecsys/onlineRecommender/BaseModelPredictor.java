@@ -83,12 +83,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
-		double rat=Double.parseDouble(rating);
-		double initDistance=Math.abs(rat-this.calculatePrediction(itemVector, oldUserPrivate.getUserProfiles()));
-	
-		
-		
-		
+			
 		HashMap<String, Vector> trainedProfiles= new HashMap<>();
 		
 		
@@ -108,7 +103,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 			double stepLoss=prob-endDotProb;
 			
 			if(Math.abs(stepLoss)>Math.abs(loss)){
-					System.err.println("Model increased loss");
+				//	System.err.println("Model increased loss");
 			}
 			trainedProfiles.put(ratingScale[i], result);
 			
@@ -117,11 +112,6 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		
 		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles,ratingScale, itemVector.size());
 		
-		double endDistance=Math.abs(rat-this.calculatePrediction(itemVector, trainedProfiles));
-		if(endDistance-initDistance>gamma){
-			System.out.println("Model increased distance, rejected update");
-			return oldUserPrivate.getUserProfiles();
-		}
 		return trainedProfiles;
 	}
 	@Override
@@ -136,7 +126,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector, Vector hyperparameters, int numTrains) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	@Override
@@ -159,5 +149,18 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		}
 		return prediction;
 	}
-
+	
+	
+	@Override
+	public String toString(){
+		return "BaseModelPredictor";
+	}
+	@Override
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
+			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
 }

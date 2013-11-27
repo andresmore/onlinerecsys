@@ -15,21 +15,23 @@ public interface UserModelTrainerPredictor {
 
 	public void setModelRepresentation(FactorUserItemRepresentation model);
 	
-	public abstract Prediction calculatePrediction(long itemId, long userId,
+	public  Prediction calculatePrediction(long itemId, long userId,
 			int minTrains) throws TasteException;
 
-	public abstract HashMap<String, Vector> calculateProbabilityUpdate(
+	public  HashMap<String, Vector> calculateProbabilityUpdate(
 			double gamma, String rating, Vector itemVector,
 			UserProfile oldUserPrivate, String[] ratingScale);
 
-	public abstract HashMap<String, BetaDistribution> calculatePriorsUpdate(
+	public  HashMap<String, BetaDistribution> calculatePriorsUpdate(
 			UserTrainEvent event, HashMap<String, BetaDistribution> biasVector,
 			String[] ratingScale);
 
-	public abstract Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public  Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,Vector oldHyperparameters, int numTrains);
 
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,double gamma, UserMetadataInfo trainedMetadataProfiles);
+	
 	public int getHyperParametersSize();
 	
 	

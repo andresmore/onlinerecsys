@@ -31,7 +31,7 @@ public class MetadataMapFileLoader {
 		if(f.exists()){
 			try {
 				reed= new BufferedReader(new FileReader(f));
-				Matrix metadataMatrix=loadPresentConcepts(reed, applyIDF);
+				Matrix metadataMatrix=loadPresentConcepts(reed, applyIDF,false);
 				
 				return metadataMatrix;
 				
@@ -53,11 +53,46 @@ public class MetadataMapFileLoader {
 		
 	}
 	
-	private static Matrix loadPresentConcepts(BufferedReader reed, boolean applyIDF)
+	/**
+	 * Creates a metadata matrix from the comma separated file, each line has the concepts of the matrix
+	 * @param file the metadata file
+	 * @return metadata matrix, null if not able to read or not found
+	 * @throws IOException if reading the file has problems
+	 */
+	public static Matrix loadBinaryMetadataMap(String file) throws IOException{
+		System.out.println(file);
+		File f= new File(file);
+		BufferedReader reed= null;
+		if(f.exists()){
+			try {
+				reed= new BufferedReader(new FileReader(f));
+				Matrix metadataMatrix=loadPresentConcepts(reed, false,true);
+				
+				return metadataMatrix;
+				
+			} catch (IOException e) {
+				throw e;
+			}finally{
+				if(reed!=null){
+					try {
+						reed.close();
+					} catch (IOException e) {}
+				}
+			}
+			
+			
+		}else{
+			throw new FileNotFoundException(file+" not found");
+		}
+		
+		
+	}
+	
+	private static Matrix loadPresentConcepts(BufferedReader reed, boolean applyIDF, boolean binary)
 			throws FileNotFoundException, IOException {
 		
 		//Overall concepts present in the map and their position in the list
-		HashMap<String, Integer> existingConcepts= new HashMap<String, Integer>();
+		HashMap<String, Integer> columnBindings= new HashMap<String, Integer>();
 		//Frequency of concept in maps
 		HashMap<String, Integer> conceptFrequency= new HashMap<String, Integer>();
 		
@@ -66,6 +101,8 @@ public class MetadataMapFileLoader {
 		
 		//Bindings of the rows of the matrix
 		Map<String,Integer> bindings= new HashMap<String, Integer>();
+		
+		
 		
 		String line=null;
 		
@@ -87,9 +124,9 @@ public class MetadataMapFileLoader {
 				double value=Double.parseDouble(arrValKey[1]);
 				if(!concept.startsWith("id")){
 					translation.put(concept, value);
-					if(!existingConcepts.containsKey(concept)){
+					if(!columnBindings.containsKey(concept)){
 						
-						existingConcepts.put(concept, numConcepts);
+						columnBindings.put(concept, numConcepts);
 						
 						numConcepts++;
 						conceptFrequency.put(concept, 1);
@@ -101,7 +138,7 @@ public class MetadataMapFileLoader {
 				}
 				else{
 					String id=concept.split(":")[1];
-					bindings.put(id, i);
+					bindings.put(id, numItems);
 				}
 				
 			}
@@ -114,13 +151,14 @@ public class MetadataMapFileLoader {
 		LOG.info("Finished loading map into memory, matrix size will be ("+numItems+","+numConcepts+")");
 		Matrix sparseItemRepresentation= new SparseMatrix(numItems, numConcepts);
 		sparseItemRepresentation.setRowLabelBindings(bindings);
-		fillInItemMatrix(sparseItemRepresentation,itemRepresentationMap,existingConcepts, conceptFrequency, applyIDF);
+		sparseItemRepresentation.setColumnLabelBindings(columnBindings);
+		fillInItemMatrix(sparseItemRepresentation,itemRepresentationMap,columnBindings, conceptFrequency, applyIDF,binary);
 		
 		
 		return sparseItemRepresentation;
 	}	
 	
-	private static void fillInItemMatrix(Matrix metadataMatrix,  LinkedList<HashMap<String, Double>> itemRepresentationMap, HashMap<String, Integer> existingConcepts, HashMap<String, Integer> conceptFrequency, boolean applyIDF) {
+	private static void fillInItemMatrix(Matrix metadataMatrix,  LinkedList<HashMap<String, Double>> itemRepresentationMap, HashMap<String, Integer> existingConcepts, HashMap<String, Integer> conceptFrequency, boolean applyIDF, boolean binary) {
 		
 		int numItemsMetadata= metadataMatrix.numRows();
 		for (int itemPosition = 0; itemPosition < itemRepresentationMap.size(); itemPosition++) {
@@ -134,6 +172,9 @@ public class MetadataMapFileLoader {
 					int numValues=conceptFrequency.get(concept);
 					double multValue=Math.log((double)numItemsMetadata/(double)numValues);
 					value=numValues*multValue;
+				}
+				else if(binary){
+					value=1;
 				}
 				metadataMatrix.setQuick(itemPosition, conceptPos, value);
 				

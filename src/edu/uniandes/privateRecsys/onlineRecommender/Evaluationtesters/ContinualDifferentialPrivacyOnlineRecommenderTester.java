@@ -85,7 +85,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 				
 				ContinualDifferentialPrivacyOnlineRecommenderTester rest=new ContinualDifferentialPrivacyOnlineRecommenderTester(data, dimensions, tsCreator);
 				UserModelTrainerPredictor modelTrainer=new BaseModelPredictor();
-				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainer.getHyperParametersSize());
+				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainer.getHyperParametersSize(),true);
 				modelTrainer.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainer);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(0.69,1000);

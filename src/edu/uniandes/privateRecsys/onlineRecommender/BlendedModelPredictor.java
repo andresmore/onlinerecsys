@@ -101,12 +101,10 @@ public  class BlendedModelPredictor implements UserModelTrainerPredictor {
 			UserTrainEvent event, HashMap<String, BetaDistribution> biasVector,
 			String[] ratingScale) {
 		
-		double rat=Double.parseDouble(event.getRating());
-		double initDistance=Math.abs(rat-averageModel.calculatePrediction(biasVector));
+		
 		HashMap<String, BetaDistribution> update = averageModel.calculatePriorsUpdate(event, biasVector, ratingScale);
-		double endDistance=Math.abs(rat-averageModel.calculatePrediction(update));
-		if(endDistance-initDistance>0.1)
-			System.out.println("Model increased distance");
+		
+		
 		
 		
 		return update;
@@ -133,9 +131,6 @@ public  class BlendedModelPredictor implements UserModelTrainerPredictor {
 		losses.set(0,predictor1Loss);
 		losses.set(1, predictor2Loss);
 		losses.set(2,predictorLoss);
-		/*regrets.set(0, Math.max(0, finalLoss-Math.pow(rating-prediction1,2)/this.lossNormalization));
-		regrets.set(1, Math.max(0, finalLoss-Math.pow(rating-prediction2,2)/this.lossNormalization));
-		 */
 		
 		
 		hyperparameters=hyperparameters.plus(losses);
@@ -145,6 +140,19 @@ public  class BlendedModelPredictor implements UserModelTrainerPredictor {
 	public int getHyperParametersSize() {
 		
 		return 3;
+	}
+	
+	@Override
+	public String toString(){
+		return "BlendedModelPredictor";
+	}
+	
+	
+	@Override
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
+			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+		
+		return null;
 	}
 
 }

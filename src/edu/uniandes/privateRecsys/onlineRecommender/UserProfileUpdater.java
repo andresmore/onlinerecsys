@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.hadoop.hdfs.server.datanode.FSDatasetInterface.MetaDataInputStream;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.MetadataDatasetConverter;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class UserProfileUpdater implements IUserProfileUpdater {
@@ -41,6 +43,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> biasVector=oldUserPrivate.getUserBias();
 		Vector hyperParameterVector= oldUserPrivate.getHyperParameters();
+		UserMetadataInfo metaInfo=oldUserPrivate.getMetadataInfo();
 		
 		if (oldUserPrivate != null) {
 			
@@ -50,17 +53,17 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 
 			String[] ratingScale = userItemRep.getRatingScale().getScale();
 			
-			hyperParameterVector=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
+			Vector newHyperParams=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
 			HashMap<String, Vector> trainedProfiles = predictor.calculateProbabilityUpdate(
 					gamma, rating, itemVector, oldUserPrivate, ratingScale);
-			biasVector = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
+			HashMap<String, BetaDistribution> biasVectorUpdate = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
+			
+			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event,gamma, metaInfo);
 		
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
-					biasVector,hyperParameterVector);
+					biasVectorUpdate,newHyperParams,metadataInfo);
 		
 			
-			
-			// System.out.println("UserUpdater: Train was "+event.getRating()+", initPrediction="+initPrediction+", endPrediction="+endPrediction);
 			
 		}
 		return oldUserPrivate;
@@ -85,5 +88,11 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		}
 		
 		return prediction;
+	}
+	
+	@Override
+	public String toString() {
+
+		return predictor.toString();
 	}
 }

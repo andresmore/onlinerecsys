@@ -8,13 +8,15 @@ public class UserTrainEvent implements FileEvent{
 	private String rating;
 	private long time;
 	private int timeSlot;
+	private String metadata;
 	
-	public UserTrainEvent(long userId, long itemId, String rating, long time) {
+	public UserTrainEvent(long userId, long itemId, String rating, long time, String metadata) {
 		super();
 		this.userId = userId;
 		this.itemId = itemId;
 		this.rating = rating;
 		this.time = time;
+		this.metadata=metadata;
 		
 	}
 	public long getUserId() {
@@ -29,6 +31,10 @@ public class UserTrainEvent implements FileEvent{
 	public long getTime() {
 		return time;
 	}
+	public String getMetadata(){
+		return metadata;
+	}
+	
 	
 	public void updateRating(String rating){
 		this.rating=rating;

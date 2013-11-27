@@ -59,7 +59,7 @@ public class ClickImpressionEvent implements FileEvent {
 	@Override
 	public UserTrainEvent convertToTrainEvent() {
 		// TODO Auto-generated method stub
-		return new UserTrainEvent(this.userId, this.itemId, type.equals(ITEM_CLICKED_EVENT)?"2":"1", timeStamp);
+		return new UserTrainEvent(this.userId, this.itemId, type.equals(ITEM_CLICKED_EVENT)?"2":"1", timeStamp,keywords.toString());
 	}
 
 	public String getLine() {

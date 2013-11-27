@@ -47,7 +47,7 @@ DenseFactorUserItemRepresentation {
 
 	public DenseFactorUserItemRepresentationWithMetadata(AverageDataModel model,
 			RatingScale scale, int fDimensions, String matrixRepresentationFile, int numNeighbors, boolean spectralFile, int numHyperParams) throws TasteException, IOException {
-		super(model, scale, fDimensions, numHyperParams);
+		super(model, scale, fDimensions, numHyperParams,false);
 		if(spectralFile)
 				this.metadataMatrix=SpectralDataLoader.loadSpectralRepresentation(matrixRepresentationFile);
 		else

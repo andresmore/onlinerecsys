@@ -22,6 +22,8 @@ public class FileEventCreator extends Observable{
 
 	
 	//private Splitter splitter;
+	
+	private static final int MAX_FIELDS=5;
 	private HashSet<String> separators= new HashSet<String>();
 	private int numEventReport;
 	private int limitEvents;
@@ -87,7 +89,7 @@ public class FileEventCreator extends Observable{
 
 
 	private UserTrainEvent processLine(String line) {
-		Iterator<String> tokens=this.split(line);
+		Iterator<String> tokens=this.split(line,MAX_FIELDS);
 		
 	
 			 String userIDString = new String(tokens.next());
@@ -95,18 +97,18 @@ public class FileEventCreator extends Observable{
 			 String preferenceValueString = new String(tokens.next());
 			 boolean hasTimestamp = tokens.hasNext();
 			 String timestampString = hasTimestamp ? new String(tokens.next()) : null;
-			 
-		
-		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString));
+			 boolean hasMetadata = tokens.hasNext();
+			 String metadata=hasMetadata? new String(tokens.next()):null;
+		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString),metadata);
 	}
 
 
-	private Iterator<String> split(String line) {
+	private Iterator<String> split(String line, int maxFields) {
 		LinkedList<String> list= new LinkedList<String>();
 		StringBuilder builder= new StringBuilder();
 		for (int i = 0; i < line.length(); i++) {
 			char at= line.charAt(i);
-			if( this.separators.contains(Character.toString(at))){
+			if( this.separators.contains(Character.toString(at)) &&list.size()<maxFields-1  ){
 				if(builder.length()>0)
 					list.add(builder.toString());
 				

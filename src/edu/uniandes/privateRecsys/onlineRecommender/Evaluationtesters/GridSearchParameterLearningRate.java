@@ -194,7 +194,7 @@ public GridSearchParameterLearningRate(RSDataset data) throws IOException{
 		this.tsCreator=LearningRateStrategy.createWithConstantRate(learningRate);
 		int dimensions=(int) dimension;
 		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-		DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(this.model, data.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize());
+		DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(this.model, data.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 		modelTrainerPredictor.setModelRepresentation(denseModel);
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
 		

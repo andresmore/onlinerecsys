@@ -48,12 +48,14 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			long userTime=0;
 			long userAggregation=0;
 			boolean ok=true;
+			double gamma=gammaStrategy.getGammaFromK(userItemRep.getNumberTrainsItems());
 			synchronized (userItemRep.blockUser(event.getUserId())) {
 				//trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
 				
-				double userGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
+				//double userGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
+				
 				try {
-					user = userUpdater.processEvent(event,userItemRep,userGamma);
+					user = userUpdater.processEvent(event,userItemRep,gamma);
 					if(user==null)
 						ok=false;
 					trainer.updateState(Thread.currentThread().getId(), event,"LOCK-USERUPDATED");
@@ -71,8 +73,9 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				if(ok){
 				userTime=System.nanoTime();
 				try {
-					userAggregator.aggregateEvent(event,userItemRep,user);
-					trainer.updateState(Thread.currentThread().getId(), event,"LOCK-AGGREGATED");
+					 
+						user=userAggregator.aggregateEvent(event,userItemRep);
+						trainer.updateState(Thread.currentThread().getId(), event,"LOCK-AGGREGATED");
 				} catch (Exception e) {
 					LOG.log(Level.SEVERE,"ERROR",e);
 					LOG.severe(Thread.currentThread()+" ended event with error "+event.getUserId()+","+event.getItemId()+" "+e.getMessage()+"" );
@@ -90,8 +93,8 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			
 			try {
 				if(ok){
-					double itemGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
-					itemProfileUpdater.processEvent(event,userItemRep,itemGamma,user);
+					//double itemGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
+					itemProfileUpdater.processEvent(event,userItemRep,gamma,user);
 					//trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
 				}
 			} catch (Exception e) {

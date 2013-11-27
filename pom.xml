@@ -1,0 +1,134 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>PrivacyRecommenderSystem</groupId>
+  <artifactId>PrivacyRecommenderSystem</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <description>A event oriented recommender system model </description>
+ 
+  <organization>
+  	<name>uniandes.edu.co</name>
+  	<url>uniandes.edu.co</url>
+  </organization>
+  
+  <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jettyVersion>7.6.4.v20120524</jettyVersion>
+	</properties>
+  
+  
+  <dependencies>
+  	<dependency>
+  		<groupId>org.uncommons.maths</groupId>
+  		<artifactId>uncommons-maths</artifactId>
+  		<version>1.2.2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>jfree</groupId>
+  		<artifactId>jfreechart</artifactId>
+  		<version>1.0.13</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout</artifactId>
+  		<version>0.8</version>
+  		<type>zip</type>
+  		<classifier>source-release</classifier>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout-core</artifactId>
+  		<version>0.8</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.mahout</groupId>
+  		<artifactId>mahout-math</artifactId>
+  		<version>0.8</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>commons-dbcp</groupId>
+  		<artifactId>commons-dbcp</artifactId>
+  		<version>1.4</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-math3</artifactId>
+  		<version>3.2</version>
+  	</dependency>
+  </dependencies>
+  <build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+		  <execution>
+			<id>copy-dependencies</id>
+			<phase>package</phase>
+			<goals>
+				<goal>copy-dependencies</goal>
+			</goals>
+			<configuration>
+				<!--  includeGroupIds>jfree,log4j,org.uncommons.maths,org.apache.mahout,commons-dbcp,org.apache.commons</includeGroupIds>-->
+				<excludeTransitive>false</excludeTransitive>
+				<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+			</configuration>
+		  </execution>
+		 </executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>edu.uniandes.privateRecsys.onlineRecommender.RecommenderMainClass</mainClass>
+              <classpathPrefix>dependency-jars/</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
+			</plugin>
+		</plugins>
+		<!--  
+        Above maven-dependepcy-plugin gives a validation error in m2e. 
+        To fix that, add the plugin management step below. Per: http://stackoverflow.com/a/12109018
+        -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[2.0,)</versionRange>
+                                        <goals>
+                                            <goal>copy-dependencies</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+	</build>
+  
+</project>

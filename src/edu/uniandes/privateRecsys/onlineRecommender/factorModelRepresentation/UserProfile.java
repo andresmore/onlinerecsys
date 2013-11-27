@@ -1,11 +1,13 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 
 public class UserProfile {
@@ -14,6 +16,7 @@ public class UserProfile {
 	private HashMap<String, BetaDistribution> userBias= new HashMap<String, BetaDistribution>();
 	private Vector hyperParams;
 	private int numTrains;
+	private UserMetadataInfo metadataInfo;
 	
 	private UserProfile(){
 		
@@ -22,14 +25,16 @@ public class UserProfile {
 	
 	
 	public static UserProfile buildDenseProfile(
-			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams,int numTrains) {
+			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams, LinkedList<Vector> userMetadataVectors,LinkedList<String> existingConcepts,int numTrains) {
 		UserProfile prof= new UserProfile();
 		
 		prof.setHyperParams(userHyperParams);
 		prof.numTrains=numTrains;
+		prof.metadataInfo=new UserMetadataInfo(existingConcepts);
 		for (int i = 0; i < userVectors.size(); i++) {
 			prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
 			prof.addBias(userBiasVector.get(i), ratingScale.getScale()[i]);
+			prof.addMetadataVector(userMetadataVectors.get(i),ratingScale.getScale()[i]);
 		}
 		
 		return prof;
@@ -37,6 +42,12 @@ public class UserProfile {
 	
 	
 	
+	private void addMetadataVector(Vector vector, String scale) {
+		this.metadataInfo.addMetadataVector(vector,scale);
+		
+	}
+
+
 	private void setHyperParams(Vector userHyperParams) {
 		this.hyperParams=userHyperParams;
 		
@@ -75,11 +86,13 @@ public class UserProfile {
 
 
 	public int getNumTrains() {
-		// TODO Auto-generated method stub
+		
 		return this.numTrains;
 	}
 
-	
+	public UserMetadataInfo getMetadataInfo(){
+		return this.metadataInfo;
+	}
 
 	
 }

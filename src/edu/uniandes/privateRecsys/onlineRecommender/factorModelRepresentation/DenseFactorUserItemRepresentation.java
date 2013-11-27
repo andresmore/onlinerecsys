@@ -16,10 +16,12 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
+@Deprecated
 public class DenseFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {
 
@@ -28,24 +30,26 @@ public class DenseFactorUserItemRepresentation implements
 	private int fDimensions;
 	private DenseMatrix itemFactors;
 	private DenseMatrix[] privateUserFactors;
+	
 	private BetaDistribution[][] privateUserBias;
 	private DenseMatrix privateUserHyperParams;
 	private DenseMatrix[] publicUserFactors;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, AtomicInteger> numTrainsItem= new ConcurrentHashMap <>();
-	
+	private AtomicInteger numTrainsItems= new AtomicInteger();
 	private ConcurrentHashMap <Long, Long> userId_userPos= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, Long> itemId_itemPos= new ConcurrentHashMap <>();
 	private HashSet<Long> restrictedUserIds;
+	private boolean hasPrivate;
 	
 
 	public DenseFactorUserItemRepresentation(AverageDataModel model,
-			RatingScale scale, int fDimensions, int numHyperParams) throws TasteException {
+			RatingScale scale, int fDimensions, int numHyperParams, boolean hasPrivate) throws TasteException {
 		this.model=model;
 		this.ratingScale=scale;
 		this.fDimensions=fDimensions;
-		
+		this.hasPrivate=hasPrivate;
 		createDenseRatingModel(this.fDimensions,numHyperParams );
 		updateHashMapIds();
 		
@@ -68,7 +72,7 @@ public class DenseFactorUserItemRepresentation implements
 		 
 		
 	}
-//TODO:Init private bias
+
 	private void createDenseRatingModel(int fDimensions, int numHyperParams) throws TasteException {
 		int ratingSize=this.ratingScale.getRatingSize();
 		int numUsers= model.getNumUsers();
@@ -95,7 +99,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		for (int i = 0; i < privateUserBias.length; i++) {
 			for (int j = 0; j < privateUserBias[0].length; j++) {
-				privateUserBias[i][j]=new BetaDistribution(1, 1);
+				privateUserBias[i][j]=new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1,1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 			}
 		}
 		
@@ -120,7 +124,7 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(this.privateUserBias[userPos][i]);
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos), this.numTrainsUser.get(userId).get());
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos), null, null, this.numTrainsUser.get(userId).get());
 		return profile;
 	}
 
@@ -141,8 +145,8 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1, 1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 		
 		}
-		Vector emptyHyperParms= new DenseVector();
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms,0);
+		Vector emptyHyperParms= null;
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms,null, null, 0);
 		return profile;
 	}
 	
@@ -188,7 +192,7 @@ public class DenseFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParamenters) throws TasteException {
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParamenters, UserMetadataInfo info) throws TasteException {
 
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
@@ -238,7 +242,8 @@ public class DenseFactorUserItemRepresentation implements
 
 			else
 				trains.incrementAndGet();
-		
+			
+			this.numTrainsItems.incrementAndGet();
 		
 			itemFactors.assignRow(itemPos, itemVector);
 		
@@ -365,6 +370,18 @@ public class DenseFactorUserItemRepresentation implements
 	public Set<Long> getUsersId() {
 		
 		return this.numTrainsUser.keySet();
+	}
+
+	@Override
+	public boolean hasPrivateStrategy() {
+		
+		return this.hasPrivate;
+	}
+
+	@Override
+	public double getNumberTrainsItems() {
+	
+		return this.numTrainsItems.get();
 	}
 
 

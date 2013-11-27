@@ -84,7 +84,7 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 				
 				DifferentialPrivacyOnlineRecommenderTester rest=new DifferentialPrivacyOnlineRecommenderTester(data, dimensions, tsCreator);
 				UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize());
+				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(0.69);

@@ -11,8 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
+
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 
@@ -24,12 +26,16 @@ public class IncrementalFactorUserItemRepresentation implements
 	
 	private Map<Long, Vector> itemFactors;
 	private Map<Long, Vector>[] privateUserFactors;
+	private Map<Long, Vector>[] privateUserMetadataFactors;
+	private Map<Long, LinkedList<String> > privateUserConcepts;
 	private Map<Long, LinkedList<BetaDistribution>> privateUserBias;
 	private Map<Long, Vector>[] publicUserFactors;
 	private Map<Long, Vector> privateHyperParams;
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, AtomicInteger> numTrainsItem= new ConcurrentHashMap <>();
+	
+	private AtomicInteger numTrainsItems= new AtomicInteger();
 	private boolean hasPrivateInfo;
 	private HashSet<Long> restrictedUserIds;
 	private int hyperParamDimension;
@@ -46,11 +52,16 @@ public class IncrementalFactorUserItemRepresentation implements
 		this.itemFactors= new ConcurrentHashMap<>();
 		this.hasPrivateInfo=hasPrivateStrategy;
 		this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+		this.privateUserMetadataFactors= new ConcurrentHashMap[scale.getRatingSize()];
+		this.privateUserConcepts= new ConcurrentHashMap<>();
+		
 		this.privateUserBias= new ConcurrentHashMap<>();
 		this.privateHyperParams= new ConcurrentHashMap<>();
+	
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i]= new ConcurrentHashMap<>();
+			privateUserMetadataFactors[i]= new ConcurrentHashMap<>();
 		}
 		
 		if(this.hasPrivateInfo){
@@ -71,25 +82,31 @@ public class IncrementalFactorUserItemRepresentation implements
 			insertUser(userId);
 		
 		LinkedList<Vector> userVectors= new LinkedList<>();
+		LinkedList<Vector> metadataVectors= new LinkedList<>();
 		for (int i = 0; i < this.privateUserFactors.length; i++) {
 			userVectors.add(this.privateUserFactors[i].get(userId));
+			metadataVectors.add(this.privateUserMetadataFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), this.numTrainsUser.get(userId).get());
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), userVectors, this.privateUserConcepts.get(userId), this.numTrainsUser.get(userId).get());
 		}
 		return null;
 	}
 	
 	private void insertUser(long userId) {
+		
 		String[] scale= this.ratingScale.getScale();
+		
 		LinkedList<BetaDistribution> userPriors= new LinkedList<>();
 		
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
+		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			Vector vec= new DenseVector(this.fDimensions);
 			vec=PrivateRandomUtils.normalRandom(0, 1, vec);
 			userProfile.put(scale[i],vec);
-			userPriors.add(new BetaDistribution(1,1));
+			
+			userPriors.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1,1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 		}
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
 		
@@ -99,8 +116,10 @@ public class IncrementalFactorUserItemRepresentation implements
 			this.privateHyperParams.put(userId, userHyperParams);
 		}
 		
+		this.privateUserConcepts.put(userId, new LinkedList<String>());
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
+			privateUserMetadataFactors[i].put(userId, new DenseVector(0));
 			if(this.hasPrivateInfo){
 				publicUserFactors[i].put(userId, userProfile.get(scale[i]));
 			}
@@ -122,9 +141,9 @@ public class IncrementalFactorUserItemRepresentation implements
 				userVectors.add(this.publicUserFactors[i].get(userId));
 				dist.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1, 1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 			}
-			Vector emptyHyperParams= new DenseVector();
+			Vector emptyHyperParams=null;
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					dist,emptyHyperParams,0);
+					dist,emptyHyperParams,null, null, 0);
 		}
 		return null;
 	}
@@ -173,7 +192,7 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles,HashMap<String, BetaDistribution> bias, Vector hyperParams) throws TasteException {
+			HashMap<String, Vector> trainedProfiles,HashMap<String, BetaDistribution> bias, Vector hyperParams, UserMetadataInfo info) throws TasteException {
 		AtomicInteger trains = this.numTrainsUser.get(userId);
 
 		if (trains == null)
@@ -182,18 +201,29 @@ public class IncrementalFactorUserItemRepresentation implements
 			trains.incrementAndGet();
 		
 		String[] scale= this.ratingScale.getScale();
-		LinkedList<BetaDistribution> userPriors= new LinkedList<BetaDistribution>();
+		
+		LinkedList<BetaDistribution> userPriors= null;
+		
+		if(bias!=null)
+			userPriors=new LinkedList<BetaDistribution>();
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
-			publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
-			userPriors.add(bias.get(scale[i]));
+			
+			if(bias!=null)
+				userPriors.add(bias.get(scale[i]));
 		}
-		if(userPriors!=null ){
+		if(bias!=null ){
 			privateUserBias.put(userId, userPriors);
 			
 		}	
 		if(hyperParams!=null){
 			privateHyperParams.put(userId, hyperParams);
+		}
+		if(info!=null){
+			privateUserConcepts.put(userId,info.getIncludedConcepts());
+			for (int i = 0; i < scale.length; i++) {
+				privateUserMetadataFactors[i].put(userId, info.getTrainedProfiles().get(scale[i]));
+			}
 		}
 	}
 
@@ -208,7 +238,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		
 			for (int i = 0; i < publicUserFactors.length; i++) {
 				publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
-				publicUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
+				
 			}
 		}
 		
@@ -226,7 +256,8 @@ public class IncrementalFactorUserItemRepresentation implements
 		else
 			trains.incrementAndGet();
 	
-	
+		this.numTrainsItems.incrementAndGet();
+		
 		itemFactors.put(itemId, itemVector);
 
 	}
@@ -281,12 +312,12 @@ public class IncrementalFactorUserItemRepresentation implements
 	
 
 	public long getNumUsers() {
-		// TODO Auto-generated method stub
+		
 		return this.numTrainsUser.size();
 	}
 
 	public long getNumItems() {
-		// TODO Auto-generated method stub
+		
 		return this.numTrainsItem.size();
 	}
 	
@@ -312,6 +343,18 @@ public class IncrementalFactorUserItemRepresentation implements
 	public Set<Long> getUsersId() {
 		
 		return this.numTrainsUser.keySet();
+	}
+
+	@Override
+	public boolean hasPrivateStrategy() {
+		
+		return this.hasPrivateInfo;
+	}
+
+	@Override
+	public double getNumberTrainsItems() {
+		
+		return this.numTrainsItems.get();
 	}
 
 }

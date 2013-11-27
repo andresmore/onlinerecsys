@@ -8,6 +8,7 @@ import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 
 
@@ -23,7 +24,7 @@ public interface FactorUserItemRepresentation {
 	public int getNumberTrainsItem(long itemId);
 
 	void updatePrivateTrainedProfile(long userId,
-			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParameters) throws TasteException;
+			HashMap<String, Vector> trainedProfiles, HashMap<String, BetaDistribution> bias, Vector hyperParameters, UserMetadataInfo info) throws TasteException;
 
 	UserProfile getPublicUserProfile(long userId) throws TasteException;
 
@@ -33,6 +34,8 @@ public interface FactorUserItemRepresentation {
 	void updateItemVector(long itemId,Vector itemVector) throws TasteException;
 	
 	public int getfDimensions();
+	
+	public boolean hasPrivateStrategy();
 
 	 Object blockUser(long userId);
 
@@ -43,6 +46,8 @@ public interface FactorUserItemRepresentation {
 
 	Set<Long> getItemsId(int minTrains);
 	Set<Long> getUsersId();
+
+	double getNumberTrainsItems();
 
 	
 
