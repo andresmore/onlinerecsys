@@ -88,7 +88,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			metadataVectors.add(this.privateUserMetadataFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), userVectors, this.privateUserConcepts.get(userId), this.numTrainsUser.get(userId).get());
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), metadataVectors, this.privateUserConcepts.get(userId), this.numTrainsUser.get(userId).get());
 		}
 		return null;
 	}
@@ -102,8 +102,8 @@ public class IncrementalFactorUserItemRepresentation implements
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		
 		for (int i = 0; i < privateUserFactors.length; i++) {
-			Vector vec= new DenseVector(this.fDimensions);
-			vec=PrivateRandomUtils.normalRandom(0, 1, vec);
+			
+			Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 			userProfile.put(scale[i],vec);
 			
 			userPriors.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1,1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
@@ -119,7 +119,8 @@ public class IncrementalFactorUserItemRepresentation implements
 		this.privateUserConcepts.put(userId, new LinkedList<String>());
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
-			privateUserMetadataFactors[i].put(userId, new DenseVector(0));
+			Vector privateMetadataVector=new DenseVector(0);
+			privateUserMetadataFactors[i].put(userId, privateMetadataVector);
 			if(this.hasPrivateInfo){
 				publicUserFactors[i].put(userId, userProfile.get(scale[i]));
 			}
@@ -166,8 +167,8 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	private void insertItem(long itemId) {
 		
-		Vector vec= new DenseVector(this.fDimensions);
-		vec=PrivateRandomUtils.normalRandom(0, 1, vec);
+		
+		Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 		vec=VectorProjector.projectVectorIntoSimplex(vec);
 		
 		itemFactors.put(itemId, vec);

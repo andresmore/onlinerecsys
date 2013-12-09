@@ -75,8 +75,8 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				
 				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
 				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
-				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
-				UserModelTrainerPredictor trainerPredictor= new MetadataPredictor();
+				UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new MetadataPredictor();
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
 				//FactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(new AverageDataModel(new File(data.getTrainSet())), scale, dimensions, trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);

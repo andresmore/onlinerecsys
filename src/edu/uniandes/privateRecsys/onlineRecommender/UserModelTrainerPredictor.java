@@ -15,7 +15,7 @@ public interface UserModelTrainerPredictor {
 
 	public void setModelRepresentation(FactorUserItemRepresentation model);
 	
-	public  Prediction calculatePrediction(long itemId, long userId,
+	public  Prediction calculatePrediction(UserTrainEvent event,
 			int minTrains) throws TasteException;
 
 	public  HashMap<String, Vector> calculateProbabilityUpdate(

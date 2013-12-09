@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class TopNRecommenderFactorModel implements TopNRecommender {
 
@@ -29,7 +30,8 @@ public class TopNRecommenderFactorModel implements TopNRecommender {
 		
 		
 		for (Long itemId : ids) {
-			Prediction p=predictor.calculatePrediction(itemId, userID, 10);
+			UserTrainEvent event= new UserTrainEvent(userID, itemId, "", 1, "");
+			Prediction p=predictor.calculatePrediction(event, 10);
 			predictions.add(p);
 			if(predictions.size()>size){
 				predictions.poll();

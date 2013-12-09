@@ -32,9 +32,10 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 	/**
 	 * No sampling
 	 */
-	@Override
-	public Prediction calculatePrediction(long itemId, long userId,
-			int minTrains) throws TasteException {
+	public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
+		
+		long userId=event.getUserId();
+		long itemId=event.getItemId();
 		UserProfile profile=model.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> dist=profile.getUserBias();
 		double prediction=this.calculatePrediction(dist);

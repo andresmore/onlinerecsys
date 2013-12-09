@@ -1,5 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender.vo;
 
+import java.util.HashSet;
+
 
 public class UserTrainEvent implements FileEvent{
 	
@@ -8,15 +10,24 @@ public class UserTrainEvent implements FileEvent{
 	private String rating;
 	private long time;
 	private int timeSlot;
-	private String metadata;
+	private HashSet<String> metadata;
+	
+	private HashSet<Character> separators;
 	
 	public UserTrainEvent(long userId, long itemId, String rating, long time, String metadata) {
 		super();
+		this.separators= new HashSet<>(4);
+		separators.add('{');
+		separators.add('}');
+		separators.add(',');
+		separators.add(':');
+		
+		
 		this.userId = userId;
 		this.itemId = itemId;
 		this.rating = rating;
 		this.time = time;
-		this.metadata=metadata;
+		this.metadata=breakConcepts(metadata);
 		
 	}
 	public long getUserId() {
@@ -31,7 +42,7 @@ public class UserTrainEvent implements FileEvent{
 	public long getTime() {
 		return time;
 	}
-	public String getMetadata(){
+	public HashSet<String> getMetadata(){
 		return metadata;
 	}
 	
@@ -59,6 +70,31 @@ public class UserTrainEvent implements FileEvent{
 	public UserTrainEvent convertToTrainEvent() {
 		
 		return this;
+	}
+	
+	private HashSet<String> breakConcepts(String metadataVector) {
+		HashSet<String> concepts= new HashSet<String>();
+		
+		StringBuilder builder= new StringBuilder();
+		
+		for (int i = 0; i < metadataVector.length(); i++) {
+			char at= metadataVector.charAt(i);
+			if( this.separators.contains(at) ){
+				if(builder.length()>0)
+					concepts.add(builder.toString());
+				
+					builder= new StringBuilder();
+				
+			}
+			else{
+				builder.append(at);
+			}
+			
+		}
+		if(builder.length()>0)
+			concepts.add(builder.toString());
+		
+		return concepts;
 	}
 
 }

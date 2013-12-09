@@ -176,8 +176,7 @@ public class PosgresDAO {
 	
 	public static void main(String[] args) throws PrivateRecsysException, SQLException {
 		PosgresDAO dao= new PosgresDAO();
-		Vector vec= new DenseVector(5);
-		vec=PrivateRandomUtils.normalRandom(0, 1, vec);
+		Vector vec=PrivateRandomUtils.normalRandom(0, 1, 5);
 		vec=VectorProjector.projectVectorIntoSimplex(vec);
 		dao.putItem(1, vec);
 	}

@@ -36,9 +36,10 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor#calculatePrediction(long, long, int)
 	 */
 	@Override
-	public  Prediction calculatePrediction(long itemId, long userId, int minTrains) throws TasteException{
+	public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
 		
-		
+		long userId=event.getUserId();
+		long itemId=event.getItemId();
 		UserProfile user = modelRepresentation
 				.getPrivateUserProfile(userId);
 		ItemProfile item = modelRepresentation
@@ -138,14 +139,14 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 			HashMap<String, Vector> trainedProfiles) {
 		String[] ratingScale=this.modelRepresentation.getRatingScale().getScale();
 		double prediction=0;
-		Vector dotVector= new DenseVector(this.modelRepresentation.getRatingScale().getRatingSize());
+		//Vector dotVector= new DenseVector(this.modelRepresentation.getRatingScale().getRatingSize());
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector userVector = trainedProfiles
 					.get(ratingScale[i]);
 			double dot = userVector.dot(itemVector);
 			
 			prediction += dot * Double.parseDouble(ratingScale[i]);
-			dotVector.setQuick(i, dot);
+			//dotVector.setQuick(i, dot);
 		}
 		return prediction;
 	}

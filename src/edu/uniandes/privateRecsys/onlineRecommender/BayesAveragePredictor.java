@@ -30,8 +30,10 @@ public class BayesAveragePredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public Prediction calculatePrediction(long itemId, long userId,
-			int minTrains) throws TasteException {
+public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
+		
+		long userId=event.getUserId();
+		long itemId=event.getItemId();
 		UserProfile profile=model.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> dist=profile.getUserBias();
 		double avgModelEstimation=0;

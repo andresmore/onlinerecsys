@@ -54,7 +54,7 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 			Vector privateVector=privateUserProfile.getProfileForScale(ratingScale[i]);
 			Vector randVector=privateVector.like();
 			for (int j = 0; j < numNoises; j++) {
-				randVector.plus(PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector));
+				randVector.plus(PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector.size()));
 			}
 			
 			Vector noiseVector=privateVector.plus(randVector) ;

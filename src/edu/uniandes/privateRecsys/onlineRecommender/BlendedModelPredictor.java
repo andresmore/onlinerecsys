@@ -41,11 +41,14 @@ public  class BlendedModelPredictor implements UserModelTrainerPredictor {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor#calculatePrediction(long, long, int)
 	 */
 	@Override
-	public  Prediction calculatePrediction(long itemId, long userId, int minTrains) throws TasteException{
+public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
+		
+		long userId=event.getUserId();
+		long itemId=event.getItemId();
 		
 		
-		Prediction prediction1=baseModel.calculatePrediction(itemId,userId,minTrains);
-		Prediction prediction2=averageModel.calculatePrediction(itemId, userId, minTrains);
+		Prediction prediction1=baseModel.calculatePrediction(event,minTrains);
+		Prediction prediction2=averageModel.calculatePrediction(event, minTrains);
 		
 		UserProfile profile=modelRepresentation.getPrivateUserProfile(userId);
 		Vector hyperparameters=profile.getHyperParameters();

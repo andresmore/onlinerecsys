@@ -37,7 +37,7 @@ public class PredictionEvaluationRunnable implements Runnable {
 		long initialTime=System.nanoTime();
 		
 		try {
-			Prediction prediction = predictor.calculatePrediction(itemId, userId,minTrains);
+			Prediction prediction = predictor.calculatePrediction(event,minTrains);
 			rmse_Evaluator.notifyPrediction(event,prediction);
 			PredictionProfiler.getInstance().reportTimes(initialTime, System.nanoTime());
 

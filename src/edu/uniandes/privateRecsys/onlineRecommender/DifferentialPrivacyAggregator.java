@@ -44,7 +44,7 @@ public class DifferentialPrivacyAggregator implements IUserItemAggregator {
 		HashMap<String, Vector> trainedProfiles= new HashMap<>();
 		for (int i = 0; i < ratingScale.length; i++) {
 			Vector privateVector=privateUserProfile.getProfileForScale(ratingScale[i]);
-			Vector randVector=PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector);
+			Vector randVector=PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector.size());
 			Vector noiseVector=privateVector.plus(randVector) ;
 			trainedProfiles.put(ratingScale[i],noiseVector);
 			

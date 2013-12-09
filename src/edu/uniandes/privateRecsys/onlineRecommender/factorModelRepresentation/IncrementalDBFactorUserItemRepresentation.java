@@ -95,8 +95,8 @@ public class IncrementalDBFactorUserItemRepresentation implements
 		String[] scale= this.ratingScale.getScale();
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		for (int i = 0; i < scale.length; i++) {
-			Vector vec= new DenseVector(this.fDimensions);
-			vec=PrivateRandomUtils.normalRandom(0, 1, vec);
+			
+			Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 			userProfile.put(scale[i],vec);
 		}
 		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
@@ -141,8 +141,8 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 	private void insertItem(long itemId) throws SQLException {
 		
-		Vector vec= new DenseVector(this.fDimensions);
-		vec=PrivateRandomUtils.normalRandom(0, 1, vec);
+		
+		Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 		vec=VectorProjector.projectVectorIntoSimplex(vec);
 		
 		sqlDAO.putItem(itemId, vec);

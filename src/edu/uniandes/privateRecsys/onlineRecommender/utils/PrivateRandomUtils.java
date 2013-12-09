@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.utils;
 
 import java.util.Random;
 
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.uncommons.maths.random.XORShiftRNG;
@@ -35,8 +36,8 @@ public class PrivateRandomUtils {
 		
 	}
 	
-	 public static Vector normalRandom(double mu, double sigma, Vector vectorLike){
-		Vector retVector= vectorLike.like();
+	 public static Vector normalRandom(double mu, double sigma, int size){
+		Vector retVector= new DenseVector(size);
 		
 		
 		
@@ -48,8 +49,8 @@ public class PrivateRandomUtils {
 		return retVector;
 	}
 	 
-	public static Vector laplaceRandom(Random m, double mu, double sigma, Vector vectorLike){
-		Vector retVector= vectorLike.like();
+	public static Vector laplaceRandom(Random m, double mu, double sigma, int size){
+		Vector retVector= new DenseVector(size);
 		
 		
 		

@@ -7,7 +7,11 @@ import java.util.LinkedList;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorBinaryAggregate;
+import org.apache.mahout.math.function.Functions;
+import org.uncommons.maths.random.PoissonGenerator;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
@@ -24,8 +28,8 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 	private FactorUserItemRepresentation model;
 	
 	
-	private PoissonDistribution samplingDistribution= new PoissonDistribution(PrivateRandomUtils.getCurrentRandomGenerator(), 0.03, PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
-
+	//private PoissonDistribution samplingDistribution= new PoissonDistribution(PrivateRandomUtils.getCurrentRandomGenerator(), 0.03, PoissonDistribution.DEFAULT_EPSILON, PoissonDistribution.DEFAULT_MAX_ITERATIONS);
+	private PoissonGenerator generator= new PoissonGenerator(0.03, PrivateRandomUtils.getCurrentRandomGenerator());
 
 	private HashSet<Character> separators;
 
@@ -44,11 +48,33 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public Prediction calculatePrediction(long itemId, long userId,
-			int minTrains) throws TasteException {
-		//TODO
+public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
 		
-		return Prediction.createPrediction(userId, itemId, 1);
+		long userId=event.getUserId();
+		long itemId=event.getItemId();
+		
+		UserProfile user = model
+				.getPrivateUserProfile(userId);
+		UserMetadataInfo trainedMetadataProfiles=user.getMetadataInfo();
+		LinkedList<String> profileConcepts=trainedMetadataProfiles.getIncludedConcepts();
+		HashMap<String,Vector> profiles=trainedMetadataProfiles.getTrainedProfiles();
+		
+		
+		HashSet<String> metadataConcepts=event.getMetadata();
+		Vector itemVector=buildItemVector(profileConcepts,metadataConcepts);
+		
+		double prediction=0;
+		double sumProb=0;
+		for (String ratingKey: profiles.keySet()) {
+			Vector userVector = profiles
+					.get(ratingKey);
+			double dot = Functions.SIGMOID.apply(userVector.dot(itemVector)) ;
+			sumProb+=dot;
+			prediction += dot * Double.parseDouble(ratingKey);
+			
+		}
+		
+		return Prediction.createPrediction(userId, itemId, prediction);
 	}
 
 	@Override
@@ -78,26 +104,75 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
 			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+		String rating=event.getRating();
 		
-		String metadataVector=event.getMetadata();
 		LinkedList<String> profileConcepts=trainedMetadataProfiles.getIncludedConcepts();
+		HashMap<String,Vector> profiles=trainedMetadataProfiles.getTrainedProfiles();
 		
-		HashSet<String> metadataConcepts=breakConcepts(metadataVector);
+		HashSet<String> metadataConcepts=event.getMetadata();
 		int initSize=profileConcepts.size();
 		addMetadataConceptsFromDistribution(profileConcepts,metadataConcepts);
+		int endSize=profileConcepts.size();
+		HashMap<String, Vector> extendedProfiles=increaseSizeMetadataConcepts(profiles, endSize-initSize);
+		Vector itemVector=buildItemVector(profileConcepts,metadataConcepts);
+		UserMetadataInfo profile=new UserMetadataInfo(profileConcepts);
+		
+		for (String ratingKey : extendedProfiles.keySet()) {	
+			Vector privateVector=extendedProfiles.get(ratingKey);
+			int prob=ratingKey.equals(rating)?1:0;
+			
+			double dotProb=privateVector.dot(itemVector);
+			
+			double loss=prob-dotProb;
+			
+			double multiplicator=gamma*(loss);
+			Vector privateVectorMult=itemVector.times(multiplicator);
+			Vector result=privateVector.plus(privateVectorMult);
+			
+			
+			profile.addMetadataVector(result, ratingKey);
+		}
 		
 		
+		return profile;
 		
 		
-		 return trainedMetadataProfiles;
+	}
+
+	private Vector buildItemVector(LinkedList<String> profileConcepts, HashSet<String> metadataConcepts) {
 		
+		Vector denseVector= new DenseVector(profileConcepts.size());
+		for (int i = 0; i < profileConcepts.size(); i++) {
+			if(metadataConcepts.contains(profileConcepts.get(i)))
+				denseVector.setQuick(i, 1);
+		}
+		return denseVector;
+	}
+
+	private HashMap<String, Vector> increaseSizeMetadataConcepts(HashMap<String, Vector> profiles,
+			int howMany) {
+		HashMap<String, Vector> ret=  new HashMap<String, Vector>();
+		if(howMany==0)
+			return profiles;
+		for (String key : profiles.keySet()) {
+			Vector metadataVector=profiles.get(key);
+			Vector extendedVector= new DenseVector(metadataVector.size()+howMany);
+			extendedVector.viewPart(0, metadataVector.size()).assign(metadataVector);
+			extendedVector.viewPart(metadataVector.size(), howMany).assign(PrivateRandomUtils.normalRandom(0, 1, howMany));
+			ret.put(key, extendedVector);
+		}
+		return ret;
 		
 	}
 
 	private void addMetadataConceptsFromDistribution(
 			LinkedList<String> profileConcepts, HashSet<String> metadataConcepts) {
 		metadataConcepts.removeAll(profileConcepts);
-		int[] add=samplingDistribution.sample(metadataConcepts.size());
+		
+		int[] add=new int[metadataConcepts.size()];
+		for (int i = 0; i < add.length; i++) {
+			add[i]=this.generator.nextValue();
+		}
 		int i=0;
 		for (String concept : metadataConcepts) {
 		 if(add[i]>0)	 
@@ -107,30 +182,7 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 		
 	}
 
-	private HashSet<String> breakConcepts(String metadataVector) {
-		HashSet<String> concepts= new HashSet<String>();
-		
-		StringBuilder builder= new StringBuilder();
-		
-		for (int i = 0; i < metadataVector.length(); i++) {
-			char at= metadataVector.charAt(i);
-			if( this.separators.contains(at) ){
-				if(builder.length()>0)
-					concepts.add(builder.toString());
-				
-					builder= new StringBuilder();
-				
-			}
-			else{
-				builder.append(at);
-			}
-			
-		}
-		if(builder.length()>0)
-			concepts.add(builder.toString());
-		
-		return concepts;
-	}
+	
 
 	@Override
 	public int getHyperParametersSize() {
