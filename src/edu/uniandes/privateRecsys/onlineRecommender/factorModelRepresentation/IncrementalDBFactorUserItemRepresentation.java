@@ -82,7 +82,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				LinkedList<BetaDistribution> bias= new LinkedList<>();
 				Vector emptyHyperParams= new DenseVector();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, null, null, this.numTrainsUser.get(userId).get());
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, null, null, null, this.numTrainsUser.get(userId).get());
 			} catch (SQLException e) {
 				
 				e.printStackTrace();

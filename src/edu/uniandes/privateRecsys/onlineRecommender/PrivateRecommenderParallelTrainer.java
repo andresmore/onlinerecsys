@@ -122,7 +122,9 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	public void processEvent(UserTrainEvent event) throws TasteException,
 			InterruptedException {
 
-		while (executor.getQueue().size() > 500000) {
+		
+		if(executor.getQueue().size()>500000)
+		while (executor.getQueue().size() > 500000/3) {
 		/*	StringBuilder build = new StringBuilder("[");
 			for (int i = 0; i < states.length; i++) {
 				build.append(states[i]);

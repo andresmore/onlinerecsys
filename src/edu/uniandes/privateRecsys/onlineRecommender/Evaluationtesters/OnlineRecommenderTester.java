@@ -71,12 +71,9 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//LearningRateStrategy tsCreator=LearningRateStrategy.createWithConstantRate(delta);
 			LearningRateStrategy tsCreator=LearningRateStrategy.createDecreasingRate(1e-6, 0.1);
 			int dimensions=5;
-			
-				
-				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
-				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
-				UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
-				//UserModelTrainerPredictor trainerPredictor= new MetadataPredictor();
+			int[] limitSizes={5,10,50,100,150};
+			for (int i = 0; i < limitSizes.length; i++) {
+				UserModelTrainerPredictor trainerPredictor= new MetadataPredictor(limitSizes[i]);
 				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
 				//FactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(new AverageDataModel(new File(data.getTrainSet())), scale, dimensions, trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
@@ -87,19 +84,19 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 				rest.setModelPredictor(trainerPredictor);
-				ErrorReport result=rest.startExperiment(10);
-				results.add(result.toString());
+				ErrorReport result=rest.startExperiment(1);
+				results.add(limitSizes[i]+" "+result.toString());
+			}
+				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				
 			
 			for (String string : results) {
 				System.out.println(string);
 			}
 			
 			
-		
-			
-			//OnlineRecommenderTester rest=new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 5, 1*24*60*60);
-			//double result=rest.startRecommendations();
-			//System.out.println(result);
 		} catch (IOException e) {
 		
 			e.printStackTrace();

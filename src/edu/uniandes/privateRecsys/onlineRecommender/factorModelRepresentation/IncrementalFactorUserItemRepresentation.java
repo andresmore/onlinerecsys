@@ -1,5 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,26 +13,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
-
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.ResetableCountMinSketch;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 
 public class IncrementalFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {
 
+	
 	private RatingScale ratingScale;
 	private int fDimensions;
 	
 	private Map<Long, Vector> itemFactors;
 	private Map<Long, Vector>[] privateUserFactors;
 	private Map<Long, Vector>[] privateUserMetadataFactors;
-	private Map<Long, LinkedList<String> > privateUserConcepts;
+	private Map<Long, LinkedList<Long> > privateUserConcepts;
+	private Map<Long, SlidingWindowCountMinSketch> privateUserSketch;
 	private Map<Long, LinkedList<BetaDistribution>> privateUserBias;
 	private Map<Long, Vector>[] publicUserFactors;
 	private Map<Long, Vector> privateHyperParams;
+	
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
 	private ConcurrentHashMap <Long, AtomicInteger> numTrainsItem= new ConcurrentHashMap <>();
@@ -54,6 +60,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
 		this.privateUserMetadataFactors= new ConcurrentHashMap[scale.getRatingSize()];
 		this.privateUserConcepts= new ConcurrentHashMap<>();
+		this.privateUserSketch= new ConcurrentHashMap<Long, SlidingWindowCountMinSketch>();
 		
 		this.privateUserBias= new ConcurrentHashMap<>();
 		this.privateHyperParams= new ConcurrentHashMap<>();
@@ -88,7 +95,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			metadataVectors.add(this.privateUserMetadataFactors[i].get(userId));
 		}
 		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), metadataVectors, this.privateUserConcepts.get(userId), this.numTrainsUser.get(userId).get());
+		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), metadataVectors, this.privateUserConcepts.get(userId),this.privateUserSketch.get(userId), this.numTrainsUser.get(userId).get());
 		}
 		return null;
 	}
@@ -116,7 +123,11 @@ public class IncrementalFactorUserItemRepresentation implements
 			this.privateHyperParams.put(userId, userHyperParams);
 		}
 		
-		this.privateUserConcepts.put(userId, new LinkedList<String>());
+		this.privateUserConcepts.put(userId, new LinkedList<Long>());
+		
+		
+		this.privateUserSketch.put(userId, new SlidingWindowCountMinSketch(UserProfile.SKETCH_DEPTH, UserProfile.SKETCH_WIDTH,UserProfile.SEED ,UserProfile.NUMBER_OF_SEGMENTS,UserProfile.WINDOW_LENGHT, UserProfile.HASH_A) );
+		
 		for (int i = 0; i < privateUserFactors.length; i++) {
 			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
 			Vector privateMetadataVector=new DenseVector(0);
@@ -144,7 +155,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			}
 			Vector emptyHyperParams=null;
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					dist,emptyHyperParams,null, null, 0);
+					dist,emptyHyperParams,null, null, null, 0);
 		}
 		return null;
 	}
@@ -222,6 +233,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		}
 		if(info!=null){
 			privateUserConcepts.put(userId,info.getIncludedConcepts());
+			privateUserSketch.put(userId, info.getUserSketch());
 			for (int i = 0; i < scale.length; i++) {
 				privateUserMetadataFactors[i].put(userId, info.getTrainedProfiles().get(scale[i]));
 			}

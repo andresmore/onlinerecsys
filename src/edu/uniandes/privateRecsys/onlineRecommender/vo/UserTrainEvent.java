@@ -9,25 +9,20 @@ public class UserTrainEvent implements FileEvent{
 	private long itemId;
 	private String rating;
 	private long time;
-	private int timeSlot;
-	private HashSet<String> metadata;
+	private HashSet<Long> metadata;
 	
-	private HashSet<Character> separators;
 	
-	public UserTrainEvent(long userId, long itemId, String rating, long time, String metadata) {
+	
+	public UserTrainEvent(long userId, long itemId, String rating, long time, HashSet<Long> metadata) {
 		super();
-		this.separators= new HashSet<>(4);
-		separators.add('{');
-		separators.add('}');
-		separators.add(',');
-		separators.add(':');
+		
 		
 		
 		this.userId = userId;
 		this.itemId = itemId;
 		this.rating = rating;
 		this.time = time;
-		this.metadata=breakConcepts(metadata);
+		this.metadata=metadata;
 		
 	}
 	public long getUserId() {
@@ -42,7 +37,7 @@ public class UserTrainEvent implements FileEvent{
 	public long getTime() {
 		return time;
 	}
-	public HashSet<String> getMetadata(){
+	public HashSet<Long> getMetadata(){
 		return metadata;
 	}
 	
@@ -72,29 +67,6 @@ public class UserTrainEvent implements FileEvent{
 		return this;
 	}
 	
-	private HashSet<String> breakConcepts(String metadataVector) {
-		HashSet<String> concepts= new HashSet<String>();
-		
-		StringBuilder builder= new StringBuilder();
-		
-		for (int i = 0; i < metadataVector.length(); i++) {
-			char at= metadataVector.charAt(i);
-			if( this.separators.contains(at) ){
-				if(builder.length()>0)
-					concepts.add(builder.toString());
-				
-					builder= new StringBuilder();
-				
-			}
-			else{
-				builder.append(at);
-			}
-			
-		}
-		if(builder.length()>0)
-			concepts.add(builder.toString());
-		
-		return concepts;
-	}
+	
 
 }

@@ -30,7 +30,7 @@ public interface UserModelTrainerPredictor {
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,Vector oldHyperparameters, int numTrains);
 
-	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,double gamma, UserMetadataInfo trainedMetadataProfiles);
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains);
 	
 	public int getHyperParametersSize();
 	

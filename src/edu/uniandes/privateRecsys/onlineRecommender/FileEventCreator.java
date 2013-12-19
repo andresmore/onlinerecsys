@@ -2,15 +2,13 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 
 import org.apache.mahout.common.iterator.FileLineIterator;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ReportErrorEvent;
@@ -21,10 +19,14 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public class FileEventCreator extends Observable{
 
 	
-	//private Splitter splitter;
+	
 	
 	private static final int MAX_FIELDS=5;
 	private HashSet<String> separators= new HashSet<String>();
+	
+	//Horrible hack to save memory
+	private HashMap<Long,Long> allConcepts= new HashMap<Long,Long>();
+	private HashSet<Character> metaDataSeparators;
 	private int numEventReport;
 	private int limitEvents;
 	private File file;
@@ -34,6 +36,12 @@ public class FileEventCreator extends Observable{
 		
 		this.separators.add(":");
 		this.separators.add(",");
+		
+		this.metaDataSeparators= new HashSet<>(4);
+		metaDataSeparators.add('{');
+		metaDataSeparators.add('}');
+		metaDataSeparators.add(',');
+		metaDataSeparators.add(':');
 				
 		this.numEventReport=numEventReport;
 		this.limitEvents=limitEvents;
@@ -98,7 +106,8 @@ public class FileEventCreator extends Observable{
 			 boolean hasTimestamp = tokens.hasNext();
 			 String timestampString = hasTimestamp ? new String(tokens.next()) : null;
 			 boolean hasMetadata = tokens.hasNext();
-			 String metadata=hasMetadata? new String(tokens.next()):null;
+			 HashSet<Long> metadata=hasMetadata? breakConcepts(new String(tokens.next())):null;
+			 
 		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString),metadata);
 	}
 
@@ -124,6 +133,48 @@ public class FileEventCreator extends Observable{
 			list.add(builder.toString());
 		
 		return list.iterator();
+	}
+	
+	private HashSet<Long> breakConcepts(String metadataVector) {
+		HashSet<Long> concepts= new HashSet<Long>();
+		
+		StringBuilder builder= new StringBuilder();
+		
+		for (int i = 0; i < metadataVector.length(); i++) {
+			char at= metadataVector.charAt(i);
+			if( this.metaDataSeparators.contains(at) ){
+				if(builder.length()>0){
+					try{
+					Long concept=Long.parseLong(new String(builder.toString()));
+					
+					if(!allConcepts.containsKey(concept))
+						allConcepts.put(concept,concept);
+					
+					concepts.add(allConcepts.get(concept));
+					}catch(NumberFormatException e){};
+				}
+					builder= new StringBuilder();
+				
+			}
+			else{
+				builder.append(at);
+			}
+			
+		}
+		if(builder.length()>0){
+			try{
+				Long concept=Long.parseLong(new String(builder.toString()));
+				if(!allConcepts.containsKey(concept))
+					allConcepts.put(concept,concept);
+				
+				concepts.add(allConcepts.get(concept));
+				}catch(NumberFormatException e){};
+		}
+		
+		
+		
+		
+		return concepts;
 	}
 	
 	

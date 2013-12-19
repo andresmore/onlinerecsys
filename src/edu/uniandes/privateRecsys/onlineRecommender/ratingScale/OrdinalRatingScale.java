@@ -48,8 +48,11 @@ public class OrdinalRatingScale implements RatingScale {
 
 	@Override
 	public String getRatingAlias(String rating) {
-		if(translations.containsKey(rating))
-			return translations.get(rating);
+		
+		String alias=translations.get(rating);
+		if(alias!=null)
+			return alias;
+		
 		return rating;
 	}
 

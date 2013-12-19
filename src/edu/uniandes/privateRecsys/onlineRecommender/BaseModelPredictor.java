@@ -158,7 +158,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	}
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		// TODO Auto-generated method stub
 		return null;
 	}

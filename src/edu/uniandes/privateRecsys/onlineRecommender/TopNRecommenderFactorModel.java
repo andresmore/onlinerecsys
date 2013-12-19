@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class TopNRecommenderFactorModel implements TopNRecommender {
 		
 		
 		for (Long itemId : ids) {
-			UserTrainEvent event= new UserTrainEvent(userID, itemId, "", 1, "");
+			UserTrainEvent event= new UserTrainEvent(userID, itemId, "", 1, new HashSet<Long>());
 			Prediction p=predictor.calculatePrediction(event, 10);
 			predictions.add(p);
 			if(predictions.size()>size){

@@ -58,7 +58,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 					gamma, rating, itemVector, oldUserPrivate, ratingScale);
 			HashMap<String, BetaDistribution> biasVectorUpdate = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
 			
-			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event,gamma, metaInfo);
+			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event,gamma, metaInfo,oldUserPrivate.getNumTrains()+1);
 		
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
 					biasVectorUpdate,newHyperParams,metadataInfo);

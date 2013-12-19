@@ -153,7 +153,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles) {
+			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
 		return null;
 	}

@@ -10,7 +10,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public class PredictionEvaluationRunnable implements Runnable {
 
 	private UserTrainEvent event;
-	private FactorUserItemRepresentation userItemRepresentation;
+	
 	
 	private int minTrains;
 	private RMSE_Evaluator rmse_Evaluator;
@@ -29,10 +29,7 @@ public class PredictionEvaluationRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		long itemId = event.getItemId();
-		long userId = event.getUserId();
-		String rating = event.getRating();
-		long time = event.getTime();
+		
 		
 		long initialTime=System.nanoTime();
 		
