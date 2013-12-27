@@ -35,6 +35,8 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
+		
+		if(itemProfile!=null){
 		Vector itemVector = itemProfile.getVector();
 		
 		
@@ -81,7 +83,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		
 		
-		
+		}
 	}
 	
 	public double calculatePrediction(Vector itemVector,UserProfile oldUserProfile, String[] ratingScale ){

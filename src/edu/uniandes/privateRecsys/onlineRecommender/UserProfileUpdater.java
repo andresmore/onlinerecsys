@@ -39,7 +39,10 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		
 		
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
-		Vector itemVector = itemProfile.getVector();
+		Vector itemVector =null;
+		if(itemProfile!=null)
+			itemVector = itemProfile.getVector();
+		
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> biasVector=oldUserPrivate.getUserBias();
 		Vector hyperParameterVector= oldUserPrivate.getHyperParameters();

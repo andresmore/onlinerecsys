@@ -156,11 +156,31 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	public String toString(){
 		return "BaseModelPredictor";
 	}
+	
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
 			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
-		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public boolean hasHyperParameters() {
+		
+		return false;
+	}
+	@Override
+	public boolean hasProbabilityPrediction() {
+		
+		return true;
+	}
+	@Override
+	public boolean hasMetadataPredictor() {
+		
+		return false;
+	}
+	@Override
+	public boolean hasBiasPredictor() {
+		
+		return false;
 	}
 	
 	

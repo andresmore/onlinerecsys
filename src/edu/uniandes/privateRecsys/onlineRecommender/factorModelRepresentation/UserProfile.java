@@ -65,10 +65,15 @@ public class UserProfile {
 		prof.setHyperParams(userHyperParams);
 		prof.numTrains=numTrains;
 		prof.metadataInfo=new UserMetadataInfo(existingConcepts,sketch);
-		for (int i = 0; i < userVectors.size(); i++) {
-			prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
-			prof.addBias(userBiasVector.get(i), ratingScale.getScale()[i]);
-			prof.addMetadataVector(userMetadataVectors.get(i),ratingScale.getScale()[i]);
+		for (int i = 0; i < ratingScale.getScale().length; i++) {
+			if(userVectors!=null&&!userVectors.isEmpty())
+				prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
+			
+			if(userBiasVector!=null&&!userBiasVector.isEmpty())
+				prof.addBias(userBiasVector.get(i), ratingScale.getScale()[i]);
+			
+			if(userMetadataVectors!=null&&!userMetadataVectors.isEmpty())
+				prof.addMetadataVector(userMetadataVectors.get(i),ratingScale.getScale()[i]);
 		}
 		
 		return prof;
@@ -105,7 +110,10 @@ public class UserProfile {
 
 	public Vector getProfileForScale(String key) {
 		
-		return userProfiles.get(key);
+		if(userProfiles!=null)
+			return userProfiles.get(key);
+		
+		return null;
 	}
 	
 	public HashMap<String, BetaDistribution> getUserBias(){

@@ -45,17 +45,19 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 	 */
 	public static void main(String[] args) {
 		try {
-			//new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 10).startRecommendations();
 			
 			LinkedList<String> results= new LinkedList<>();
-			String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
+			String trainSet=new String("data/ml-10M100K/rb.train.sorted");
+			//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
 			//String trainSet="data/netflix/rb.train.sorted";
-			String testSet=new String("data/ml-10M100K/rb.test.meta.test");
+			String testSet=new String("data/ml-10M100K/rb.test.test");
+			//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
 			//String testSet="data/netflix/rb.test.test";
-			String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
+			String testCV=new String("data/ml-10M100K/rb.test.cv");
+			//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
-			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
+			
 			 HashMap<String,String> translations=new HashMap<String,String>();
 			 translations.put(new String("0.5"), new String("1"));
 			 translations.put(new String("1.5"), new String("2"));
@@ -65,16 +67,19 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			//AverageDataModel model= new AverageDataModel(new File(trainSet));
-			double delta=0.1;
+			double delta=0.15;
 			
 			
 			//LearningRateStrategy tsCreator=LearningRateStrategy.createWithConstantRate(delta);
 			LearningRateStrategy tsCreator=LearningRateStrategy.createDecreasingRate(1e-6, 0.1);
-			int dimensions=5;
+			int dimensions=15;
 			int[] limitSizes={5,10,50,100,150};
-			for (int i = 0; i < limitSizes.length; i++) {
-				UserModelTrainerPredictor trainerPredictor= new MetadataPredictor(limitSizes[i]);
-				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor.getHyperParametersSize());
+			for (int i = 0; i < /*limitSizes.length*/1; i++) {
+				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
+				UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				//UserModelTrainerPredictor trainerPredictor= new MetadataPredictor(limitSizes[i]);
+				FactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(scale, dimensions, false,trainerPredictor);
 				//FactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(new AverageDataModel(new File(data.getTrainSet())), scale, dimensions, trainerPredictor.getHyperParametersSize());
 				trainerPredictor.setModelRepresentation(denseModel);
 				OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
@@ -87,9 +92,7 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				ErrorReport result=rest.startExperiment(1);
 				results.add(limitSizes[i]+" "+result.toString());
 			}
-				//UserModelTrainerPredictor trainerPredictor= new BayesAveragePredictor();
-				//UserModelTrainerPredictor trainerPredictor= new BlendedModelPredictor();
-				//UserModelTrainerPredictor trainerPredictor= new BaseModelPredictor();
+				
 				
 			
 			for (String string : results) {

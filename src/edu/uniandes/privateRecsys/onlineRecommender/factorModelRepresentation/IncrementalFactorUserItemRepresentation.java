@@ -1,7 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,7 +14,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
-import edu.uniandes.privateRecsys.onlineRecommender.metadata.ResetableCountMinSketch;
+import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
@@ -44,62 +42,118 @@ public class IncrementalFactorUserItemRepresentation implements
 	private AtomicInteger numTrainsItems= new AtomicInteger();
 	private boolean hasPrivateInfo;
 	private HashSet<Long> restrictedUserIds;
-	private int hyperParamDimension;
+	private UserModelTrainerPredictor modelTrainerPredictor;
 
 	public HashSet<Long> getRestrictedUserIds() {
 		return restrictedUserIds;
 	}
 
 	@SuppressWarnings("unchecked")
-	public IncrementalFactorUserItemRepresentation(RatingScale scale, int fDimensions, boolean hasPrivateStrategy, int hyperParameterDimension){
+	public IncrementalFactorUserItemRepresentation(RatingScale scale, int fDimensions, boolean hasPrivateStrategy, UserModelTrainerPredictor trainerPredictor){
 		this.ratingScale=scale;
 		this.fDimensions=fDimensions;
-		this.hyperParamDimension=hyperParameterDimension;
-		this.itemFactors= new ConcurrentHashMap<>();
+		this.modelTrainerPredictor=trainerPredictor;
 		this.hasPrivateInfo=hasPrivateStrategy;
-		this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
-		this.privateUserMetadataFactors= new ConcurrentHashMap[scale.getRatingSize()];
-		this.privateUserConcepts= new ConcurrentHashMap<>();
-		this.privateUserSketch= new ConcurrentHashMap<Long, SlidingWindowCountMinSketch>();
 		
-		this.privateUserBias= new ConcurrentHashMap<>();
-		this.privateHyperParams= new ConcurrentHashMap<>();
-	
-		
-		for (int i = 0; i < privateUserFactors.length; i++) {
-			privateUserFactors[i]= new ConcurrentHashMap<>();
-			privateUserMetadataFactors[i]= new ConcurrentHashMap<>();
-		}
-		
-		if(this.hasPrivateInfo){
-			this.publicUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
-			for (int i = 0; i < publicUserFactors.length; i++) {
-				publicUserFactors[i]= new ConcurrentHashMap<>();
+		if(this.modelTrainerPredictor.hasProbabilityPrediction()){
+			this.itemFactors= new ConcurrentHashMap<>();
+			this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+			for (int i = 0; i < privateUserFactors.length; i++) {
+				privateUserFactors[i]= new ConcurrentHashMap<>();
 			}
-		}	
-		else{
-			this.publicUserFactors= privateUserFactors;
+			if(this.hasPrivateInfo){
+				this.publicUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+				for (int i = 0; i < publicUserFactors.length; i++) {
+					publicUserFactors[i]= new ConcurrentHashMap<>();
+				}
+			}	
+			else{
+				this.publicUserFactors= privateUserFactors;
+			}
+			
 		}
+		
+		if(this.modelTrainerPredictor.hasMetadataPredictor()){
+			this.privateUserMetadataFactors= new ConcurrentHashMap[scale.getRatingSize()];
+			this.privateUserConcepts= new ConcurrentHashMap<>();
+			this.privateUserSketch= new ConcurrentHashMap<Long, SlidingWindowCountMinSketch>();
+			for (int i = 0; i < privateUserMetadataFactors.length; i++) {
+				privateUserMetadataFactors[i]= new ConcurrentHashMap<>();
+			}
+		}
+		if(this.modelTrainerPredictor.hasBiasPredictor()){
+			this.privateUserBias= new ConcurrentHashMap<>();
+		}
+		
+		if(trainerPredictor.hasHyperParameters()){
+			this.privateHyperParams= new ConcurrentHashMap<>();
+		}
+		
+		
+		
 	}
 	
 	@Override
 	public UserProfile getPrivateUserProfile(long userId) throws TasteException {
 		if(isAllowed(userId)){
-		if(!privateUserFactors[0].containsKey(userId))
-			insertUser(userId);
-		
-		LinkedList<Vector> userVectors= new LinkedList<>();
-		LinkedList<Vector> metadataVectors= new LinkedList<>();
-		for (int i = 0; i < this.privateUserFactors.length; i++) {
-			userVectors.add(this.privateUserFactors[i].get(userId));
-			metadataVectors.add(this.privateUserMetadataFactors[i].get(userId));
-		}
-		
-		return UserProfile.buildDenseProfile(userVectors, ratingScale, this.privateUserBias.get(userId),this.privateHyperParams.get(userId), metadataVectors, this.privateUserConcepts.get(userId),this.privateUserSketch.get(userId), this.numTrainsUser.get(userId).get());
+			
+			
+			if (!checkIfUserExists(userId))
+				insertUser(userId);
+
+			LinkedList<Vector> userVectors = new LinkedList<>();
+			LinkedList<Vector> metadataVectors = new LinkedList<>();
+			for (int i = 0; i < this.ratingScale.getRatingSize(); i++) {
+				if (modelTrainerPredictor.hasProbabilityPrediction())
+					userVectors.add(this.privateUserFactors[i].get(userId));
+				if (modelTrainerPredictor.hasMetadataPredictor())
+					metadataVectors.add(this.privateUserMetadataFactors[i]
+							.get(userId));
+			}
+			
+			
+			LinkedList<BetaDistribution> userBiasVector = new LinkedList<>();
+			
+			if(this.modelTrainerPredictor.hasBiasPredictor())
+					userBiasVector=this.privateUserBias.get(userId);
+			
+			
+			Vector userHyperParams = new DenseVector(0);
+			if(this.modelTrainerPredictor.hasHyperParameters())
+				userHyperParams=privateHyperParams.get(userId);
+			
+			
+			LinkedList<Long> existingConcepts = null;
+			SlidingWindowCountMinSketch sketch = null;
+			if(this.modelTrainerPredictor.hasMetadataPredictor()){
+				existingConcepts = this.privateUserConcepts.get(userId);
+				sketch = this.privateUserSketch.get(userId);
+			}
+			
+			return UserProfile.buildDenseProfile(userVectors, ratingScale,
+					userBiasVector, userHyperParams, metadataVectors,
+					existingConcepts,
+					sketch,
+					this.numTrainsUser.get(userId).get());
+
 		}
 		return null;
 	}
 	
+	private boolean checkIfUserExists(long userId) {
+		if(this.modelTrainerPredictor.hasProbabilityPrediction()&&!privateUserFactors[0].containsKey(userId))
+			return false;
+		if(this.modelTrainerPredictor.hasBiasPredictor()&&!privateUserBias.containsKey(userId))
+			return false;
+		if(this.modelTrainerPredictor.hasMetadataPredictor()&&!privateUserSketch.containsKey(userId))
+			return false;
+		if(this.modelTrainerPredictor.hasHyperParameters()&&!privateHyperParams.containsKey(userId))
+			return false;
+		
+		
+		return true;
+	}
+
 	private void insertUser(long userId) {
 		
 		String[] scale= this.ratingScale.getScale();
@@ -108,32 +162,51 @@ public class IncrementalFactorUserItemRepresentation implements
 		
 		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
 		
-		for (int i = 0; i < privateUserFactors.length; i++) {
+		for (int i = 0; i < scale.length; i++) {
 			
-			Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
-			userProfile.put(scale[i],vec);
+			if(this.modelTrainerPredictor.hasProbabilityPrediction()){
+				Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
+				userProfile.put(scale[i],vec);
+			}
 			
-			userPriors.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1,1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
+			if(this.modelTrainerPredictor.hasBiasPredictor())
+				userPriors.add(new BetaDistribution(PrivateRandomUtils.getCurrentRandomGenerator(),1,1,BetaDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY));
 		}
-		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
 		
-		this.privateUserBias.put(userId, userPriors);
-		if(hyperParamDimension>0){
-			Vector userHyperParams= new DenseVector(hyperParamDimension);
+		if(this.modelTrainerPredictor.hasProbabilityPrediction()){
+			userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, scale, this.fDimensions);
+			
+		}
+		
+		if(this.modelTrainerPredictor.hasBiasPredictor())
+			this.privateUserBias.put(userId, userPriors);
+		
+		if(this.modelTrainerPredictor.hasHyperParameters()){
+			Vector userHyperParams= new DenseVector(modelTrainerPredictor.getHyperParametersSize());
 			this.privateHyperParams.put(userId, userHyperParams);
 		}
 		
-		this.privateUserConcepts.put(userId, new LinkedList<Long>());
-		
-		
-		this.privateUserSketch.put(userId, new SlidingWindowCountMinSketch(UserProfile.SKETCH_DEPTH, UserProfile.SKETCH_WIDTH,UserProfile.SEED ,UserProfile.NUMBER_OF_SEGMENTS,UserProfile.WINDOW_LENGHT, UserProfile.HASH_A) );
-		
-		for (int i = 0; i < privateUserFactors.length; i++) {
-			privateUserFactors[i].put(userId, userProfile.get(scale[i]));
-			Vector privateMetadataVector=new DenseVector(0);
-			privateUserMetadataFactors[i].put(userId, privateMetadataVector);
-			if(this.hasPrivateInfo){
-				publicUserFactors[i].put(userId, userProfile.get(scale[i]));
+		if (this.modelTrainerPredictor.hasMetadataPredictor()) {
+			this.privateUserConcepts.put(userId, new LinkedList<Long>());
+
+			this.privateUserSketch.put(userId, new SlidingWindowCountMinSketch(
+					UserProfile.SKETCH_DEPTH, UserProfile.SKETCH_WIDTH,
+					UserProfile.SEED, UserProfile.NUMBER_OF_SEGMENTS,
+					UserProfile.WINDOW_LENGHT, UserProfile.HASH_A));
+		}
+
+		for (int i = 0; i < scale.length; i++) {
+			if (this.modelTrainerPredictor.hasProbabilityPrediction()) {
+				privateUserFactors[i].put(userId, userProfile.get(scale[i]));
+
+				if (this.hasPrivateInfo) {
+					publicUserFactors[i].put(userId, userProfile.get(scale[i]));
+				}
+			}
+			if (this.modelTrainerPredictor.hasMetadataPredictor()) {
+				Vector privateMetadataVector = new DenseVector(0);
+				privateUserMetadataFactors[i]
+						.put(userId, privateMetadataVector);
 			}
 		}
 		
@@ -169,6 +242,9 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public ItemProfile getPrivateItemProfile(long itemId) throws TasteException {
+		if(!this.modelTrainerPredictor.hasProbabilityPrediction())
+			return null;
+					
 		if(!this.itemFactors.containsKey(itemId))
 			insertItem(itemId);
 		return ItemProfile.buildDenseProfile(this.itemFactors.get(itemId));
@@ -176,13 +252,13 @@ public class IncrementalFactorUserItemRepresentation implements
 		
 	}
 
-	private void insertItem(long itemId) {
+	private Vector insertItem(long itemId) {
 		
 		
 		Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 		vec=VectorProjector.projectVectorIntoSimplex(vec);
 		
-		itemFactors.put(itemId, vec);
+		return itemFactors.put(itemId, vec);
 	}
 
 	@Override
@@ -218,20 +294,21 @@ public class IncrementalFactorUserItemRepresentation implements
 		
 		if(bias!=null)
 			userPriors=new LinkedList<BetaDistribution>();
-		for (int i = 0; i < privateUserFactors.length; i++) {
-			privateUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
+		for (int i = 0; i < scale.length; i++) {
+			if(this.modelTrainerPredictor.hasProbabilityPrediction())
+				privateUserFactors[i].put(userId, trainedProfiles.get(scale[i]));
 			
 			if(bias!=null)
 				userPriors.add(bias.get(scale[i]));
 		}
-		if(bias!=null ){
+		if(bias!=null &&modelTrainerPredictor.hasBiasPredictor()){
 			privateUserBias.put(userId, userPriors);
 			
 		}	
-		if(hyperParams!=null){
+		if(hyperParams!=null&& modelTrainerPredictor.hasHyperParameters()){
 			privateHyperParams.put(userId, hyperParams);
 		}
-		if(info!=null){
+		if(info!=null && modelTrainerPredictor.hasMetadataPredictor()){
 			privateUserConcepts.put(userId,info.getIncludedConcepts());
 			privateUserSketch.put(userId, info.getUserSketch());
 			for (int i = 0; i < scale.length; i++) {

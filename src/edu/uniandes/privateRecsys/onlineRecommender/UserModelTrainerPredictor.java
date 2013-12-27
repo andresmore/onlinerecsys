@@ -33,6 +33,14 @@ public interface UserModelTrainerPredictor {
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains);
 	
 	public int getHyperParametersSize();
+
+	public boolean hasHyperParameters();
+
+	public boolean hasProbabilityPrediction();
+
+	public boolean hasMetadataPredictor();
+
+	public boolean hasBiasPredictor();
 	
 	
 	

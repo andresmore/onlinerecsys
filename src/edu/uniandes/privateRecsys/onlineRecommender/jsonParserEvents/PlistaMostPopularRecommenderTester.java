@@ -154,7 +154,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		try {
 			PlistaMostPopularRecommenderTester tester= new PlistaMostPopularRecommenderTester(dataset, 10, LearningRateStrategy.createWithConstantRate(0.2),true);
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor.getHyperParametersSize());
+			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor);
 			modelTrainerPredictor.setModelRepresentation(representation);
 			
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);

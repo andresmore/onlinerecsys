@@ -262,6 +262,27 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return "MetadataPredictor";
 	}
 
+	@Override
+	public boolean hasHyperParameters() {
+		
+		return false;
+	}
+
+	@Override
+	public boolean hasProbabilityPrediction() {
+		return false;
+	}
+
+	@Override
+	public boolean hasMetadataPredictor() {
+		return true;
+	}
+
+	@Override
+	public boolean hasBiasPredictor() {
+		return false;
+	}
+
 	
 
 	
