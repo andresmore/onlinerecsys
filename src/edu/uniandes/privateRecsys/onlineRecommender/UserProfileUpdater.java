@@ -36,12 +36,13 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		long userId=event.getUserId();
 		String rating=event.getRating();
 		
-		
+		if(predictor.saveItemMetadata())
+			userItemRep.saveItemMetadata(itemId,event.getMetadata());
 		
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		Vector itemVector =null;
 		if(itemProfile!=null)
-			itemVector = itemProfile.getVector();
+			itemVector = itemProfile.getProbabilityVector();
 		
 		UserProfile oldUserPrivate=userItemRep.getPrivateUserProfile(userId);
 		HashMap<String, BetaDistribution> biasVector=oldUserPrivate.getUserBias();
@@ -53,20 +54,24 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 			
 			
 			
+			
+			
 
 			String[] ratingScale = userItemRep.getRatingScale().getScale();
 			
 			Vector newHyperParams=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
+			
+			
 			HashMap<String, Vector> trainedProfiles = predictor.calculateProbabilityUpdate(
 					gamma, rating, itemVector, oldUserPrivate, ratingScale);
 			HashMap<String, BetaDistribution> biasVectorUpdate = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
 			
 			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event,gamma, metaInfo,oldUserPrivate.getNumTrains()+1);
-		
+			
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
 					biasVectorUpdate,newHyperParams,metadataInfo);
 		
-			
+			userItemRep.addUserEvent(userId,itemId,rating);
 			
 		}
 		return oldUserPrivate;
@@ -74,23 +79,6 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 		
 		
 		
-	}
-	
-	
-	public double calculatePrediction(Vector itemVector,HashMap<String, Vector> trainedProfiles, String[] ratingScale){
-		double prediction=0;
-	
-		
-		
-		for (int i = 0; i < ratingScale.length; i++) {
-			Vector userVector = trainedProfiles.get(ratingScale[i]);
-			double dot = userVector.dot(itemVector);
-		
-			prediction += dot * Double.parseDouble(ratingScale[i]);
-			
-		}
-		
-		return prediction;
 	}
 	
 	@Override

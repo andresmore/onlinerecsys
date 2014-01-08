@@ -33,8 +33,10 @@ public class AveragePredictorTester implements Observer {
 
 	public static void main(String[] args) {
 		
-		String trainSet="data/netflix/rb.train.sorted";
-		String testSet="data/netflix/rb.test.test";
+		//String trainSet="data/netflix/rb.train.sorted";/PrivacyRecommenderSystem/data/ml-10M100K
+		String trainSet="data/ml-10M100K/rb.train.sorted";
+		//String testSet="data/netflix/rb.test.test";
+		String testSet="data/ml-10M100K/rb.test.test";
 		
 		AveragePredictorTester tester= new AveragePredictorTester(trainSet, testSet);
 		try {

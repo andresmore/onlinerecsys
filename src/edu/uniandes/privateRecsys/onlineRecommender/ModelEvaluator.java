@@ -46,10 +46,10 @@ public class ModelEvaluator {
 			}
 			
 			
-			if(rmseEval.getNumEvals()!=rmseEval.getNumSubmitedTasks()){
+			if((rmseEval.getNumEvals()+rmseEval.getRandEvals())!=rmseEval.getNumSubmitedTasks()){
 				throw new TasteException(
 						"Evaluation failed -  numEvaluated not as  numSubmitedTasks: "
-								+ rmseEval.getNumEvals()+"!="+rmseEval.getNumSubmitedTasks());
+								+ (rmseEval.getNumEvals()+rmseEval.getRandEvals())+"!="+rmseEval.getNumSubmitedTasks());
 			}
 		} catch (InterruptedException e) {
 			throw new TasteException(

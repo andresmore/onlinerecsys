@@ -180,4 +180,16 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return true;
 	}
 
+	@Override
+	public boolean hasUserHistory() {
+		
+		return false;
+	}
+
+	@Override
+	public boolean saveItemMetadata() {
+		
+		return false;
+	}
+
 }

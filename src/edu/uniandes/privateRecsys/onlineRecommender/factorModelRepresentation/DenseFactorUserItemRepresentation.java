@@ -124,7 +124,7 @@ public class DenseFactorUserItemRepresentation implements
 			privateBias.add(this.privateUserBias[userPos][i]);
 		
 		}
-		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos), null, null, null, this.numTrainsUser.get(userId).get());
+		UserProfile profile= UserProfile.buildDenseProfile(privateVectors,ratingScale, privateBias, this.privateUserHyperParams.viewRow(userPos), null, null, null, null,this.numTrainsUser.get(userId).get());
 		return profile;
 	}
 
@@ -146,7 +146,7 @@ public class DenseFactorUserItemRepresentation implements
 		
 		}
 		Vector emptyHyperParms= null;
-		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms,null, null, null, 0);
+		UserProfile profile= UserProfile.buildDenseProfile(publicVectors,ratingScale,privateBias,emptyHyperParms,null, null, null,null, 0);
 		return profile;
 	}
 	
@@ -157,7 +157,7 @@ public class DenseFactorUserItemRepresentation implements
 		if(itemPos==-1)
 			throw new TasteException("Item "+itemId+" not found");
 		
-		ItemProfile profile=ItemProfile.buildDenseProfile(itemFactors.viewRow(itemPos));
+		ItemProfile profile=ItemProfile.buildDenseProfile(itemFactors.viewRow(itemPos),null);
 		return profile;
 	}
 	
@@ -307,7 +307,7 @@ public class DenseFactorUserItemRepresentation implements
 			
 			double sumprob = 0;
 			if (item != null && user != null) {
-				Vector itemVector = item.getVector();
+				Vector itemVector = item.getProbabilityVector();
 				if(numTrainsItem<minTrains){
 					//Equiprobable vector
 						itemVector=itemVector.assign(1);
@@ -382,6 +382,18 @@ public class DenseFactorUserItemRepresentation implements
 	public double getNumberTrainsItems() {
 	
 		return this.numTrainsItems.get();
+	}
+
+	@Override
+	public void addUserEvent(long userId, long itemId, String rating) {
+		
+		
+	}
+
+	@Override
+	public void saveItemMetadata(long itemId, String metadata) {
+	
+		
 	}
 
 

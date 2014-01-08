@@ -1,6 +1,8 @@
 package edu.uniandes.privateRecsys.onlineRecommender.vo;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,14 +65,14 @@ public class ClickImpressionEvent implements FileEvent {
 		// TODO Auto-generated method stub
 		
 		Set<String> keys=keywords.keySet();
-		HashSet<Long> concepts= new HashSet<>();
+		LinkedList<Long> concepts= new LinkedList<Long>();
 		for (String string : keys) {
 			try{
 				concepts.add(Long.parseLong(string));
 			}catch(NumberFormatException e){};
 		}
-		 
-		return new UserTrainEvent(this.userId, this.itemId, type.equals(ITEM_CLICKED_EVENT)?"2":"1", timeStamp,concepts);
+		Collections.sort(concepts); 
+		return new UserTrainEvent(this.userId, this.itemId, type.equals(ITEM_CLICKED_EVENT)?"2":"1", timeStamp,concepts.toString());
 	}
 
 	public String getLine() {

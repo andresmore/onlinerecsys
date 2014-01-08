@@ -63,7 +63,7 @@ public class NeighborExperiment {
 			modelTrainerPredictor.setModelRepresentation(representation);
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
-			IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+			IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 			tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 			tester.setModelPredictor(modelTrainerPredictor);
 			//tester.setEventsReport(100000);

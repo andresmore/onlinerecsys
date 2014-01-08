@@ -95,7 +95,7 @@ DenseFactorUserItemRepresentation {
 				
 				Vector itemVector = null;
 				if(numTrainsItem>=minTrains){
-					itemVector =item.getVector();
+					itemVector =item.getProbabilityVector();
 				}
 				else{
 					itemVector=buildVectorFromSpectralData(itemId,minTrains);
@@ -160,7 +160,7 @@ DenseFactorUserItemRepresentation {
 		Vector ret=null;
 		for (SimilarItem item : topItems) {
 			double multiplier=(double)item.getSimilarity()/(double)totalSimilarity;
-			Vector itemVector=this.getPrivateItemProfile(item.getItemID()).getVector();
+			Vector itemVector=this.getPrivateItemProfile(item.getItemID()).getProbabilityVector();
 			Vector multiplied=itemVector.times(multiplier);
 			if(ret==null)
 				ret=multiplied;

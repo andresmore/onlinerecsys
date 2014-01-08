@@ -1,14 +1,13 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
-
-import org.apache.mahout.common.iterator.FileLineIterator;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ReportErrorEvent;
@@ -20,13 +19,12 @@ public class FileEventCreator extends Observable{
 
 	
 	
-	
+	private static int defaultCharBufferSize = 8192*3;
 	private static final int MAX_FIELDS=5;
 	private HashSet<String> separators= new HashSet<String>();
 	
-	//Horrible hack to save memory
-	private HashMap<Long,Long> allConcepts= new HashMap<Long,Long>();
-	private HashSet<Character> metaDataSeparators;
+
+	
 	private int numEventReport;
 	private int limitEvents;
 	private File file;
@@ -37,11 +35,7 @@ public class FileEventCreator extends Observable{
 		this.separators.add(":");
 		this.separators.add(",");
 		
-		this.metaDataSeparators= new HashSet<>(4);
-		metaDataSeparators.add('{');
-		metaDataSeparators.add('}');
-		metaDataSeparators.add(',');
-		metaDataSeparators.add(':');
+		
 				
 		this.numEventReport=numEventReport;
 		this.limitEvents=limitEvents;
@@ -50,27 +44,31 @@ public class FileEventCreator extends Observable{
 	
 	public int startEvents() throws PrivateRecsysException, IOException {
 
-		FileLineIterator iterator = null;
+		BufferedReader iterator = null;
 		int numlines = 0;
 		try {
-			iterator = new FileLineIterator(file);
+			iterator = new BufferedReader(new FileReader(file),defaultCharBufferSize);
 
 			if (this.countObservers() == 0) {
 
 				throw new PrivateRecsysException(
 						"No observers registered for experiment, cancelling ...");
 			}
+			String line =null;
+			while ((line=iterator.readLine())!=null) {
 
-			while (iterator.hasNext()) {
-
-				String line = new String(iterator.next());
+				 
 				UserTrainEvent event = processLine(line);
 				setChanged();
 				notifyObservers(event);
 				numlines++;
 				if (limitEvents == numlines) {
-
-					return limitEvents;
+					try{
+						iterator.close();
+						return limitEvents;
+					}catch(Exception e){
+						
+					}
 				}
 				if ((numlines % this.numEventReport) == 0
 						&& this.numEventReport != -1) {
@@ -80,15 +78,17 @@ public class FileEventCreator extends Observable{
 				}
 
 				
-				 /* if(numlines%100000==0)
-				  System.out.println(numlines+" events created");
-				 */
+			/*	 if(numlines%100000==0)
+				  System.out.println(numlines+" events created");*/
+				 
 			}
 		} catch (IOException e) {
 
 		} finally {
 			if (iterator != null)
-				iterator.close();
+				try{
+					iterator.close();
+				}catch (Exception e2) {}
 		}
 
 		// System.out.println("Number of events created is "+numlines);
@@ -106,7 +106,7 @@ public class FileEventCreator extends Observable{
 			 boolean hasTimestamp = tokens.hasNext();
 			 String timestampString = hasTimestamp ? new String(tokens.next()) : null;
 			 boolean hasMetadata = tokens.hasNext();
-			 HashSet<Long> metadata=hasMetadata? breakConcepts(new String(tokens.next())):null;
+			 String metadata=hasMetadata? new String(tokens.next()):null;
 			 
 		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString),metadata);
 	}
@@ -135,47 +135,7 @@ public class FileEventCreator extends Observable{
 		return list.iterator();
 	}
 	
-	private HashSet<Long> breakConcepts(String metadataVector) {
-		HashSet<Long> concepts= new HashSet<Long>();
-		
-		StringBuilder builder= new StringBuilder();
-		
-		for (int i = 0; i < metadataVector.length(); i++) {
-			char at= metadataVector.charAt(i);
-			if( this.metaDataSeparators.contains(at) ){
-				if(builder.length()>0){
-					try{
-					Long concept=Long.parseLong(new String(builder.toString()));
-					
-					if(!allConcepts.containsKey(concept))
-						allConcepts.put(concept,concept);
-					
-					concepts.add(allConcepts.get(concept));
-					}catch(NumberFormatException e){};
-				}
-					builder= new StringBuilder();
-				
-			}
-			else{
-				builder.append(at);
-			}
-			
-		}
-		if(builder.length()>0){
-			try{
-				Long concept=Long.parseLong(new String(builder.toString()));
-				if(!allConcepts.containsKey(concept))
-					allConcepts.put(concept,concept);
-				
-				concepts.add(allConcepts.get(concept));
-				}catch(NumberFormatException e){};
-		}
-		
-		
-		
-		
-		return concepts;
-	}
+	
 	
 	
 

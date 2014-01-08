@@ -159,7 +159,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 			
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
-			IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+			IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 			tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 			tester.setModelPredictor(modelTrainerPredictor);
 			IRPrecisionError rr=(IRPrecisionError) tester.startExperiment(1);

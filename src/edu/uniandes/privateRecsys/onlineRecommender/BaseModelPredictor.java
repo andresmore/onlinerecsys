@@ -56,7 +56,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 			double prediction=0;
 			
 			if (item != null && user != null) {
-				Vector itemVector = item.getVector();
+				Vector itemVector = item.getProbabilityVector();
 				if(numTrainsItem<minTrains){
 					//Equiprobable vector
 						itemVector=itemVector.assign(1);
@@ -179,6 +179,16 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	}
 	@Override
 	public boolean hasBiasPredictor() {
+		
+		return false;
+	}
+	@Override
+	public boolean hasUserHistory() {
+		
+		return false;
+	}
+	@Override
+	public boolean saveItemMetadata() {
 		
 		return false;
 	}

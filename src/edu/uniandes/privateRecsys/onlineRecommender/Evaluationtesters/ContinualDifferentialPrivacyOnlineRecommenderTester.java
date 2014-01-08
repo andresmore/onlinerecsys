@@ -89,7 +89,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 				modelTrainer.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainer);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(0.69,1000);
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainer);
 				rest.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				rest.setModelPredictor(modelTrainer);
 				rest.setEventsReport(eventsReport);

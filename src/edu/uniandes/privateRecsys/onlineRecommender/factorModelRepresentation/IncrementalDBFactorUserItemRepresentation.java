@@ -82,7 +82,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 				LinkedList<BetaDistribution> bias= new LinkedList<>();
 				Vector emptyHyperParams= new DenseVector();
 				return UserProfile.buildDenseProfile(
-						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, null, null, null, this.numTrainsUser.get(userId).get());
+						this.sqlDAO.getUserFactors(ratingScale,userId), ratingScale,bias,emptyHyperParams, null, null, null,null, this.numTrainsUser.get(userId).get());
 			} catch (SQLException e) {
 				
 				e.printStackTrace();
@@ -128,7 +128,7 @@ public class IncrementalDBFactorUserItemRepresentation implements
 			 
 			
 			
-			return ItemProfile.buildDenseProfile(sqlDAO.getItemFactors(itemId));
+			return ItemProfile.buildDenseProfile(sqlDAO.getItemFactors(itemId),null);
 		} catch (SQLException e) {
 		
 			LOG.log(Level.SEVERE, "SQLException", e);
@@ -298,6 +298,18 @@ public class IncrementalDBFactorUserItemRepresentation implements
 	public double getNumberTrainsItems() {
 		
 		return 0;
+	}
+
+	@Override
+	public void addUserEvent(long userId, long itemId, String rating) {
+		
+		
+	}
+
+	@Override
+	public void saveItemMetadata(long itemId, String metadata) {
+
+		
 	}
 	
 

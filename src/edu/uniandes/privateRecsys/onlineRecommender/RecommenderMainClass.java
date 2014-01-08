@@ -368,7 +368,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
 				
@@ -384,7 +384,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
 			}
@@ -400,7 +400,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
 			
@@ -416,7 +416,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
 			

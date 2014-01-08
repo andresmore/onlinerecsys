@@ -200,7 +200,7 @@ public GridSearchParameterLearningRate(RSDataset data) throws IOException{
 		
 		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();
-		IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+		IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 		rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 		rest.setModelPredictor(modelTrainerPredictor);
 		ErrorReport result=rest.startExperiment(1);

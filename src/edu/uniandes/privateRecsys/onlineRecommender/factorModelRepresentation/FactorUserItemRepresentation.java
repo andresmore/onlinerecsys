@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
@@ -48,6 +49,10 @@ public interface FactorUserItemRepresentation {
 	Set<Long> getUsersId();
 
 	double getNumberTrainsItems();
+
+	void addUserEvent(long userId, long itemId, String rating);
+
+	void saveItemMetadata(long itemId, String linkedList);
 
 	
 

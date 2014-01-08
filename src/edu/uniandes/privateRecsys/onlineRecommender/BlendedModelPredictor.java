@@ -173,5 +173,15 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public boolean hasBiasPredictor() {
 		return true;
 	}
+	@Override
+	public boolean hasUserHistory() {
+		
+		return false;
+	}
+	@Override
+	public boolean saveItemMetadata() {
+		
+		return false;
+	}
 
 }

@@ -180,5 +180,17 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 		return true;
 	}
 
+	@Override
+	public boolean hasUserHistory() {
+	
+		return false;
+	}
+
+	@Override
+	public boolean saveItemMetadata() {
+		
+		return false;
+	}
+
 
 }

@@ -41,6 +41,12 @@ public interface UserModelTrainerPredictor {
 	public boolean hasMetadataPredictor();
 
 	public boolean hasBiasPredictor();
+
+	public boolean hasUserHistory();
+
+	public boolean saveItemMetadata();
+
+	
 	
 	
 	

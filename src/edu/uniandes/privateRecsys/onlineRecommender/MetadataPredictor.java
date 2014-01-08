@@ -53,7 +53,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		HashMap<String,Vector> profiles=trainedMetadataProfiles.getTrainedProfiles();
 		
 		
-		HashSet<Long> metadataConcepts=event.getMetadata();
+		LinkedList<Long> metadataConcepts=ConceptBreaker.breakConcepts(event.getMetadata());
 		Vector itemVector=buildItemVector(profileConcepts,metadataConcepts);
 		
 		double prediction=0;
@@ -103,7 +103,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		HashMap<String,Vector> profiles=trainedMetadataProfiles.getTrainedProfiles();
 		SlidingWindowCountMinSketch sketch=trainedMetadataProfiles.getUserSketch();
 		
-		HashSet<Long> metadataConcepts=event.getMetadata();
+		LinkedList<Long> metadataConcepts=ConceptBreaker.breakConcepts(event.getMetadata());
 		
 		
 		LinkedList<Long> endProfileConcepts=addMetadataConceptsFromDistribution(profileConcepts,metadataConcepts,sketch,numTrains);
@@ -197,7 +197,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return ret;
 	}
 
-	private Vector buildItemVector(LinkedList<Long> profileConcepts, HashSet<Long> metadataConcepts) {
+	private Vector buildItemVector(LinkedList<Long> profileConcepts, LinkedList<Long> metadataConcepts) {
 		
 		Vector denseVector= new DenseVector(profileConcepts.size());
 		for (int i = 0; i < profileConcepts.size(); i++) {
@@ -209,7 +209,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 
 //TODO: LIMIT SIZE OF INCLUDED CONCEPTS
 	private LinkedList<Long>  addMetadataConceptsFromDistribution(
-			LinkedList<Long> profileConcepts, HashSet<Long> metadataConcepts, SlidingWindowCountMinSketch sketch, int numTrains) {
+			LinkedList<Long> profileConcepts, LinkedList<Long> metadataConcepts, SlidingWindowCountMinSketch sketch, int numTrains) {
 		
 		
 		LinkedList<Long> endConcepts= new LinkedList<Long>();
@@ -280,6 +280,18 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 
 	@Override
 	public boolean hasBiasPredictor() {
+		return false;
+	}
+
+	@Override
+	public boolean hasUserHistory() {
+		
+		return false;
+	}
+
+	@Override
+	public boolean saveItemMetadata() {
+		
 		return false;
 	}
 

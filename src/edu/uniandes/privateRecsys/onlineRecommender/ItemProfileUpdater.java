@@ -15,12 +15,13 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	private final static Logger LOG = Logger.getLogger(ItemProfileUpdater.class
 		      .getName());
 	
-	private static final int TRIES=3;
 
-	public ItemProfileUpdater() {
-		
+
+	private UserModelTrainerPredictor predictor;
+
+	public ItemProfileUpdater(UserModelTrainerPredictor predictor){
+		this.predictor=predictor;
 	}
-
 	/* (non-Javadoc)
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater#processEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
@@ -28,16 +29,20 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	public void processEvent(UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep, double gamma, UserProfile oldUserProfile) throws TasteException {
 	
+		
+		
 		long itemId=event.getItemId();
 		
 		String rating=event.getRating();
 		
+		if(predictor.saveItemMetadata())
+			userItemRep.saveItemMetadata(itemId,event.getMetadata());
 		
-		
+		if(predictor.hasProbabilityPrediction()){
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		
-		if(itemProfile!=null){
-		Vector itemVector = itemProfile.getVector();
+		
+		Vector itemVector = itemProfile.getProbabilityVector();
 		
 		
 		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
@@ -75,7 +80,7 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		double stepLoss=Double.parseDouble(rating)-endPrediction;
 		
-				userItemRep.updateItemVector(itemId,projected);
+		userItemRep.updateItemVector(itemId,projected);
 			
 		
 		

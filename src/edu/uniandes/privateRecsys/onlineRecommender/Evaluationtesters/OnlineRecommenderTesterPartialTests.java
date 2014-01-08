@@ -77,7 +77,7 @@ double delta=0.1;
 				
 				UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 				rest.setModelPredictor(modelTrainerPredictor);
 				RMSE_ErrorReport result=(RMSE_ErrorReport) rest.startExperiment(1);

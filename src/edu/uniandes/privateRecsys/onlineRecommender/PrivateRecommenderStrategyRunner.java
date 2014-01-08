@@ -50,6 +50,8 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			boolean ok=true;
 			double gamma=gammaStrategy.getGammaFromK(userItemRep.getNumberTrainsItems());
 			synchronized (userItemRep.blockUser(event.getUserId())) {
+				
+				
 				//trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
 				
 				//double userGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
@@ -74,7 +76,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				userTime=System.nanoTime();
 				try {
 					 
-						user=userAggregator.aggregateEvent(event,userItemRep);
+						user=userAggregator.aggregateEvent(user,event,userItemRep);
 						trainer.updateState(Thread.currentThread().getId(), event,"LOCK-AGGREGATED");
 				} catch (Exception e) {
 					LOG.log(Level.SEVERE,"ERROR",e);

@@ -8,7 +8,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public interface IUserItemAggregator {
 
-	public abstract UserProfile aggregateEvent(UserTrainEvent event,
+	public abstract UserProfile aggregateEvent(UserProfile user, UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException;
 
 }

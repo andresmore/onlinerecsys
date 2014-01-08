@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.util.Pair;
+import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
@@ -33,6 +35,8 @@ public class UserProfile {
 	
 	private HashMap<String, Vector> userProfiles= new HashMap<>();
 	private HashMap<String, BetaDistribution> userBias= new HashMap<String, BetaDistribution>();
+	private LinkedList<Preference> userHistory= new LinkedList<Preference>();
+	
 	private Vector hyperParams;
 	private int numTrains;
 	private UserMetadataInfo metadataInfo;
@@ -59,12 +63,14 @@ public class UserProfile {
 	
 	
 	public static UserProfile buildDenseProfile(
-			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams, LinkedList<Vector> userMetadataVectors,LinkedList<Long> existingConcepts,SlidingWindowCountMinSketch sketch, int numTrains) {
+			LinkedList<Vector> userVectors, RatingScale ratingScale, LinkedList<BetaDistribution> userBiasVector, Vector userHyperParams, LinkedList<Vector> userMetadataVectors,LinkedList<Long> existingConcepts,SlidingWindowCountMinSketch sketch, LinkedList<Preference> userHistory, int numTrains) {
 		UserProfile prof= new UserProfile();
 		
 		prof.setHyperParams(userHyperParams);
 		prof.numTrains=numTrains;
 		prof.metadataInfo=new UserMetadataInfo(existingConcepts,sketch);
+		prof.userHistory=userHistory;
+		
 		for (int i = 0; i < ratingScale.getScale().length; i++) {
 			if(userVectors!=null&&!userVectors.isEmpty())
 				prof.addVector(userVectors.get(i), ratingScale.getScale()[i]);
@@ -135,6 +141,13 @@ public class UserProfile {
 	public UserMetadataInfo getMetadataInfo(){
 		return this.metadataInfo;
 	}
+
+
+	public LinkedList<Preference> getUserHistory() {
+		return userHistory;
+	}
+	
+	
 
 	
 }

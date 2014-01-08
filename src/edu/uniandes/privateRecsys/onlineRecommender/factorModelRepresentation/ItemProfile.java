@@ -1,25 +1,34 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+
 import org.apache.mahout.math.Vector;
 
 public class ItemProfile {
 
-	private Vector vector;
+	private Vector probabilityVector;
+	private LinkedList<Long> metadataVector;
 
-	public ItemProfile(Vector vector) {
-		this.vector=vector;
+	public ItemProfile(Vector vector, LinkedList<Long> metadataVector) {
+		this.probabilityVector=vector;
+		this.metadataVector=metadataVector;
 	}
 
 	public static ItemProfile buildDenseProfile(
-			Vector itemVect) {
+			Vector itemVect, LinkedList<Long> metadataVector) {
 		
 		
-		return new ItemProfile(itemVect);
+		return new ItemProfile(itemVect,metadataVector);
 	}
 
-	public Vector getVector() {
+	public Vector getProbabilityVector() {
 		
-		return vector;
+		return probabilityVector;
+	}
+	
+	public LinkedList<Long> getMetadataVector(){
+		return metadataVector;
 	}
 
 }

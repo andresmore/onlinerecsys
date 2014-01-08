@@ -21,6 +21,7 @@ public class RMSE_Evaluator implements Observer {
 
 	
 	
+	private static final int LIMIT_SIZE_QUEUE = 100000;
 	private RunningAverage rmseAverage= new FullRunningAverage();
 	private RunningAverage maeAverage= new FullRunningAverage();
 	private RunningAverage averagePrediction= new FullRunningAverage();
@@ -63,13 +64,15 @@ public class RMSE_Evaluator implements Observer {
 
 		UserTrainEvent event = (UserTrainEvent) arg;
 		PredictionEvaluationRunnable run= new PredictionEvaluationRunnable(event,this.predictor,this.minTrains,this);
-		while(executor.getQueue().size()>400000){
-			//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
-			try {
-				Thread.sleep(500);
-				
-			} catch (InterruptedException e) {
-				LOG.log(Level.SEVERE, "Interrupted exception", e);
+		if(executor.getQueue().size()>LIMIT_SIZE_QUEUE){
+			while (executor.getQueue().size() > LIMIT_SIZE_QUEUE/3) {
+				try {
+					//System.out.println("wating for RMSE eval "+executor.getQueue().size());
+					Thread.sleep(5000);
+					//System.out.println("waited for RMSE eval "+executor.getQueue().size());
+				} catch (InterruptedException e) {
+					LOG.log(Level.SEVERE, "Interrupted exception", e);
+				}
 			}
 			
 		}
@@ -123,9 +126,10 @@ public class RMSE_Evaluator implements Observer {
 		}
 		if (prediction.isNoPrediction()) {
 			
-			int randIndex = Math.abs(RandomUtils
+			/*int randIndex = Math.abs(RandomUtils
 					.nextInt(this.scale.getScale().length));
 			predictionValue = Double.parseDouble(this.scale.getScale()[randIndex]);
+			*/
 			randEvals.incrementAndGet();
 
 		}
@@ -133,19 +137,21 @@ public class RMSE_Evaluator implements Observer {
 			predictionValue=prediction.getPredictionValue();
 			if(prediction.isHybrid())
 				this.hybridEvals.incrementAndGet();
+			
+			// TODO:Generalize limits
+			if (predictionValue < 1)
+				predictionValue = 1;
+			if (predictionValue > 5)
+				predictionValue = 5;
+
+			averagePrediction.addDatum(predictionValue);
+			float diff = (float) (Double.parseDouble(event.getRating()) - predictionValue);
+			rmseAverage.addDatum(diff * diff);
+			maeAverage.addDatum(Math.abs(diff));
+			numEvals.incrementAndGet();
 		}
 		
-		// TODO:Generalize limits
-		if (predictionValue < 1)
-			predictionValue = 1;
-		if (predictionValue > 5)
-			predictionValue = 5;
-
-		averagePrediction.addDatum(predictionValue);
-		float diff = (float) (Double.parseDouble(event.getRating()) - predictionValue);
-		rmseAverage.addDatum(diff * diff);
-		maeAverage.addDatum(Math.abs(diff));
-		numEvals.incrementAndGet();
+		
 		
 		
 	}

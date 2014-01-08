@@ -13,11 +13,11 @@ public class MetadataMapFileMerger {
 	
 	
 	
-	public void mergeFiles(String movieFileMap, String mapFile, String destFile) throws IOException{
+	public void mergeFiles(String movieListFile, String mapFile, String destFile, boolean removeMoviesNotPresentInList) throws IOException{
 		HashMap<Long, HashSet<String>> movieDatConcepts=new HashMap<Long, HashSet<String>>();
 		BufferedReader bf=null;
 		try {
-			bf= new BufferedReader(new FileReader(movieFileMap));
+			bf= new BufferedReader(new FileReader(movieListFile));
 			String line=null;
 			while((line=bf.readLine())!=null){
 				
@@ -53,13 +53,14 @@ public class MetadataMapFileMerger {
 		System.out.println("MovieDataFile parsed");
 		
 		BufferedReader bf2=null;
-		PrintWriter pr=null;
+		PrintWriter destPr=null;
 		try {
 			bf2= new BufferedReader(new FileReader(mapFile));
-			pr= new PrintWriter(new File(destFile));
+			destPr= new PrintWriter(new File(destFile));
 			String line=null;
 			while((line=bf2.readLine())!=null){
-				pr.println(line);
+				String originalLine= new String(line);
+				
 				line=line.replace("{", "");
 				line=line.replace("}", "");
 				String[] hashMap=line.split(", ");
@@ -72,10 +73,18 @@ public class MetadataMapFileMerger {
 					if(concept.startsWith("id")){
 					
 						String id=concept.split(":")[1];
-						HashSet<String> removed=movieDatConcepts.remove(Long.parseLong(id));
+						long movieIdLong = Long.parseLong(id);
+						if( (removeMoviesNotPresentInList && movieDatConcepts.containsKey(movieIdLong) )|| !removeMoviesNotPresentInList )	
+							destPr.println(originalLine);
+						
+						
+						HashSet<String> removed=movieDatConcepts.remove(movieIdLong);
 						if(removed!=null){
 							System.out.println("Removed from hashmap "+id);
-						}	
+						}
+						
+						
+						
 					}
 					
 				}
@@ -88,7 +97,7 @@ public class MetadataMapFileMerger {
 				HashSet<String> concepts=movieDatConcepts.get(movieId);
 				String conceptRepresentation=concepts.toString().replaceAll("\\[", "{");
 				conceptRepresentation=concepts.toString().replaceAll("\\]", "}");
-				pr.println(conceptRepresentation);
+				destPr.println(conceptRepresentation);
 				System.out.println();
 			}
 			
@@ -101,15 +110,15 @@ public class MetadataMapFileMerger {
 		}finally{
 			if(bf2!=null)
 				bf2.close();
-			if(pr!=null)
-				pr.close();
+			if(destPr!=null)
+				destPr.close();
 		}
 		
 	}
 	
 	public static void main(String[] args) {
 		try {
-			new MetadataMapFileMerger().mergeFiles("data/ml-10M100K/movies.dat", "data/ml-10M100K/metadata/mapFile.data", "data/ml-10M100K/metadata/mapFileUpdated.data");
+			new MetadataMapFileMerger().mergeFiles("data/ml-1m/movies.dat", "data/ml-10M100K/metadata/mapFileUpdated.data", "data/ml-1m/mapFile.data",true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

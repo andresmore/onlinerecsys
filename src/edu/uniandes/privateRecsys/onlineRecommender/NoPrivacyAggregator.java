@@ -21,9 +21,9 @@ public class NoPrivacyAggregator implements IUserItemAggregator {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public UserProfile aggregateEvent(UserTrainEvent event,
+	public UserProfile aggregateEvent(UserProfile oldProfile,UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException {
-		
+		return oldProfile;
 		/*if (userItemRep.hasPrivateStrategy()) {
 			long itemId = event.getItemId();
 			long userId = event.getUserId();
@@ -41,7 +41,7 @@ public class NoPrivacyAggregator implements IUserItemAggregator {
 			userItemRep.updatePublicTrainedProfile(userId, trainedProfiles);
 		}*/
 		
-		return userItemRep.getPrivateUserProfile(event.getUserId());
+		
 
 	}
 

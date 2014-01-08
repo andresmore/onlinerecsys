@@ -37,6 +37,7 @@ public class PredictionEvaluationRunnable implements Runnable {
 			Prediction prediction = predictor.calculatePrediction(event,minTrains);
 			rmse_Evaluator.notifyPrediction(event,prediction);
 			PredictionProfiler.getInstance().reportTimes(initialTime, System.nanoTime());
+			event=null;
 
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error making prediction", e);

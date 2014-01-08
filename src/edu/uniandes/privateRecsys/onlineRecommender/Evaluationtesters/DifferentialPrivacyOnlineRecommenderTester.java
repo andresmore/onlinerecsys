@@ -88,7 +88,7 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 				modelTrainerPredictor.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(0.69);
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater();
+				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				rest.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				rest.setModelPredictor(modelTrainerPredictor);
 				rest.setEventsReport(eventsReport);

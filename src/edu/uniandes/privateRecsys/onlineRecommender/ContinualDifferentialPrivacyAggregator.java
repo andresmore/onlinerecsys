@@ -31,7 +31,7 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public UserProfile aggregateEvent(UserTrainEvent event,
+	public UserProfile aggregateEvent(UserProfile oldProfile,UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
 		long itemId=event.getItemId();

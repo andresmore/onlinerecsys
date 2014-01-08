@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,10 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.util.Pair;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
+import edu.uniandes.privateRecsys.onlineRecommender.ConceptBreaker;
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
@@ -26,14 +32,17 @@ public class IncrementalFactorUserItemRepresentation implements
 	private RatingScale ratingScale;
 	private int fDimensions;
 	
-	private Map<Long, Vector> itemFactors;
-	private Map<Long, Vector>[] privateUserFactors;
-	private Map<Long, Vector>[] privateUserMetadataFactors;
-	private Map<Long, LinkedList<Long> > privateUserConcepts;
-	private Map<Long, SlidingWindowCountMinSketch> privateUserSketch;
-	private Map<Long, LinkedList<BetaDistribution>> privateUserBias;
-	private Map<Long, Vector>[] publicUserFactors;
-	private Map<Long, Vector> privateHyperParams;
+	private ConcurrentHashMap<Long, Vector> itemFactors;
+	private ConcurrentHashMap<Long, LinkedList<Long>> itemMetadata;
+	private ConcurrentHashMap<Long, Vector>[] privateUserFactors;
+	private ConcurrentHashMap<Long, Vector>[] privateUserMetadataFactors;
+	private ConcurrentHashMap<Long, LinkedList<Long> > privateUserConcepts;
+	private ConcurrentHashMap<Long, SlidingWindowCountMinSketch> privateUserSketch;
+	private ConcurrentHashMap<Long, LinkedList<BetaDistribution>> privateUserBias;
+	private ConcurrentHashMap<Long, Vector>[] publicUserFactors;
+	private ConcurrentHashMap<Long, Vector> privateHyperParams;
+	private ConcurrentHashMap<Long, LinkedList<Preference>> privateUserHistory;
+	
 	
 	
 	private ConcurrentHashMap<Long, AtomicInteger> numTrainsUser= new ConcurrentHashMap <>();
@@ -88,7 +97,13 @@ public class IncrementalFactorUserItemRepresentation implements
 		if(trainerPredictor.hasHyperParameters()){
 			this.privateHyperParams= new ConcurrentHashMap<>();
 		}
-		
+		if(trainerPredictor.hasUserHistory())
+		{
+			this.privateUserHistory= new ConcurrentHashMap<>();
+		}
+		if(trainerPredictor.saveItemMetadata()){
+			this.itemMetadata= new ConcurrentHashMap<Long, LinkedList<Long>>();
+		}
 		
 		
 	}
@@ -112,13 +127,13 @@ public class IncrementalFactorUserItemRepresentation implements
 			}
 			
 			
-			LinkedList<BetaDistribution> userBiasVector = new LinkedList<>();
+			LinkedList<BetaDistribution> userBiasVector = null;
 			
 			if(this.modelTrainerPredictor.hasBiasPredictor())
 					userBiasVector=this.privateUserBias.get(userId);
 			
 			
-			Vector userHyperParams = new DenseVector(0);
+			Vector userHyperParams = null;
 			if(this.modelTrainerPredictor.hasHyperParameters())
 				userHyperParams=privateHyperParams.get(userId);
 			
@@ -130,11 +145,17 @@ public class IncrementalFactorUserItemRepresentation implements
 				sketch = this.privateUserSketch.get(userId);
 			}
 			
+			LinkedList<Preference> userHistory= null;
+			if(this.modelTrainerPredictor.hasUserHistory())
+				userHistory=this.privateUserHistory.get(userId);
+			
+			int numTrains=this.numTrainsUser.get(userId)==null? 0:this.numTrainsUser.get(userId).get();
+			
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
 					userBiasVector, userHyperParams, metadataVectors,
 					existingConcepts,
-					sketch,
-					this.numTrainsUser.get(userId).get());
+					sketch,userHistory,
+					numTrains);
 
 		}
 		return null;
@@ -228,7 +249,7 @@ public class IncrementalFactorUserItemRepresentation implements
 			}
 			Vector emptyHyperParams=null;
 			return UserProfile.buildDenseProfile(userVectors, ratingScale,
-					dist,emptyHyperParams,null, null, null, 0);
+					dist,emptyHyperParams,null, null, null,null, 0);
 		}
 		return null;
 	}
@@ -242,12 +263,14 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public ItemProfile getPrivateItemProfile(long itemId) throws TasteException {
-		if(!this.modelTrainerPredictor.hasProbabilityPrediction())
-			return null;
+		
 					
-		if(!this.itemFactors.containsKey(itemId))
+		if(this.modelTrainerPredictor.hasProbabilityPrediction()&&!this.itemFactors.containsKey(itemId))
 			insertItem(itemId);
-		return ItemProfile.buildDenseProfile(this.itemFactors.get(itemId));
+		
+		LinkedList<Long> metadataVector=this.modelTrainerPredictor.saveItemMetadata()?this.itemMetadata.get(itemId):null;
+		Vector probVector = this.modelTrainerPredictor.hasProbabilityPrediction()?this.itemFactors.get(itemId):null;
+		return ItemProfile.buildDenseProfile(probVector,metadataVector);
 		
 		
 	}
@@ -258,7 +281,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
 		vec=VectorProjector.projectVectorIntoSimplex(vec);
 		
-		return itemFactors.put(itemId, vec);
+		return itemFactors.putIfAbsent(itemId, vec);
 	}
 
 	@Override
@@ -446,5 +469,31 @@ public class IncrementalFactorUserItemRepresentation implements
 		
 		return this.numTrainsItems.get();
 	}
+
+	@Override
+	public void addUserEvent(long userId, long itemId, String rating) {
+		if(this.modelTrainerPredictor.saveItemMetadata()){
+			LinkedList<Preference> userHistory=privateUserHistory.get(userId);
+			if(userHistory==null)
+				userHistory= new LinkedList<>();
+			
+			GenericPreference pref= new GenericPreference(userId, itemId, Float.parseFloat(rating));	
+			userHistory.add(pref);
+			
+			this.privateUserHistory.putIfAbsent(userId, userHistory);
+		}
+	}
+
+	@Override
+	public void saveItemMetadata(long itemId, String metadataStr) {
+		if(!this.itemMetadata.containsKey(itemId)){
+			
+			LinkedList<Long>metadata=ConceptBreaker.breakConcepts(metadataStr);
+			Collections.sort(metadata);
+			this.itemMetadata.putIfAbsent(itemId, metadata);
+		}
+	}
+
+	
 
 }

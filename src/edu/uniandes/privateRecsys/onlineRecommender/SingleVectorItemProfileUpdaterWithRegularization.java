@@ -35,7 +35,7 @@ public class SingleVectorItemProfileUpdaterWithRegularization implements IItemPr
 		String rating = event.getRating();
 
 		ItemProfile itemProfile = userItemRep.getPrivateItemProfile(itemId);
-		Vector itemVector = itemProfile.getVector();
+		Vector itemVector = itemProfile.getProbabilityVector();
 
 		double initPrediction = calculatePrediction(itemVector, oldUserProfile,
 				userItemRep.getRatingScale().getScale());

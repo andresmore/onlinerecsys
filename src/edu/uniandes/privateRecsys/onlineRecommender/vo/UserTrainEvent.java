@@ -1,6 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender.vo;
 
-import java.util.HashSet;
 
 
 public class UserTrainEvent implements FileEvent{
@@ -9,13 +8,11 @@ public class UserTrainEvent implements FileEvent{
 	private long itemId;
 	private String rating;
 	private long time;
-	private HashSet<Long> metadata;
+	private String metadata;
 	
 	
 	
-	public UserTrainEvent(long userId, long itemId, String rating, long time, HashSet<Long> metadata) {
-		super();
-		
+	public UserTrainEvent(long userId, long itemId, String rating, long time, String metadata) {		
 		
 		
 		this.userId = userId;
@@ -37,7 +34,7 @@ public class UserTrainEvent implements FileEvent{
 	public long getTime() {
 		return time;
 	}
-	public HashSet<Long> getMetadata(){
+	public String getMetadata(){
 		return metadata;
 	}
 	
