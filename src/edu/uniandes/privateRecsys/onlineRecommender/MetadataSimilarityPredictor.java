@@ -217,5 +217,11 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 	public boolean saveItemMetadata() {
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		
+		return "MetadataSimilarityPredictor";
+	}
 
 }

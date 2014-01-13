@@ -118,7 +118,7 @@ public class MetadataMapFileMerger {
 	
 	public static void main(String[] args) {
 		try {
-			new MetadataMapFileMerger().mergeFiles("data/ml-1m/movies.dat", "data/ml-10M100K/metadata/mapFileUpdated.data", "data/ml-1m/mapFile.data",true);
+			new MetadataMapFileMerger().mergeFiles("data/ml-10M100K/movies.dat", "data/ml-10M100K/metadata/mapFileUpdated.data", "data/ml-10M100K/metadata/mapFileUpdatedFinal.data",true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

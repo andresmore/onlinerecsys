@@ -48,13 +48,13 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			long userTime=0;
 			long userAggregation=0;
 			boolean ok=true;
-			double gamma=gammaStrategy.getGammaFromK(userItemRep.getNumberTrainsItems());
+			//double gamma=gammaStrategy.getGammaFromK(userItemRep.getNumberTrainsItems());
 			synchronized (userItemRep.blockUser(event.getUserId())) {
 				
 				
 				//trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
 				
-				//double userGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
+				double gamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
 				
 				try {
 					user = userUpdater.processEvent(event,userItemRep,gamma);
@@ -95,7 +95,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			
 			try {
 				if(ok){
-					//double itemGamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
+					double gamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
 					itemProfileUpdater.processEvent(event,userItemRep,gamma,user);
 					//trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
 				}

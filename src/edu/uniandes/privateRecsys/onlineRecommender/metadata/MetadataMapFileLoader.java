@@ -110,11 +110,12 @@ public class MetadataMapFileLoader {
 		int numItems=0;
 	
 		while((line=reed.readLine())!=null){
-			
 			//HashMap where the concept for each item will be reconstructed
 			HashMap<String, Double> translation=new HashMap<String, Double>();
 			line=line.replace("{", "");
 			line=line.replace("}", "");
+			line=line.replace("[", "");
+			line=line.replace("]", "");
 			String[] hashMap=line.split(", ");
 			for (int i = 0; i < hashMap.length; i++) {
 				String valueKey=hashMap[i];

@@ -21,11 +21,12 @@ public class MetadataDatasetConverter {
 		
 		FileLineIterator iterator = null;
 		PrintWriter writer=null;
+		int numLinesIterator=0;
 		try {
 			Matrix mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
 			Map<String, Integer> bindings=mat.getRowLabelBindings();
 			Map<String, Integer> colBindings=mat.getColumnLabelBindings();
-			int row186=bindings.get("2688");
+			/*int row186=bindings.get("2688");
 			Vector vectorTest=mat.viewRow(row186);
 			for (int i = 0; i < vectorTest.size(); i++) {
 				if(vectorTest.get(i)==1){
@@ -36,12 +37,14 @@ public class MetadataDatasetConverter {
 				}
 				
 			}
-			
+			*/
 			
 			iterator = new FileLineIterator(new File(inputDatasetFile));
 			writer= new PrintWriter(new FileWriter(outputDatasetFile));
+			
 			while (iterator.hasNext()) {
 				String line = new String(iterator.next());
+				numLinesIterator++;
 				//ItemId is in the second place
 				String[] array=line.split(",|:");
 				String itemId=array[1];
@@ -52,6 +55,9 @@ public class MetadataDatasetConverter {
 					line+=","+vectorRow.asFormatString();
 					writer.println(line);
 				}
+				else{
+					throw new Exception("Item id "+itemId+" not found ");
+				}
 			
 				
 			}
@@ -61,7 +67,8 @@ public class MetadataDatasetConverter {
 			
 			
 		}catch(Exception e){
-			
+			System.err.println(numLinesIterator);
+			e.printStackTrace();
 		}finally{
 			if(iterator!=null)
 				try {
@@ -76,7 +83,7 @@ public class MetadataDatasetConverter {
 	}
 	
 	public static void main(String[] args) {
-		new MetadataDatasetConverter().convertDatasetFile("data/ml-10M100K/rb.test.cv", "data/ml-10M100K/metadata/mapFile.data", "data/ml-10M100K/rb.test.meta.cv");
+		new MetadataDatasetConverter().convertDatasetFile("data/ml-1m/rb.test.cv", "data/ml-1m/mapFile.data", "data/ml-1m/rb.test.meta.cv");
 	}
 
 }

@@ -9,6 +9,8 @@ import org.apache.commons.math.util.MathUtils;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.BayesAveragePredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
@@ -54,7 +56,7 @@ public class GridSearchParameter {
 	public GridSearchParameter(RSDataset data, UserModelTrainerPredictor modelTrainerPredictor) throws IOException{
 		
 		setAlphaLimits(1e-6,1);
-		setInitialGammaLimits(0.01,0.5);
+		setInitialGammaLimits(0.01,0.6);
 		setDimensionLimits(5,15);
 		
 		updateParamVectors();
@@ -175,7 +177,7 @@ public class GridSearchParameter {
 	}
 
 
-	private void printResults() {
+	public void printResults() {
 		for (String key : this.results.keySet()) {
 			LOG.info(key+" "+this.results.get(key));
 		}
@@ -239,9 +241,6 @@ public class GridSearchParameter {
 	}
 	
 	public static void main(String[] args) {
-		String trainSetMovieLens="data/ml-10M100K/rb.train.sorted";
-		String testSetMovielens="data/ml-10M100K/rb.test.test";
-		String testCVMovielens="data/ml-10M100K/rb.test.cv";
 		 HashMap<String,String> translations=new HashMap<String,String>();
 		 translations.put("0.5", "1");
 		 translations.put("1.5", "2");
@@ -249,15 +248,45 @@ public class GridSearchParameter {
 		 translations.put("3.5", "4");
 		 translations.put("4.5", "5");
 		RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
-		RSDataset datasetMovielens= new RSDataset(trainSetMovieLens,testSetMovielens,testCVMovielens,scale);
 		
-		String trainSetNetflix="data/netflix/rb.train.sorted";
-		String testSetNetflix="data/netflix/rb.test.test";
-		String testCVNetflix="data/netflix/rb.test.CV";
-		RatingScale scaleNetflix= new OrdinalRatingScale(new String[] {"1","2","3","4","5"}, new HashMap<String,String>());
-		RSDataset datasetNetflix= new RSDataset(trainSetNetflix,testSetNetflix,testCVNetflix,scaleNetflix);
+		//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
+		//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
+		String trainSet=new String("data/ml-1m/rb.train.sorted");
+		//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
+		//String trainSet="data/netflix/rb.train.sorted";
+		
+		
+		//String testSet=new String("data/ml-10M100K/rb.test.test");
+		//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
+		String testSet=new String("data/ml-1m/rb.test.test");
+		//String testSet=new String("data/ml-1m/rb.test.meta.test");
+		//String testSet="data/netflix/rb.test.test";
+		
+		
+		//String testCV=new String("data/ml-10M100K/rb.test.cv");
+		//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
+		String testCV=new String("data/ml-1m/rb.test.cv");
+		//String testCV=new String("data/ml-1m/rb.test.meta.cv");
+		//String testCV="data/netflix/rb.test.CV";
+		
+		RSDataset dataset= new RSDataset(trainSet,testSet,testCV,scale);
 		try {
-			new GridSearchParameter(datasetMovielens, new BaseModelPredictor()).startSearch(1);
+			
+			
+			GridSearchParameter paramSearch2=new GridSearchParameter(dataset, new BaseModelPredictor());
+			paramSearch2.startSearch(1);
+			
+			GridSearchParameter paramSearch3=new GridSearchParameter(dataset, new BlendedModelPredictor());
+			paramSearch3.startSearch(1);
+		
+			
+			System.out.println("BaseModelPredictor");
+			paramSearch2.printResults();
+			
+			System.out.println("BlendedModelPredictor");
+			paramSearch3.printResults();
+			
+			
 		} catch (IOException | TasteException | PrivateRecsysException e) {
 			
 			e.printStackTrace();

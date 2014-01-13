@@ -21,6 +21,7 @@ public  class ProbabilityBiasMetadataSimilarityModelPredictor implements UserMod
 	
 	
 	
+	private static final int NUM_PREDICTORS = 3;
 	private FactorUserItemRepresentation modelRepresentation;
 	private BaseModelPredictor baseModel;
 	private SimpleAveragePredictor averageModel;
@@ -82,7 +83,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	 */
 	private double calculateWeightFromCumulativeLosses(double accumulatedLosses, double numTrains) {
 		
-		double n=Math.sqrt(8*Math.log(2)/numTrains);
+		double n=Math.sqrt(8*Math.log(NUM_PREDICTORS)/numTrains);
 		//double n=0.5;
 		return Math.exp(-1*n*accumulatedLosses);
 	}
@@ -169,7 +170,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 		double predictor1Loss = Math.pow(rating-prediction1,2)/this.lossNormalization;
 		double predictor2Loss = Math.pow(rating-prediction2,2)/this.lossNormalization;
-		double predictor3Loss = prediction3==-1?this.lossNormalization:Math.pow(rating-prediction3,2)/this.lossNormalization;
+		double predictor3Loss = prediction3==-1?1:Math.pow(rating-prediction3,2)/this.lossNormalization;
 	
 		losses.set(0,predictor1Loss);
 		losses.set(1, predictor2Loss);

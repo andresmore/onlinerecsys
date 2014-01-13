@@ -121,11 +121,11 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 
 				double dotProb = Functions.SIGMOID.apply(privateVector.dot(itemVector));
 
-				double loss = prob - dotProb;
+				double loss =dotProb  - prob;
 
 				double multiplicator = gamma * (loss);
 				Vector privateVectorMult = itemVector.times(multiplicator);
-				Vector result = privateVector.plus(privateVectorMult);
+				Vector result = privateVector.minus(privateVectorMult);
 
 				double dotProbEnd = Functions.SIGMOID.apply(result.dot(itemVector));
 
@@ -207,7 +207,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return denseVector;
 	}
 
-//TODO: LIMIT SIZE OF INCLUDED CONCEPTS
+
 	private LinkedList<Long>  addMetadataConceptsFromDistribution(
 			LinkedList<Long> profileConcepts, LinkedList<Long> metadataConcepts, SlidingWindowCountMinSketch sketch, int numTrains) {
 		
@@ -223,12 +223,11 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		endConcepts.addAll(profileConcepts);
 		metadataConcepts.removeAll(profileConcepts);
 		for (Iterator<Long> iterator = metadataConcepts.iterator(); iterator
-				.hasNext()&&endConcepts.size()<limitSize;) {
+				.hasNext()&& (endConcepts.size()<limitSize || limitSize==-1);) {
 			endConcepts.add(iterator.next());
 		}
 		
 		
-		//endConcepts.addAll(metadataConcepts);
 		
 		for (Iterator<Long> iterator = endConcepts.iterator(); iterator
 				.hasNext();) {
