@@ -46,8 +46,6 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		
 		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
-		//TODO: just checking, not a good idea if want to keep privacy
-		double loss=Double.parseDouble(rating)-initPrediction;
 		
 		
 		
@@ -78,7 +76,6 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 		
 		double endPrediction=calculatePrediction(projected,oldUserProfile,userItemRep.getRatingScale().getScale());
 		
-		double stepLoss=Double.parseDouble(rating)-endPrediction;
 		
 		userItemRep.updateItemVector(itemId,projected);
 			

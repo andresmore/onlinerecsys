@@ -13,27 +13,25 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 /**
- * Model that blends probability hypothesis, average beta estimators and metadata similarity for online training and prediction
+ * Model that blends probability hypothesis, average beta estimators and metadata training for online training and prediction
  * @author Andres M
  *
  */
-public  class ProbabilityBiasMetadataSimilarityModelPredictor implements UserModelTrainerPredictor {
+public  class ProbabilityMetadataModelPredictor implements UserModelTrainerPredictor {
 	
 	
 	
-	private static final int NUM_PREDICTORS = 3;
+	private static final int NUM_PREDICTORS = 2;
 	private FactorUserItemRepresentation modelRepresentation;
 	private BaseModelPredictor baseModel;
-	private SimpleAveragePredictor averageModel;
-	private MetadataSimilarityPredictor metadataModel;
+	private MetadataPredictor metadataModel;
 	private double lossNormalization;
 	
-	public ProbabilityBiasMetadataSimilarityModelPredictor(){
+	public ProbabilityMetadataModelPredictor(int limitSize){
 		this.baseModel= new BaseModelPredictor();
-		this.averageModel= new SimpleAveragePredictor();
-		this.metadataModel= new MetadataSimilarityPredictor();
+				this.metadataModel= new MetadataPredictor(limitSize);
 	}
-	public ProbabilityBiasMetadataSimilarityModelPredictor(FactorUserItemRepresentation representation){
+	public ProbabilityMetadataModelPredictor(FactorUserItemRepresentation representation){
 		this.setModelRepresentation(representation);
 	}
 	
@@ -50,24 +48,21 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 		
 		Prediction prediction1=baseModel.calculatePrediction(event,minTrains);
-		Prediction prediction2=averageModel.calculatePrediction(event, minTrains);
-		Prediction prediction3=metadataModel.calculatePrediction(event, minTrains);
+		Prediction prediction2=metadataModel.calculatePrediction(event, minTrains);
+		if(prediction1.isNoPrediction() || prediction2.isNoPrediction())
+			return prediction1;
 		
 		UserProfile profile=modelRepresentation.getPrivateUserProfile(userId);
 		Vector hyperparameters=profile.getHyperParameters();
 		int numTrains=profile.getNumTrains();
 		double weightHyperParam1 = calculateWeightFromCumulativeLosses(hyperparameters.get(0),numTrains);
 		double weightHyperParam2 = calculateWeightFromCumulativeLosses(hyperparameters.get(1),numTrains);
-		double weightHyperParam3 = calculateWeightFromCumulativeLosses(hyperparameters.get(2),numTrains);
+		
 		
 		double sumWeights=weightHyperParam1+weightHyperParam2;
 		
-		if(!prediction3.isNoPrediction())
-			sumWeights+=weightHyperParam3;
 		
 		double finalPrediction=(weightHyperParam1*prediction1.getPredictionValue()+weightHyperParam2*prediction2.getPredictionValue());
-		if(prediction3.isNoPrediction())
-			finalPrediction+=weightHyperParam3*prediction3.getPredictionValue();
 		
 		
 		finalPrediction/=sumWeights;
@@ -91,7 +86,6 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public void setModelRepresentation(FactorUserItemRepresentation model) {
 		this.modelRepresentation=model;
 		this.baseModel.setModelRepresentation(model);
-		this.averageModel.setModelRepresentation(model);
 		this.metadataModel.setModelRepresentation(model);
 		
 		this.lossNormalization=1;
@@ -120,12 +114,9 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 			String[] ratingScale) {
 		
 		
-		HashMap<String, BetaDistribution> update = averageModel.calculatePriorsUpdate(event, biasVector, ratingScale);
 		
 		
-		
-		
-		return update;
+		return null;
 	}
 	@Override
 	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
@@ -134,31 +125,30 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 
 		double rating= Double.parseDouble(event.getRating());
 		double prediction1=baseModel.calculatePrediction(itemVector,trainedProfiles);
-		double prediction2=averageModel.calculatePrediction(biasVector);
-		double prediction3=-1;
+		
+		double prediction2=-1;
 		try {
-			Prediction prediction3Pr=metadataModel.calculatePrediction(event,0);
-			if(!prediction3Pr.isNoPrediction()){
-				prediction3=prediction3Pr.getPredictionValue();
+			Prediction prediction2Pr=metadataModel.calculatePrediction(event,0);
+			if(!prediction2Pr.isNoPrediction()){
+				prediction2=prediction2Pr.getPredictionValue();
+			}else{
+				System.out.println("rare.....");
 			}
+			
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
 		
 		double weightHyperParam1 = calculateWeightFromCumulativeLosses(hyperparameters.get(0),numTrains);
 		double weightHyperParam2 = calculateWeightFromCumulativeLosses(hyperparameters.get(1),numTrains);
-		double weightHyperParam3 = calculateWeightFromCumulativeLosses(hyperparameters.get(2),numTrains);
+		
 		
 		double sumWeights=weightHyperParam1+weightHyperParam2;
 		
-		if(prediction3!=-1)
-			sumWeights+=weightHyperParam3;
 		
 		double finalPrediction=(weightHyperParam1*prediction1+weightHyperParam2*prediction2);
-		if(prediction3!=-1)
-			finalPrediction+=weightHyperParam3*prediction3;
 		
 		
 		finalPrediction/=sumWeights;
@@ -170,13 +160,13 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 		double predictor1Loss = Math.pow(rating-prediction1,2)/this.lossNormalization;
 		double predictor2Loss = Math.pow(rating-prediction2,2)/this.lossNormalization;
-		double predictor3Loss = prediction3==-1?1:Math.pow(rating-prediction3,2)/this.lossNormalization;
+		
 	
 		losses.set(0,predictor1Loss);
 		losses.set(1, predictor2Loss);
-		losses.set(2, predictor3Loss);
 		
-		losses.set(3,predictorLoss);
+		
+		losses.set(2,predictorLoss);
 		
 		
 		hyperparameters=hyperparameters.plus(losses);
@@ -185,12 +175,12 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	@Override
 	public int getHyperParametersSize() {
 		
-		return 4;
+		return 3;
 	}
 	
 	@Override
 	public String toString(){
-		return "ProbabilityBiasMetadataSimilarityModelPredictor";
+		return "ProbabilityMetadataModelPredictor";
 	}
 	
 	
@@ -198,7 +188,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
 			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
-		return null;
+		return metadataModel.calculateMetadataUpdate(event, gamma, trainedMetadataProfiles, numTrains);
 	}
 	@Override
 	public boolean hasHyperParameters() {
@@ -210,21 +200,21 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	}
 	@Override
 	public boolean hasMetadataPredictor() {
-		return false;
+		return true;
 	}
 	@Override
 	public boolean hasBiasPredictor() {
-		return true;
+		return false;
 	}
 	@Override
 	public boolean hasUserHistory() {
 		
-		return true;
+		return false;
 	}
 	@Override
 	public boolean saveItemMetadata() {
 		
-		return true;
+		return false;
 	}
 
 }

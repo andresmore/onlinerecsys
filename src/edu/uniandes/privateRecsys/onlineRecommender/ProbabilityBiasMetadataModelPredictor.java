@@ -13,11 +13,11 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 /**
- * Model that blends probability hypothesis, average beta estimators and metadata similarity for online training and prediction
+ * Model that blends probability hypothesis, average beta estimators and metadata training for online training and prediction
  * @author Andres M
  *
  */
-public  class ProbabilityBiasMetadataSimilarityModelPredictor implements UserModelTrainerPredictor {
+public  class ProbabilityBiasMetadataModelPredictor implements UserModelTrainerPredictor {
 	
 	
 	
@@ -25,15 +25,15 @@ public  class ProbabilityBiasMetadataSimilarityModelPredictor implements UserMod
 	private FactorUserItemRepresentation modelRepresentation;
 	private BaseModelPredictor baseModel;
 	private SimpleAveragePredictor averageModel;
-	private MetadataSimilarityPredictor metadataModel;
+	private MetadataPredictor metadataModel;
 	private double lossNormalization;
 	
-	public ProbabilityBiasMetadataSimilarityModelPredictor(){
+	public ProbabilityBiasMetadataModelPredictor(int limitSize){
 		this.baseModel= new BaseModelPredictor();
 		this.averageModel= new SimpleAveragePredictor();
-		this.metadataModel= new MetadataSimilarityPredictor();
+		this.metadataModel= new MetadataPredictor(limitSize);
 	}
-	public ProbabilityBiasMetadataSimilarityModelPredictor(FactorUserItemRepresentation representation){
+	public ProbabilityBiasMetadataModelPredictor(FactorUserItemRepresentation representation){
 		this.setModelRepresentation(representation);
 	}
 	
@@ -140,9 +140,12 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 			Prediction prediction3Pr=metadataModel.calculatePrediction(event,0);
 			if(!prediction3Pr.isNoPrediction()){
 				prediction3=prediction3Pr.getPredictionValue();
+			}else{
+				System.out.println("rare.....");
 			}
+			
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -190,7 +193,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	@Override
 	public String toString(){
-		return "ProbabilityBiasMetadataSimilarityModelPredictor";
+		return "ProbabilityBiasMetadataModelPredictor";
 	}
 	
 	
@@ -198,7 +201,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
 			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
-		return null;
+		return metadataModel.calculateMetadataUpdate(event, gamma, trainedMetadataProfiles, numTrains);
 	}
 	@Override
 	public boolean hasHyperParameters() {
@@ -210,7 +213,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	}
 	@Override
 	public boolean hasMetadataPredictor() {
-		return false;
+		return true;
 	}
 	@Override
 	public boolean hasBiasPredictor() {
@@ -219,12 +222,12 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	@Override
 	public boolean hasUserHistory() {
 		
-		return true;
+		return false;
 	}
 	@Override
 	public boolean saveItemMetadata() {
 		
-		return true;
+		return false;
 	}
 
 }

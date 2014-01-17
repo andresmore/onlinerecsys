@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import javax.swing.Box.Filler;
+
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
@@ -103,19 +105,19 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		HashMap<String,Vector> profiles=trainedMetadataProfiles.getTrainedProfiles();
 		SlidingWindowCountMinSketch sketch=trainedMetadataProfiles.getUserSketch();
 		
-		LinkedList<Long> metadataConcepts=ConceptBreaker.breakConcepts(event.getMetadata());
+		LinkedList<Long> metadataItemConcepts=ConceptBreaker.breakConcepts(event.getMetadata());
 		
 		
-		LinkedList<Long> endProfileConcepts=addMetadataConceptsFromDistribution(profileConcepts,metadataConcepts,sketch,numTrains);
+		HashSet<Long> endProfileConcepts=addMetadataConceptsFromDistribution(profileConcepts,metadataItemConcepts,sketch,numTrains);
 		
 		
-		HashMap<String, Vector> extendedProfiles=modifyMetadataVectors(profiles,profileConcepts,endProfileConcepts);
-		Vector itemVector=buildItemVector(endProfileConcepts,metadataConcepts);
-		UserMetadataInfo profile=new UserMetadataInfo(endProfileConcepts,sketch);
+		UserMetadataInfo profile=modifyMetadataVectors(profiles,profileConcepts,endProfileConcepts,sketch);
+		Vector itemVector=buildItemVector(profile.getIncludedConcepts(),metadataItemConcepts);
 		
-		for (String ratingKey : extendedProfiles.keySet()) {	
 		
-			Vector privateVector=extendedProfiles.get(ratingKey);
+		for (String ratingKey : profile.getTrainedProfiles().keySet()) {	
+		
+			Vector privateVector= profile.getTrainedProfiles().get(ratingKey);
 			if (privateVector.size() > 0 && itemVector.size() > 0) {
 				int prob = ratingKey.equals(rating) ? 1 : 0;
 
@@ -142,94 +144,90 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 	}
 
-	private HashMap<String, Vector> modifyMetadataVectors(HashMap<String, Vector> profiles,
+	private UserMetadataInfo modifyMetadataVectors(HashMap<String, Vector> profiles,
 			LinkedList<Long> profileConcepts,
-			LinkedList<Long> endProfileConcepts) {
+			HashSet<Long> endProfileConcepts, SlidingWindowCountMinSketch sketch) {
 		
-		HashMap<String, Vector> ret=  new HashMap<String, Vector>();
 		
-		//if(!endProfileConcepts.isEmpty())
-			//System.out.println("paus");
+		LinkedList<Long> finalConceptList= fillFinalConceptList(profileConcepts,endProfileConcepts);
+		UserMetadataInfo retUser=new UserMetadataInfo(finalConceptList, sketch);
+		
 		for (String key : profiles.keySet()) {
 			Vector metadataVector=profiles.get(key);
 			Vector extendedVector= new DenseVector(endProfileConcepts.size());
 			
 			Iterator<Long> iterator = profileConcepts.iterator();
-			Iterator<Long> iterator2 = endProfileConcepts.iterator();
-			int pos1=0;
-			int pos2=0;
-			boolean finished=false;
-			while(!finished){
+			int posNewVector=0;
+			int posOriginal=0;
+			
 				
-				if(iterator2.hasNext()){
-					
-					Long concept2=iterator2.next();
-					boolean concept2Found=false;
-					
-					Long concept1=null;
-					
-					while(!concept2Found && iterator.hasNext()){
-						concept1=iterator.next();
-						if(concept1.equals(concept2)){
-							extendedVector.set(pos2, metadataVector.get(pos1));
-							concept2Found=true;
-							pos2++;
-						}	
-						pos1++;
+				while(iterator.hasNext()){
+					Long concept=iterator.next();
+					if(endProfileConcepts.contains(concept)){
+						//
+						extendedVector.set(posNewVector, metadataVector.get(posOriginal));
+						
+						posNewVector++;
+						
 					}
-					if(!iterator.hasNext()){
-						finished=true;
-					}
-					
+					posOriginal++;
 					
 				}
-				else{
-					finished=true;
-				}
-				
 					
-			}
 			
 			
-			extendedVector.viewPart(pos2, extendedVector.size()-pos2).assign(PrivateRandomUtils.normalRandom(0, 1, extendedVector.size()-pos2));
-			ret.put(key, extendedVector);
+			
+			extendedVector.viewPart(posNewVector, extendedVector.size()-posNewVector).assign(PrivateRandomUtils.normalRandom(0, 1, extendedVector.size()-posNewVector));
+			retUser.addMetadataVector(extendedVector, key);
 		}
-		return ret;
+		
+	
+		return retUser;
+	}
+
+	private LinkedList<Long> fillFinalConceptList(
+			LinkedList<Long> profileConcepts, HashSet<Long> endProfileConcepts) {
+		HashSet<Long> endProfileConceptsClone= (HashSet<Long>) endProfileConcepts.clone();
+		LinkedList<Long> finalConceptList= new LinkedList<>();
+		for (Long concept : profileConcepts) {
+			if(endProfileConceptsClone.contains(concept)){
+				finalConceptList.add(concept);
+				endProfileConceptsClone.remove(concept);
+			}
+		}
+		finalConceptList.addAll(endProfileConceptsClone);
+		return finalConceptList;
 	}
 
 	private Vector buildItemVector(LinkedList<Long> profileConcepts, LinkedList<Long> metadataConcepts) {
-		
+		HashSet<Long> metadataConceptsHashSet=new HashSet<>();
+		metadataConceptsHashSet.addAll(metadataConcepts);
 		Vector denseVector= new DenseVector(profileConcepts.size());
+		Iterator<Long> profileConceptIter=profileConcepts.iterator();
 		for (int i = 0; i < profileConcepts.size(); i++) {
-			if(metadataConcepts.contains(profileConcepts.get(i)))
+			if(metadataConceptsHashSet.contains(profileConceptIter.next()))
 				denseVector.setQuick(i, 1);
 		}
 		return denseVector;
 	}
 
 
-	private LinkedList<Long>  addMetadataConceptsFromDistribution(
-			LinkedList<Long> profileConcepts, LinkedList<Long> metadataConcepts, SlidingWindowCountMinSketch sketch, int numTrains) {
+	private HashSet<Long>  addMetadataConceptsFromDistribution(
+			LinkedList<Long> oldProfileConcepts, LinkedList<Long> itemConcepts, SlidingWindowCountMinSketch sketch, int numTrains) {
 		
 		
-		LinkedList<Long> endConcepts= new LinkedList<Long>();
 		
+		HashSet<Long> finalConcepts =new  HashSet<>();
+		finalConcepts.addAll(oldProfileConcepts);
+		finalConcepts.addAll(itemConcepts);
 		sketch.updateCounter(numTrains+1);
 		
-		for (Long concept : metadataConcepts) {
+		for (Long concept : itemConcepts) {
 			sketch.add(concept);
 		}
 		
-		endConcepts.addAll(profileConcepts);
-		metadataConcepts.removeAll(profileConcepts);
-		for (Iterator<Long> iterator = metadataConcepts.iterator(); iterator
-				.hasNext()&& (endConcepts.size()<limitSize || limitSize==-1);) {
-			endConcepts.add(iterator.next());
-		}
 		
-		
-		
-		for (Iterator<Long> iterator = endConcepts.iterator(); iterator
+		for (Iterator<Long> iterator = finalConcepts.iterator(); iterator
 				.hasNext();) {
 			
 			
@@ -241,7 +239,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		}
 		
 		
-		return endConcepts;
+		return finalConcepts;
 		
 		
 		

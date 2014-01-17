@@ -94,10 +94,10 @@ public abstract class AbstractRecommenderTester  {
 				
 				boolean finished=pstr.forceShutdown();
 				if(!finished){
-					throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
+					throw new TasteException("Training failed - Timeout exception - not completed - Executed tasks: "+pstr.numExecutedTasks());
 				}
 				if(pstr.getNumSubmitedTasks()!=pstr.numExecutedTasks()){
-					throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
+					throw new TasteException("Training failed - not all tasks executed - Sumbited tasks: "+pstr.getNumSubmitedTasks()+" Executed tasks: "+pstr.numExecutedTasks());
 				}
 				LOG.info("Finished training, measuring errors ");
 				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,10);
