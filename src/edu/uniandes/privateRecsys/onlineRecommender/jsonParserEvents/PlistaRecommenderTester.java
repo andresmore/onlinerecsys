@@ -38,9 +38,8 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 	private PlistaDataset plistaDataset;
 	private final static Logger LOG = Logger.getLogger(PlistaRecommenderTester.class
 		      .getName());
-	public PlistaRecommenderTester(RSDataset dataset, int fDimensions,
-			LearningRateStrategy tsCreator) throws IOException {
-		super(dataset, fDimensions, tsCreator);
+	public PlistaRecommenderTester(RSDataset dataset, int fDimensionsr) throws IOException {
+		super(dataset, fDimensionsr);
 		if(!(dataset instanceof PlistaDataset))
 			throw new RuntimeException("Only works with plista dataset");
 		
@@ -92,13 +91,13 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 		}	
 		userItemRep.setRestrictUsers(this.restrictedUserIds);
 		
-		LOG.info("Starting experiment with params dim="+fDimensions+" learningRate= "+learningRateStrategy.toString()+" numIterations training "+numIterations );
+		LOG.info("Starting experiment with params dim="+fDimensions+" predictor= "+predictor.toString()+" numIterations training "+numIterations );
 		
 		
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			
-			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset);
 			PlistaJsonEventCreator plistaEventCreator=new PlistaJsonEventCreator(this.plistaDataset.getDirectory(), 1, 25, this.plistaDataset.getPrefixes());
 			plistaEventCreator.addObserver(pstr);
 			plistaEventCreator.startEvents();
@@ -118,7 +117,7 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 				LOG.info("Finished training, measuring errors ");
 				this.plistaDataset.getPrefixes().add("create");
 				this.plistaDataset.getPrefixes().add("update");
-				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(),this.learningRateStrategy, this.userItemRep, new TopNRecommenderFactorModel(this.predictor));
+				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(), this.userItemRep, new TopNRecommenderFactorModel(this.predictor));
 				return error;
 			} catch (InterruptedException e) {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
@@ -138,10 +137,11 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 		RatingScale scale= new OrdinalRatingScale(new String[] {"0","1","2"}, new HashMap<String, String>());
 		PlistaDataset dataset= new PlistaDataset("data/plista/usersCount.csv", "data/plista/filtered", trainPrefixes, scale);
 		try {
-			PlistaRecommenderTester tester= new PlistaRecommenderTester(dataset, 10, LearningRateStrategy.createWithConstantRate(0.2));
+			PlistaRecommenderTester tester= new PlistaRecommenderTester(dataset, 10);
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor);
 			modelTrainerPredictor.setModelRepresentation(representation);
+			modelTrainerPredictor.setLearningRateStrategy(LearningRateStrategy.createWithConstantRate(0.2));
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
 			IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);

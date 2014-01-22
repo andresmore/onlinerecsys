@@ -19,6 +19,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -31,8 +32,8 @@ public class OnlineRecommenderTesterPartialTests extends AbstractRecommenderTest
 		      .getName());
 
 
-	public OnlineRecommenderTesterPartialTests(RSDataset dataset, int fDimensions, LearningRateStrategy tsCreator,  int intervals) throws IOException{
-		super(dataset, fDimensions, tsCreator);
+	public OnlineRecommenderTesterPartialTests(RSDataset dataset, int fDimensions, int intervals) throws IOException{
+		super(dataset, fDimensions);
 		this.eventsReport=intervals;
 	}
 
@@ -71,9 +72,10 @@ double delta=0.1;
 			int eventsReport=100000;
 				
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-				DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
+				IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(data.getScale(),dimensions,false,modelTrainerPredictor);
 				modelTrainerPredictor.setModelRepresentation(denseModel);
-				OnlineRecommenderTesterPartialTests rest=new OnlineRecommenderTesterPartialTests(data,dimensions,tsCreator,eventsReport);
+				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
+				OnlineRecommenderTesterPartialTests rest=new OnlineRecommenderTesterPartialTests(data,dimensions,eventsReport);
 				
 				UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();

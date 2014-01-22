@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
@@ -22,11 +21,14 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
  */
 public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	
-	private FactorUserItemRepresentation modelRepresentation;
+	protected FactorUserItemRepresentation modelRepresentation;
+	protected LearningRateStrategy learningRateStrategy;
+	
 	
 	public BaseModelPredictor(){
 		
 	}
+	
 	public BaseModelPredictor(FactorUserItemRepresentation representation){
 		this.modelRepresentation=representation;
 	}
@@ -80,11 +82,17 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		
 	}
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+		this.learningRateStrategy=strategy;
+		
+	}
+	
+	@Override
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
-			
+		double gamma=this.learningRateStrategy.getGammaFromK(this.modelRepresentation.getNumberTrainsUser(event.getUserId()));	
 		HashMap<String, Vector> trainedProfiles= new HashMap<>();
 		
 		
@@ -124,7 +132,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		return null;
 	}
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector, Vector hyperparameters, int numTrains) {
 		
@@ -154,12 +162,12 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	
 	@Override
 	public String toString(){
-		return "BaseModelPredictor";
+		return "BaseModelPredictor "+this.learningRateStrategy.toString();
 	}
 	
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
+			UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		return null;
 	}
 	@Override
@@ -192,6 +200,74 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		
 		return false;
 	}
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent event, UserProfile oldUserProfile,
+			long itemId, String rating) {
+		
+			double gamma=this.learningRateStrategy.getGammaFromK( modelRepresentation.getNumberTrainsUser(event.getUserId()));
+			try {
+				ItemProfile itemProfile = modelRepresentation.getPrivateItemProfile(itemId);
+				Vector itemVector = itemProfile.getProbabilityVector();
+				
+				
+				double initPrediction=calculatePrediction(itemVector,oldUserProfile,modelRepresentation.getRatingScale().getScale());
+				
+				
+				
+				String[] ratingScale=modelRepresentation.getRatingScale().getScale();
+				double sum= 0;
+				
+				for (int i = 0; i < ratingScale.length; i++) {
+					Vector userVector = oldUserProfile
+							.getProfileForScale(ratingScale[i]);
+					int prob = ratingScale[i].equals(rating) ? 1 : 0;
+
+					double dotProd = itemVector.dot(userVector);
+					
+					sum += prob - dotProd;
+
+				}
+				
+				
+				Vector userVectorO=oldUserProfile.getProfileForScale(rating);
+			
+				Vector mult=userVectorO.times(sum).times(gamma);
+				
+				Vector toProject = itemVector.plus(mult);
+				
+				
+				Vector projected = VectorProjector
+						.projectVectorIntoSimplex(toProject);
+				
+				double endPrediction=calculatePrediction(projected,oldUserProfile,modelRepresentation.getRatingScale().getScale());
+				
+				
+				modelRepresentation.updateItemVector(itemId,projected);
+			} catch (TasteException e) {
+				
+				e.printStackTrace();
+			}
+			
+			
+			
+		}
+		
+		public double calculatePrediction(Vector itemVector,UserProfile oldUserProfile, String[] ratingScale ){
+		double prediction=0;
 	
+		
+		
+		for (int i = 0; i < ratingScale.length; i++) {
+			Vector userVector = oldUserProfile
+					.getProfileForScale(ratingScale[i]);
+			double dot = userVector.dot(itemVector);
+			
+			prediction += dot * Double.parseDouble(ratingScale[i]);
+			
+		}
+		return prediction;
+	}
+		
 	
 }

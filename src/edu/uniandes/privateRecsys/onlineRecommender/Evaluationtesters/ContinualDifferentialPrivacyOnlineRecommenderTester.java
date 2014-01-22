@@ -31,8 +31,8 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 	private final static Logger LOG = Logger.getLogger(ContinualDifferentialPrivacyOnlineRecommenderTester.class
 		      .getName());
 
-	public ContinualDifferentialPrivacyOnlineRecommenderTester(RSDataset data, int fDimensions, LearningRateStrategy tsCreator) throws IOException {
-		super(data, fDimensions, tsCreator);
+	public ContinualDifferentialPrivacyOnlineRecommenderTester(RSDataset data, int fDimensions) throws IOException {
+		super(data, fDimensions);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 				
 				
 				
-				ContinualDifferentialPrivacyOnlineRecommenderTester rest=new ContinualDifferentialPrivacyOnlineRecommenderTester(data, dimensions, tsCreator);
+				ContinualDifferentialPrivacyOnlineRecommenderTester rest=new ContinualDifferentialPrivacyOnlineRecommenderTester(data, dimensions);
 				UserModelTrainerPredictor modelTrainer=new BaseModelPredictor();
 				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainer.getHyperParametersSize(),true);
 				modelTrainer.setModelRepresentation(representation);

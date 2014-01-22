@@ -32,8 +32,8 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 	private final static Logger LOG = Logger.getLogger(DifferentialPrivacyOnlineRecommenderTester.class
 		      .getName());
 
-	public DifferentialPrivacyOnlineRecommenderTester(RSDataset data, int fDimensions, LearningRateStrategy tsCreator) throws IOException {
-		super(data, fDimensions, tsCreator);
+	public DifferentialPrivacyOnlineRecommenderTester(RSDataset data, int fDimensions) throws IOException {
+		super(data, fDimensions);
 		
 	}
 	
@@ -82,7 +82,7 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 				
 				
 				
-				DifferentialPrivacyOnlineRecommenderTester rest=new DifferentialPrivacyOnlineRecommenderTester(data, dimensions, tsCreator);
+				DifferentialPrivacyOnlineRecommenderTester rest=new DifferentialPrivacyOnlineRecommenderTester(data, dimensions);
 				UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);

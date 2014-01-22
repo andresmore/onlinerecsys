@@ -30,7 +30,7 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 	 */
 	@Override
 	public UserProfile processEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep,double gamma) throws TasteException {
+			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
 		long itemId=event.getItemId();
 		long userId=event.getUserId();
@@ -59,14 +59,14 @@ public class UserProfileUpdater implements IUserProfileUpdater {
 
 			String[] ratingScale = userItemRep.getRatingScale().getScale();
 			
-			Vector newHyperParams=predictor.calculatehyperParamsUpdate(gamma,event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
+			Vector newHyperParams=predictor.calculatehyperParamsUpdate(event,itemVector, oldUserPrivate.getUserProfiles(),biasVector,hyperParameterVector,oldUserPrivate.getNumTrains()+1);
 			
 			
 			HashMap<String, Vector> trainedProfiles = predictor.calculateProbabilityUpdate(
-					gamma, rating, itemVector, oldUserPrivate, ratingScale);
+					event, rating, itemVector, oldUserPrivate, ratingScale);
 			HashMap<String, BetaDistribution> biasVectorUpdate = predictor.calculatePriorsUpdate(event, biasVector, ratingScale);
 			
-			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event,gamma, metaInfo,oldUserPrivate.getNumTrains()+1);
+			UserMetadataInfo metadataInfo=predictor.calculateMetadataUpdate(event, metaInfo,oldUserPrivate.getNumTrains()+1);
 			
 			userItemRep.updatePrivateTrainedProfile(userId, trainedProfiles,
 					biasVectorUpdate,newHyperParams,metadataInfo);

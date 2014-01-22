@@ -16,28 +16,28 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 	private FactorUserItemRepresentation userItemRep;
 	private PrivateRecommenderParallelTrainer trainer;
 	//private double gamma;
-	private LearningRateStrategy gammaStrategy;
+
 	
 	private final static Logger LOG = Logger.getLogger(PrivateRecommenderStrategyRunner.class
 		      .getName());
 
 	public PrivateRecommenderStrategyRunner(FactorUserItemRepresentation userItemRep, IUserProfileUpdater userUpdater,
 			IUserItemAggregator userAggregator,
-			IItemProfileUpdater itemProfileUpdater, UserTrainEvent event, PrivateRecommenderParallelTrainer privateRecommenderParallelTrainer, LearningRateStrategy gamma) {
+			IItemProfileUpdater itemProfileUpdater, UserTrainEvent event, PrivateRecommenderParallelTrainer privateRecommenderParallelTrainer) {
 		this.userItemRep=userItemRep;
 		this.userUpdater=userUpdater;
 		this.userAggregator=userAggregator;
 		this.itemProfileUpdater=itemProfileUpdater;
 		this.event=event;
 		this.trainer=privateRecommenderParallelTrainer;
-		this.gammaStrategy=gamma;
+		
 		
 	}
 
 	@Override
 	public void run() {
 		
-		//double gamma=gammaStrategy.getGammaForTime(event.getTime());
+		
 		
 		LOG.finest(Thread.currentThread()+" started event "+event.getUserId()+","+event.getItemId());
 		
@@ -54,10 +54,10 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				
 				//trainer.updateState(Thread.currentThread().getId(), event,"LOCK");
 				
-				double gamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getUserId()));
+				
 				
 				try {
-					user = userUpdater.processEvent(event,userItemRep,gamma);
+					user = userUpdater.processEvent(event,userItemRep);
 					if(user==null)
 						ok=false;
 					trainer.updateState(Thread.currentThread().getId(), event,"LOCK-USERUPDATED");
@@ -95,8 +95,8 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			
 			try {
 				if(ok){
-					double gamma=gammaStrategy.getGammaFromK( userItemRep.getNumberTrainsUser(event.getItemId()));
-					itemProfileUpdater.processEvent(event,userItemRep,gamma,user);
+					
+					itemProfileUpdater.processEvent(event,userItemRep,user);
 					//trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");
 				}
 			} catch (Exception e) {

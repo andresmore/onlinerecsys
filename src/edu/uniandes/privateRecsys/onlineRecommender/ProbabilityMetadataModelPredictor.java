@@ -27,9 +27,9 @@ public  class ProbabilityMetadataModelPredictor implements UserModelTrainerPredi
 	private MetadataPredictor metadataModel;
 	private double lossNormalization;
 	
-	public ProbabilityMetadataModelPredictor(int limitSize){
-		this.baseModel= new BaseModelPredictor();
-				this.metadataModel= new MetadataPredictor(limitSize);
+	public ProbabilityMetadataModelPredictor(BaseModelPredictor baseModel, MetadataPredictor metadataModel){
+		this.baseModel= baseModel;
+		this.metadataModel= metadataModel;
 	}
 	public ProbabilityMetadataModelPredictor(FactorUserItemRepresentation representation){
 		this.setModelRepresentation(representation);
@@ -99,12 +99,12 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 	}
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
 		
-		HashMap<String, Vector> update = baseModel.calculateProbabilityUpdate(gamma, rating, itemVector, oldUserPrivate, ratingScale);
+		HashMap<String, Vector> update = baseModel.calculateProbabilityUpdate(event, rating, itemVector, oldUserPrivate, ratingScale);
 		
 		return update;
 	}
@@ -119,7 +119,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return null;
 	}
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector, Vector hyperparameters, int numTrains) {
 
@@ -180,15 +180,15 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	@Override
 	public String toString(){
-		return "ProbabilityMetadataModelPredictor";
+		return "ProbabilityMetadataModelPredictor ("+baseModel.toString()+","+metadataModel.toString()+")" ;
 	}
 	
 	
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
+			 UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
-		return metadataModel.calculateMetadataUpdate(event, gamma, trainedMetadataProfiles, numTrains);
+		return metadataModel.calculateMetadataUpdate(event, trainedMetadataProfiles, numTrains);
 	}
 	@Override
 	public boolean hasHyperParameters() {
@@ -215,6 +215,31 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public boolean saveItemMetadata() {
 		
 		return false;
+	}
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating) {
+		
+		baseModel.updateItemProbabilityVector(gamma, oldUserProfile, itemId, rating);
+	}
+	
+	@Override
+	
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+		baseModel.setLearningRateStrategy(strategy);
+		metadataModel.setLearningRateStrategy(strategy);
+		
+	}
+	
+	public void setBaseModelLearningRateStrategy(LearningRateStrategy strategy) {
+		baseModel.setLearningRateStrategy(strategy);
+		
+	}
+	
+	public void setMetadataModelModelLearningRateStrategy(LearningRateStrategy strategy) {
+		metadataModel.setLearningRateStrategy(strategy);
+		
 	}
 
 }

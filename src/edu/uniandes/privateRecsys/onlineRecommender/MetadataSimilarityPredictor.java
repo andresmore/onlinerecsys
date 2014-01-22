@@ -1,15 +1,12 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
-import org.apache.commons.math3.util.Pair;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.common.distance.TanimotoDistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
@@ -144,7 +141,7 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
@@ -160,7 +157,7 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,
+	public Vector calculatehyperParamsUpdate(
 			UserTrainEvent event, Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,
@@ -171,7 +168,7 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,
+			 UserMetadataInfo trainedMetadataProfiles,
 			int numTrains) {
 		
 		return null;
@@ -179,7 +176,7 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 
 	@Override
 	public int getHyperParametersSize() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -222,6 +219,20 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 	public String toString() {
 		
 		return "MetadataSimilarityPredictor";
+	}
+
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating) {
+		
+		
+	}
+
+	@Override
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

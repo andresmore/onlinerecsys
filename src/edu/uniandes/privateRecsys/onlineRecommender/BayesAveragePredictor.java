@@ -50,7 +50,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	}
 
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
@@ -75,7 +75,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	}
 
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,
 			Vector oldHyperparameters, int numTrains) {
@@ -154,7 +154,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
+			UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
 		return null;
 	}
@@ -191,5 +191,20 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 		return false;
 	}
+
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating) {
+		
+		
+	}
+
+	@Override
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+			
+	}
+
+	
 
 }

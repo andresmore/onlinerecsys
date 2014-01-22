@@ -40,8 +40,8 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 	private final static Logger LOG = Logger.getLogger(PlistaMostPopularRecommenderTester.class
 		      .getName());
 	public PlistaMostPopularRecommenderTester(RSDataset dataset, int fDimensions,
-			LearningRateStrategy tsCreator, boolean useTestEventForPopularity) throws IOException {
-		super(dataset, fDimensions, tsCreator);
+			 boolean useTestEventForPopularity) throws IOException {
+		super(dataset, fDimensions);
 		if(!(dataset instanceof PlistaDataset))
 			throw new RuntimeException("Only works with plista dataset");
 		
@@ -94,14 +94,14 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		}	
 		userItemRep.setRestrictUsers(this.restrictedUserIds);
 		
-		LOG.info("Starting experiment with params dim="+fDimensions+" learningRate= "+learningRateStrategy.toString()+" numIterations training "+numIterations );
+		LOG.info("Starting experiment with params dim="+fDimensions+" PREDICTOR= "+predictor.toString()+" numIterations training "+numIterations );
 		
 		LinkedList<Double> partialErrors= new LinkedList<>();
 		
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			
-			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep, predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset);
 			PlistaJsonEventCreator plistaEventCreator=new PlistaJsonEventCreator(this.plistaDataset.getDirectory(), 1, 25, this.plistaDataset.getPrefixes());
 			plistaEventCreator.addObserver(pstr);
 			PopularityObserver popObserver= new PopularityObserver();
@@ -132,7 +132,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 					
 				}
 				
-				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(),this.learningRateStrategy, this.userItemRep, new TopNPopularityRecommender(popObserver));
+				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(),this.userItemRep, new TopNPopularityRecommender(popObserver));
 				return error;
 			} catch (InterruptedException e) {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
@@ -152,10 +152,12 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		RatingScale scale= new OrdinalRatingScale(new String[] {"0","1","2"}, new HashMap<String,String>());
 		PlistaDataset dataset= new PlistaDataset("data/plista/usersCount.csv", "data/plista/filtered", trainPrefixes, scale);
 		try {
-			PlistaMostPopularRecommenderTester tester= new PlistaMostPopularRecommenderTester(dataset, 10, LearningRateStrategy.createWithConstantRate(0.2),true);
+			PlistaMostPopularRecommenderTester tester= new PlistaMostPopularRecommenderTester(dataset, 10,true);
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
+			
 			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor);
 			modelTrainerPredictor.setModelRepresentation(representation);
+			modelTrainerPredictor.setLearningRateStrategy(LearningRateStrategy.createWithConstantRate(0.2));
 			
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();

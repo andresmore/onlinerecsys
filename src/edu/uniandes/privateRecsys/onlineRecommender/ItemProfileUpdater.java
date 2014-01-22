@@ -27,81 +27,26 @@ public class ItemProfileUpdater implements IItemProfileUpdater {
 	 */
 	@Override
 	public void processEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep, double gamma, UserProfile oldUserProfile) throws TasteException {
+			FactorUserItemRepresentation userItemRep,  UserProfile oldUserProfile) throws TasteException {
 	
 		
-		
-		long itemId=event.getItemId();
-		
-		String rating=event.getRating();
-		
-		if(predictor.saveItemMetadata())
-			userItemRep.saveItemMetadata(itemId,event.getMetadata());
-		
-		if(predictor.hasProbabilityPrediction()){
-		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
-		
-		
-		Vector itemVector = itemProfile.getProbabilityVector();
-		
-		
-		double initPrediction=calculatePrediction(itemVector,oldUserProfile,userItemRep.getRatingScale().getScale());
-		
-		
-		
-		String[] ratingScale=userItemRep.getRatingScale().getScale();
-		double sum= 0;
-		
-		for (int i = 0; i < ratingScale.length; i++) {
-			Vector userVector = oldUserProfile
-					.getProfileForScale(ratingScale[i]);
-			int prob = ratingScale[i].equals(rating) ? 1 : 0;
+		long itemId = event.getItemId();
 
-			double dotProd = itemVector.dot(userVector);
-			
-			sum += prob - dotProd;
+		String rating = event.getRating();
 
-		}
-		
-		
-		Vector userVectorO=oldUserProfile.getProfileForScale(rating);
-	
-		Vector mult=userVectorO.times(sum).times(gamma);
-		
-		Vector toProject = itemVector.plus(mult);
-		
-		
-		Vector projected = VectorProjector
-				.projectVectorIntoSimplex(toProject);
-		
-		double endPrediction=calculatePrediction(projected,oldUserProfile,userItemRep.getRatingScale().getScale());
-		
-		
-		userItemRep.updateItemVector(itemId,projected);
-			
-		
-		
-		
-		
-		
-		
+		if (predictor.saveItemMetadata())
+			userItemRep.saveItemMetadata(itemId, event.getMetadata());
+
+		if (predictor.hasProbabilityPrediction()) {
+
+			predictor.updateItemProbabilityVector(event, oldUserProfile,
+					itemId, rating);
+
 		}
 	}
 	
-	public double calculatePrediction(Vector itemVector,UserProfile oldUserProfile, String[] ratingScale ){
-		double prediction=0;
 	
-		
-		
-		for (int i = 0; i < ratingScale.length; i++) {
-			Vector userVector = oldUserProfile
-					.getProfileForScale(ratingScale[i]);
-			double dot = userVector.dot(itemVector);
-			
-			prediction += dot * Double.parseDouble(ratingScale[i]);
-			
-		}
-		return prediction;
-	}
+	
+	
 
 }

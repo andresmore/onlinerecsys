@@ -328,7 +328,7 @@ public class RecommenderMainClass {
 			}
 			else if(chosenProfileUpdater.equals(BLENDED_PROFILE_UPDATER)){
 				
-				modelTrainerPredictor= new BlendedModelPredictor();
+				modelTrainerPredictor= new BlendedModelPredictor(new BaseModelPredictor(), new SimpleAveragePredictor());
 			}
 			else{
 				throw new ParseException("User profileUpdater "+chosenProfileUpdater+" not found");
@@ -363,9 +363,11 @@ public class RecommenderMainClass {
 					throw new ParseException("Continual differential privacy recommender needs privacy budget and privacy time budget");
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
-				tester= new ContinualDifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
+				tester= new ContinualDifferentialPrivacyOnlineRecommenderTester(dataset, dimensions);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
+				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
+				
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
@@ -379,9 +381,10 @@ public class RecommenderMainClass {
 					throw new ParseException("Differential privacy recommender needs privacy budget");
 				}
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset.getTrainSet()));
-				tester= new DifferentialPrivacyOnlineRecommenderTester(dataset, dimensions, tsCreator);
+				tester= new DifferentialPrivacyOnlineRecommenderTester(dataset, dimensions);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
+				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
@@ -395,9 +398,10 @@ public class RecommenderMainClass {
 				}else{
 					averageModel=new AverageDataModel(new File(dataset.getTrainSet()));
 				}
-				tester= new OnlineRecommenderTester(dataset, dimensions, tsCreator);
+				tester= new OnlineRecommenderTester(dataset, dimensions);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
+				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
@@ -411,9 +415,10 @@ public class RecommenderMainClass {
 				
 				RSMetadataDataset dataset2=(RSMetadataDataset) dataset;
 				AverageDataModel averageModel= new AverageDataModel(new File(dataset2.getAllDataset()));
-				tester= new OnlineRecommenderTester(dataset2, dimensions, tsCreator);
+				tester= new OnlineRecommenderTester(dataset2, dimensions);
 				FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), dimensions,dataset2.getSpectralDataFile(),numNeighbors,true,modelTrainerPredictor.getHyperParametersSize());
 				modelTrainerPredictor.setModelRepresentation(representation);
+				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 				IUserItemAggregator agregator= new NoPrivacyAggregator();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);

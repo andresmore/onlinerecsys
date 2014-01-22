@@ -28,10 +28,10 @@ public  class ProbabilityBiasMetadataSimilarityModelPredictor implements UserMod
 	private MetadataSimilarityPredictor metadataModel;
 	private double lossNormalization;
 	
-	public ProbabilityBiasMetadataSimilarityModelPredictor(){
-		this.baseModel= new BaseModelPredictor();
-		this.averageModel= new SimpleAveragePredictor();
-		this.metadataModel= new MetadataSimilarityPredictor();
+	public ProbabilityBiasMetadataSimilarityModelPredictor(BaseModelPredictor base,SimpleAveragePredictor average, MetadataSimilarityPredictor metadata ){
+		this.baseModel= base;
+		this.averageModel= average;
+		this.metadataModel= metadata;
 	}
 	public ProbabilityBiasMetadataSimilarityModelPredictor(FactorUserItemRepresentation representation){
 		this.setModelRepresentation(representation);
@@ -105,12 +105,12 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 	}
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
 		
-		HashMap<String, Vector> update = baseModel.calculateProbabilityUpdate(gamma, rating, itemVector, oldUserPrivate, ratingScale);
+		HashMap<String, Vector> update = baseModel.calculateProbabilityUpdate(event, rating, itemVector, oldUserPrivate, ratingScale);
 		
 		return update;
 	}
@@ -128,7 +128,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return update;
 	}
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector, Vector hyperparameters, int numTrains) {
 
@@ -142,7 +142,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 				prediction3=prediction3Pr.getPredictionValue();
 			}
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -196,7 +196,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
+			UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		
 		return null;
 	}
@@ -225,6 +225,18 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public boolean saveItemMetadata() {
 		
 		return true;
+	}
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating) {
+		baseModel.updateItemProbabilityVector(gamma, oldUserProfile, itemId, rating);
+		
+	}
+	@Override
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+	
+		
 	}
 
 }

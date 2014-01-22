@@ -27,7 +27,6 @@ public abstract class AbstractRecommenderTester  {
 	protected IUserProfileUpdater userUpdater;
 	protected IUserItemAggregator userAggregator;
 	protected IItemProfileUpdater itemProfileUpdater;
-	protected LearningRateStrategy learningRateStrategy;
 	protected int numLimitEvents=-1;
 	protected int eventsReport=-1;
 	
@@ -37,10 +36,10 @@ public abstract class AbstractRecommenderTester  {
 	private final static Logger LOG = Logger.getLogger(AbstractRecommenderTester.class
 		      .getName());
 
-	public AbstractRecommenderTester(RSDataset dataset, int fDimensions, LearningRateStrategy learningRateStrategy) throws IOException {
+	public AbstractRecommenderTester(RSDataset dataset, int fDimensions) throws IOException {
 		this.rsDataset=dataset;
 		this.fDimensions=fDimensions;
-		this.learningRateStrategy=learningRateStrategy;
+	
 		
 		
 		
@@ -73,7 +72,7 @@ public abstract class AbstractRecommenderTester  {
 		}	
 		
 		
-		LOG.info("Starting experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations );
+		LOG.info("Starting experiment with predictor ="+predictor.toString()+" numIterations training "+numIterations );
 		double error=0;
 		double errorTrain=0;
 		double errorCV=0;
@@ -81,7 +80,7 @@ public abstract class AbstractRecommenderTester  {
 		for (int iteration = 1; iteration <= numIterations; iteration++) {
 			
 			
-			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep,this.predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset,this.learningRateStrategy);
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep,this.predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset);
 			
 			FileEventCreator cec= new FileEventCreator(new File(rsDataset.getTrainSet()),this.eventsReport,this.numLimitEvents);
 			cec.addObserver(pstr);
@@ -110,7 +109,7 @@ public abstract class AbstractRecommenderTester  {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 			}
 		}
-		LOG.info("Final error for experiment with params dim="+fDimensions+" learningrateStrategy="+learningRateStrategy.toString()+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: train="+errorTrain+" cv="+errorCV+" test="+error);
+		LOG.info("Final error for experiment with with predictor ="+predictor.toString()+" numIterations training "+numIterations+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: train="+errorTrain+" cv="+errorCV+" test="+error);
 		
 		
 		return new RMSE_ErrorReport(errorTrain, error, errorCV,partialErrors);//""+errorTrain+'\t'+errorCV+'\t'+error;

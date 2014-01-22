@@ -9,6 +9,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public interface IUserProfileUpdater {
 
 	public abstract UserProfile processEvent(UserTrainEvent event,
-			FactorUserItemRepresentation userItemRep, double gamma) throws TasteException;
+			FactorUserItemRepresentation userItemRep) throws TasteException;
 
 }

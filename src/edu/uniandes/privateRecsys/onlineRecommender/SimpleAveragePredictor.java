@@ -43,7 +43,7 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public HashMap<String, Vector> calculateProbabilityUpdate(double gamma,
+	public HashMap<String, Vector> calculateProbabilityUpdate(UserTrainEvent event,
 			String rating, Vector itemVector, UserProfile oldUserPrivate,
 			String[] ratingScale) {
 		
@@ -68,7 +68,7 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 	}
 
 	@Override
-	public Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,
 			Vector oldHyperparameters, int numTrains) {
@@ -156,7 +156,7 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 
 	@Override
 	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,
-			double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains) {
+			 UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		return null;
 	}
 
@@ -190,6 +190,20 @@ public class SimpleAveragePredictor implements UserModelTrainerPredictor {
 	public boolean saveItemMetadata() {
 		
 		return false;
+	}
+
+	@Override
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating) {
+	
+		
+	}
+
+	@Override
+	public void setLearningRateStrategy(LearningRateStrategy strategy) {
+		
+		
 	}
 
 

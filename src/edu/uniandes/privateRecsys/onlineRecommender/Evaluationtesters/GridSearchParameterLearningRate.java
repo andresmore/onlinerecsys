@@ -18,6 +18,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 
 public class GridSearchParameterLearningRate {
@@ -194,9 +195,10 @@ public GridSearchParameterLearningRate(RSDataset data) throws IOException{
 		this.tsCreator=LearningRateStrategy.createWithConstantRate(learningRate);
 		int dimensions=(int) dimension;
 		UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-		DenseFactorUserItemRepresentation denseModel= new DenseFactorUserItemRepresentation(this.model, data.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
+		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(data.getScale(),dimensions,false,modelTrainerPredictor);
 		modelTrainerPredictor.setModelRepresentation(denseModel);
-		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
+		modelTrainerPredictor.setLearningRateStrategy(tsCreator);
+		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions);
 		
 		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();

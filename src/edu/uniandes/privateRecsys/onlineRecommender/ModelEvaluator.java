@@ -70,7 +70,7 @@ return rmseEval.getRMSE();
 
 	public static IRPrecisionError evaluatePlistaModel(
 			PlistaDataset plistaDataset, RatingScale scale,
-			LearningRateStrategy tsCreator,
+			
 			FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender) throws IOException,
 			TasteException {
 		

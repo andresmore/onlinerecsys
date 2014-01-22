@@ -56,11 +56,12 @@ public class NeighborExperiment {
 			AverageDataModel averageModel= new AverageDataModel(new File(dataset2.getAllDataset()));
 		for (int i = 0; i < numNeighbors.length; i++) {
 			
-			tester= new OnlineRecommenderTester(dataset2, 10, tsCreator);
+			tester= new OnlineRecommenderTester(dataset2, 10);
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
 			//FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),numNeighbors[i],false);
 			FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), 10,dataset2.getSpectralDataFile(),numNeighbors[i],true,modelTrainerPredictor.getHyperParametersSize());
 			modelTrainerPredictor.setModelRepresentation(representation);
+			modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
 			IUserItemAggregator agregator= new NoPrivacyAggregator();
 			IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);

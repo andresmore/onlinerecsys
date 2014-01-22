@@ -14,24 +14,26 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public interface UserModelTrainerPredictor {
 
 	public void setModelRepresentation(FactorUserItemRepresentation model);
+	public void setLearningRateStrategy(LearningRateStrategy strategy);
 	
 	public  Prediction calculatePrediction(UserTrainEvent event,
 			int minTrains) throws TasteException;
 
 	public  HashMap<String, Vector> calculateProbabilityUpdate(
-			double gamma, String rating, Vector itemVector,
+			UserTrainEvent event, String rating, Vector itemVector,
 			UserProfile oldUserPrivate, String[] ratingScale);
 
 	public  HashMap<String, BetaDistribution> calculatePriorsUpdate(
 			UserTrainEvent event, HashMap<String, BetaDistribution> biasVector,
 			String[] ratingScale);
 
-	public  Vector calculatehyperParamsUpdate(double gamma,UserTrainEvent event,Vector itemVector,
+	public  Vector calculatehyperParamsUpdate(UserTrainEvent event,Vector itemVector,
 			HashMap<String, Vector> trainedProfiles,
 			HashMap<String, BetaDistribution> biasVector,Vector oldHyperparameters, int numTrains);
 
-	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event,double gamma, UserMetadataInfo trainedMetadataProfiles,int numTrains);
+	public UserMetadataInfo calculateMetadataUpdate(UserTrainEvent event, UserMetadataInfo trainedMetadataProfiles,int numTrains);
 	
+
 	public int getHyperParametersSize();
 
 	public boolean hasHyperParameters();
@@ -45,6 +47,14 @@ public interface UserModelTrainerPredictor {
 	public boolean hasUserHistory();
 
 	public boolean saveItemMetadata();
+
+	public void updateItemProbabilityVector(
+			UserTrainEvent gamma, UserProfile oldUserProfile,
+			long itemId, String rating);
+
+	
+
+
 
 	
 	

@@ -37,7 +37,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	private ConcurrentLinkedQueue<Long> threadIds= new ConcurrentLinkedQueue<Long>();
 	private String[] states;
 	private RSDataset dataset;
-	private LearningRateStrategy lambda;
+
 	private static int NUM_TRIES_EVALUATION=10;
 	
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
@@ -50,13 +50,13 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 			UserModelTrainerPredictor predictor,
 			IUserProfileUpdater userUpdater,
 			IUserItemAggregator userAggregator,
-			IItemProfileUpdater itemProfileUpdater, RSDataset dataset, LearningRateStrategy lambda) {
+			IItemProfileUpdater itemProfileUpdater, RSDataset dataset) {
 		this.userItemRep=userItemRep;
 		this.predictor = predictor;
 		this.userUpdater = userUpdater;
 		this.userAggregator = userAggregator;
 		this.itemProfileUpdater = itemProfileUpdater;
-		this.lambda=lambda;
+	
 	
 		this.dataset=dataset;
 		LOG.info("Parallel trainer asking for number of available processors");
@@ -145,7 +145,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 			event.updateRating(rs.getRatingAlias(event.getRating()));
 			PrivateRecommenderStrategyRunner runner = new PrivateRecommenderStrategyRunner(
 					this.userItemRep, this.userUpdater, this.userAggregator,
-					this.itemProfileUpdater, event, this, this.lambda);
+					this.itemProfileUpdater, event, this);
 			final Future sub = executor.submit(runner);
 			numSubmitedTasks.incrementAndGet();
 		} else {
@@ -175,7 +175,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	public boolean forceShutdown() throws InterruptedException {
 		
 		LOG.info("Awaiting termination of Parallel training:");
-		executor.awaitTermination(15, TimeUnit.MINUTES);
+		executor.awaitTermination(20, TimeUnit.MINUTES);
 		LOG.info("Finished termination of Parallel training: "+executor.isTerminated());
 		if(!executor.isTerminated())
 			executor.shutdownNow();

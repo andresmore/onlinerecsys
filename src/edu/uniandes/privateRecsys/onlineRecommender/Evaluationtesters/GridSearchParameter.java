@@ -9,13 +9,14 @@ import org.apache.commons.math.util.MathUtils;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.BayesAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
+import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -56,7 +57,7 @@ public class GridSearchParameter {
 	public GridSearchParameter(RSDataset data, UserModelTrainerPredictor modelTrainerPredictor) throws IOException{
 		
 		setAlphaLimits(1e-6,1);
-		setInitialGammaLimits(0.01,0.6);
+		setInitialGammaLimits(0.01,0.9);
 		setDimensionLimits(5,15);
 		
 		updateParamVectors();
@@ -227,8 +228,8 @@ public class GridSearchParameter {
 		
 		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data.getScale(), dimensions, false,modelTrainerPredictor);
 		modelTrainerPredictor.setModelRepresentation(denseModel);
-		
-		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions, tsCreator);
+		modelTrainerPredictor.setLearningRateStrategy(tsCreator);
+		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions);
 		
 		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
 		IUserItemAggregator agregator= new NoPrivacyAggregator();
@@ -251,39 +252,41 @@ public class GridSearchParameter {
 		
 		//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
 		//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
-		String trainSet=new String("data/ml-1m/rb.train.sorted");
-		//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
+		//String trainSet=new String("data/ml-1m/rb.train.sorted");
+		String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
 		//String trainSet="data/netflix/rb.train.sorted";
 		
 		
 		//String testSet=new String("data/ml-10M100K/rb.test.test");
 		//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
-		String testSet=new String("data/ml-1m/rb.test.test");
-		//String testSet=new String("data/ml-1m/rb.test.meta.test");
+		//String testSet=new String("data/ml-1m/rb.test.test");
+		String testSet=new String("data/ml-1m/rb.test.meta.test");
 		//String testSet="data/netflix/rb.test.test";
 		
 		
 		//String testCV=new String("data/ml-10M100K/rb.test.cv");
 		//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
-		String testCV=new String("data/ml-1m/rb.test.cv");
-		//String testCV=new String("data/ml-1m/rb.test.meta.cv");
+		//String testCV=new String("data/ml-1m/rb.test.cv");
+		String testCV=new String("data/ml-1m/rb.test.meta.cv");
 		//String testCV="data/netflix/rb.test.CV";
 		
 		RSDataset dataset= new RSDataset(trainSet,testSet,testCV,scale);
 		try {
+			BaseModelPredictor pred1=new BaseModelPredictor();
 			
 			
-			GridSearchParameter paramSearch2=new GridSearchParameter(dataset, new BaseModelPredictor());
+			
+			GridSearchParameter paramSearch2=new GridSearchParameter(dataset, pred1);
 			paramSearch2.startSearch(1);
 			
-			GridSearchParameter paramSearch3=new GridSearchParameter(dataset, new BlendedModelPredictor());
+			GridSearchParameter paramSearch3=new GridSearchParameter(dataset, new MetadataPredictor(-1));
 			paramSearch3.startSearch(1);
 		
 			
 			System.out.println("BaseModelPredictor");
 			paramSearch2.printResults();
 			
-			System.out.println("BlendedModelPredictor");
+			System.out.println("MetadataPredictor");
 			paramSearch3.printResults();
 			
 			
