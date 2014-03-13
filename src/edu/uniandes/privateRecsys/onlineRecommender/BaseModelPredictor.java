@@ -15,7 +15,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 /**
- * Model that uses only the probability hypothesis for online training and prediction
+ * Model that uses only the probability hypothesis for online training and prediction, details on:<br>
+ *  Distributed rating prediction in user generated content streams <br>
+ *  <a href="http://dl.acm.org/citation.cfm?id=2043948">http://dl.acm.org/citation.cfm?id=2043948</a>
  * @author Andres M
  *
  */

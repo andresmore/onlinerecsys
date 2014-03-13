@@ -12,6 +12,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRe
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
+import edu.uniandes.privateRecsys.onlineRecommender.ItemTrainLimitPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
@@ -48,107 +49,107 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 		try {
 			
 			LinkedList<String> results= new LinkedList<>();
+			String trainSet=new String("data/dbBook/ra.train.meta");
 			//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
 			//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
 			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
+			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
 			//String trainSet="data/netflix/rb.train.sorted";
 			
-			
+			String testSet=new String("data/dbBook/ra.test.meta");
 			//String testSet=new String("data/ml-10M100K/rb.test.test");
 			//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
 			//String testSet=new String("data/ml-1m/rb.test.test");
-			String testSet=new String("data/ml-1m/rb.test.meta.test");
+			//String testSet=new String("data/ml-1m/rb.test.meta.test");
 			//String testSet="data/netflix/rb.test.test";
 			
-			
+			String testCV=new String("data/dbBook/ra.test.meta");
 			//String testCV=new String("data/ml-10M100K/rb.test.cv");
 			//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
 			//String testCV=new String("data/ml-1m/rb.test.cv");
-			String testCV=new String("data/ml-1m/rb.test.meta.cv");
+			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			
 			 HashMap<String,String> translations=new HashMap<String,String>();
+			 translations.put(new String("0"), new String("1"));
 			 translations.put(new String("0.5"), new String("1"));
 			 translations.put(new String("1.5"), new String("2"));
 			 translations.put(new String("2.5"), new String("3"));
 			 translations.put(new String("3.5"), new String("4"));
 			 translations.put(new String("4.5"), new String("5"));
-			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
+			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			
 			
 			
 			
 			
-			int dimensions=5;
-			int[] limitSizes={5,10,50};
-			double[] learningRates={0.01,0.05,0.15,0.25,0.5,0.9};
+			
+			int[] limitSizes={5,10,25,50,75,100};
+			double[] learningRates={0.01,0.05,0.15,0.25,0.3,0.4,0.5,0.6,0.75,0.9};
+			int[] trainLimits={5,10,25,50,75,100,150,200,-1};
 			LinkedList<UserModelTrainerPredictor> predictorsLinked= new LinkedList<UserModelTrainerPredictor>();
 			//predictorsLinked.add(new BayesAveragePredictor());	
 			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0);
-			//predictorsLinked.add(baseModelPredictor);
+			predictorsLinked.add(baseModelPredictor);
+			//BaseModelPredictor basemodel= new BaseModelPredictor();
+			//predictorsLinked.add(basemodel);
 			//predictorsLinked.add(new BlendedModelPredictor());
 			//predictorsLinked.add(new  MetadataSimilarityPredictor());
-			MetadataPredictor metadataModel = new MetadataPredictor(-1);
-			//predictorsLinked.add(metadataModel);
-			//predictorsLinked.add(new  ProbabilityBiasMetadataSimilarityModelPredictor());
-			predictorsLinked.add(new ProbabilityBiasMetadataModelPredictor(baseModelPredictor,new SimpleAveragePredictor(),metadataModel));
-
+			MetadataPredictor metadataModel = new MetadataPredictor(50);
+			predictorsLinked.add(metadataModel);
+			
 			predictorsLinked.add(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
 			//predictorsLinked.add(new BaseModelPredictorWithItemRegularizationUpdate(0));
-			LearningRateStrategy tsCreator = LearningRateStrategy.createDecreasingRate(1e-6, 0.25);
-			baseModelPredictor.setLearningRateStrategy(tsCreator);
+			
 			
 			Object[] predictors=  predictorsLinked.toArray();
 				
 			for (int i = 0; i < predictors.length; i++) {
+				
 				for (int j = 0; j < learningRates.length; j++) {
 					
+					int dimensions=limitSizes[0];
 						
-						LearningRateStrategy tsCreator2 = LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]);
 						UserModelTrainerPredictor trainerPredictor = (UserModelTrainerPredictor) predictors[i];
-						//ProbabilityMetadataModelPredictor trainerPredictor = (ProbabilityMetadataModelPredictor) predictors[i];
-						// UserModelTrainerPredictor trainerPredictor= new
-						// ProbabilityBiasMetadataSimilarityModelPredictor();
-						// UserModelTrainerPredictor trainerPredictor= new
-						// BayesAveragePredictor();
-						// UserModelTrainerPredictor trainerPredictor= new
-						// BlendedModelPredictor();
-						// UserModelTrainerPredictor trainerPredictor= new
-						// MetadataSimilarityPredictor();
-						// UserModelTrainerPredictor trainerPredictor= new
-						// BaseModelPredictor();
-						// UserModelTrainerPredictor trainerPredictor= new
-						// MetadataPredictor(limitSizes[j]);
 						FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
 								scale, dimensions, false, trainerPredictor);
-						// FactorUserItemRepresentation denseModel= new
-						// DenseFactorUserItemRepresentation(new
-						// AverageDataModel(new File(data.getTrainSet())),
-						// scale, dimensions,
-						// trainerPredictor.getHyperParametersSize());
-						trainerPredictor.setModelRepresentation(denseModel);
 						
-						//trainerPredictor.setLearningRateStrategy(tsCreator2);
-						//baseModel.setLearningRateStrategy(tsCreator);
-						metadataModel.setLearningRateStrategy(tsCreator2);
+						trainerPredictor.setModelRepresentation(denseModel);
+						if(trainerPredictor instanceof ProbabilityMetadataModelPredictor){
+							LearningRateStrategy learningRateStrategy = LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]);
+							baseModelPredictor.setLearningRateStrategy(learningRateStrategy);
+							LearningRateStrategy tsCreator = LearningRateStrategy.createDecreasingRate(1e-6, 0.75);
+							metadataModel.setLearningRateStrategy(tsCreator);
+							
+						}
+						else{
+							trainerPredictor.setLearningRateStrategy( LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]));
+						}
+						
+
 						OnlineRecommenderTester rest = new OnlineRecommenderTester(
 								data, dimensions);
 						// rest.setEventsReport(1000000);
 						UserProfileUpdater userUp = new UserProfileUpdater(
 								trainerPredictor);
+						//int limit=trainLimits[j];
 						IUserItemAggregator agregator = new NoPrivacyAggregator();
 						IItemProfileUpdater itemUpdater = new ItemProfileUpdater(
 								trainerPredictor);
 						rest.setModelAndUpdaters(denseModel, userUp, agregator,
 								itemUpdater);
 						rest.setModelPredictor(trainerPredictor);
-						ErrorReport result = rest.startExperiment(1);
-						results.add(predictors[i] + "" + '\t'
+						ErrorReport result = rest.startExperiment(50);
+						String resultLine=predictors[i] + "" + '\t'
 								+ learningRates[j] + "" + '\t'
-								+ result.toString());
+								+ result.toString();
+						if(trainerPredictor instanceof ProbabilityMetadataModelPredictor){
+							ProbabilityMetadataModelPredictor blender=(ProbabilityMetadataModelPredictor) trainerPredictor;
+							resultLine=resultLine+'\t'+blender.calculateRegretBaseExpert().toString(); 
+						}
+						results.add(resultLine);
 						denseModel = null;
 
 				
@@ -160,7 +161,8 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				
 			
 			for (String string : results) {
-				System.out.println(string);
+				LOG.info(string);
+				
 			}
 			
 			

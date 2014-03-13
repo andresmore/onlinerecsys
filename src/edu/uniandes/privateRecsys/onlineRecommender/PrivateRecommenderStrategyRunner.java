@@ -3,6 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.uniandes.privateRecsys.onlineRecommender.exception.StopTrainingException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -48,6 +49,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 			long userTime=0;
 			long userAggregation=0;
 			boolean ok=true;
+			boolean stopTraining=false;
 			//double gamma=gammaStrategy.getGammaFromK(userItemRep.getNumberTrainsItems());
 			synchronized (userItemRep.blockUser(event.getUserId())) {
 				
@@ -72,29 +74,38 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				//System.out.println(Thread.currentThread()+" ended event "+event.getUserId()+","+event.getItemId());
 				
 				//System.out.println(Thread.currentThread()+" ended user update "+event.getUserId()+","+event.getItemId());
-				if(ok){
-				userTime=System.nanoTime();
+			
+			if (ok) {
+				userTime = System.nanoTime();
 				try {
-					 
-						user=userAggregator.aggregateEvent(user,event,userItemRep);
-						trainer.updateState(Thread.currentThread().getId(), event,"LOCK-AGGREGATED");
+
+					user = userAggregator.aggregateEvent(user, event,
+							userItemRep);
+					trainer.updateState(Thread.currentThread().getId(), event,
+							"LOCK-AGGREGATED");
+				} catch (StopTrainingException e) {
+					stopTraining=true;
 				} catch (Exception e) {
-					LOG.log(Level.SEVERE,"ERROR",e);
-					LOG.severe(Thread.currentThread()+" ended event with error "+event.getUserId()+","+event.getItemId()+" "+e.getMessage()+"" );
+
+					LOG.log(Level.SEVERE, "ERROR", e);
+					LOG.severe(Thread.currentThread()
+							+ " ended event with error " + event.getUserId()
+							+ "," + event.getItemId() + " " + e.getMessage()
+							+ "");
 					e.printStackTrace();
-					ok=false;
-				
+					ok = false;
 				}
-				//System.out.println(Thread.currentThread()+" ended user agg "+event.getUserId()+","+event.getItemId());
-				userAggregation=System.nanoTime();
-				}
+
+				// System.out.println(Thread.currentThread()+" ended user agg "+event.getUserId()+","+event.getItemId());
+				userAggregation = System.nanoTime();
+			}
 			}
 			//trainer.updateState(Thread.currentThread().getId(), event,"WAIT-ITEM");
 			synchronized (userItemRep.blockItem(event.getItemId())) {
 				
 			
 			try {
-				if(ok){
+				if(ok&&!stopTraining){
 					
 					itemProfileUpdater.processEvent(event,userItemRep,user);
 					//trainer.updateState(Thread.currentThread().getId(), event,"ITEM-UPDATED");

@@ -21,6 +21,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.Differenti
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.GridSearchParameter;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.GridSearchParameterLearningRate;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.OnlineRecommenderTester;
+import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.ProbabilityMetadataBlenderRecommenderTester;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSMetadataDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -51,7 +52,6 @@ public class RecommenderMainClass {
 	private static final String PRIVACY_BUDGET="privacyBudget";
 	private static final String PRIVACY_TIME_BUDGET="timeBudget";
 	private static final String ERROR_REPORT="numErrorReport";
-	private static final String NUM_NEIGHBORS="numNeighborsSemantic";
 	private static final String CONSTANT_RATE="learningRate";
 	private static final String USER_HYPOTHESIS="userHypothesis";
 	
@@ -70,9 +70,10 @@ public class RecommenderMainClass {
 	private static final String CONTINUAL_DIFFERENTIAL_PRIVACY_RECOMMENDER="ContinualDifferentialPrivacyOnlineRecommenderTester";
 	private static final String DIFFERENTIAL_PRIVACY_RECOMMENDER="DifferentialPrivacyOnlineRecommenderTester";
 	private static final String NO_PRIVACY_RECOMMENDER="OnlineRecommenderTester";
-	private static final String SEMANTIC_ENHANCED_RECOMMENDER="OnlineSemanticRecommender";
 	private static final String GRIDSEARCH="GridSearchParameter";
 	private static final String GRIDSEARCH_FIXEDLEARNINGRATE="GridSearchWLearningRate";
+	private static final String PROBABILITYMETADATARECOMENDERTESTER="BlenderTesterLearningRate";
+	
 	
 	/**
 	 * Available UserProfileUpdaters
@@ -87,7 +88,7 @@ public class RecommenderMainClass {
 	private Options options;
 	private RSDataset datasetMovielens;
 	private RSDataset datasetNetflix;
-	private RSMetadataDataset datasetSemanticMovielens;
+	private RSDataset datasetSemanticMovielens;
 	
 	
 	@SuppressWarnings("static-access")
@@ -106,16 +107,14 @@ public class RecommenderMainClass {
 		RatingScale scaleMovielens= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
 		this.datasetMovielens= new RSDataset(trainSetMovieLens,testSetMovielens,testCVMovielens,scaleMovielens);
 		
-		String trainSetSemanticMovieLens="data/ml-10M100K/metadata/trainSemantic.txt.sorted";
-		String testSetSemanticMovielens="data/ml-10M100K/metadata/testSemantic.txt";
-		//String trainSetSemanticMovieLens="data/ml-10M100K/metadata/ra.train.sorted";
-		//String testSetSemanticMovielens="data/ml-10M100K/metadata/ra.test";
-				
-		String metadataSemanticMovielens="data/ml-10M100K/metadata/unitvectors/spectral-5";
-		//String metadataSemanticMovielens="data/ml-10M100K/metadata/mapFile.data";
-		String allSemanticMovielens="data/ml-10M100K/metadata/allSemantic.txt";
-		RatingScale scaleSemanticMovielens= new OrdinalRatingScale(new String[] {"0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"},translations);
-		this.datasetSemanticMovielens= new RSMetadataDataset(trainSetSemanticMovieLens,testSetSemanticMovielens,testSetSemanticMovielens,scaleSemanticMovielens,metadataSemanticMovielens,allSemanticMovielens);
+		String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
+		String testSet=new String("data/ml-10M100K/rb.test.meta.test");
+		String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
+		
+		
+		
+		
+		this.datasetSemanticMovielens= new RSDataset(trainSet,testSet,testCV,scaleMovielens);
 		
 		String trainSetNetflix="data/netflix/rb.train.sorted";
 		String testSetNetflix="data/netflix/rb.test.test";
@@ -140,8 +139,7 @@ public class RecommenderMainClass {
 				.hasArg(true).withDescription("privacy time budget (T)").isRequired(false).create(PRIVACY_TIME_BUDGET);
 		Option errorReportOption=OptionBuilder.withArgName(ERROR_REPORT)
 				.hasArg(true).withDescription("Report error every numTrainings ").isRequired(false).create(ERROR_REPORT);
-		Option numNeighborsOption=OptionBuilder.withArgName(NUM_NEIGHBORS)
-				.hasArg(true).withDescription("number of neighbors to build vector from semantic information").isRequired(false).create(NUM_NEIGHBORS);
+		
 		Option constantRateOption=OptionBuilder.withArgName(CONSTANT_RATE)
 				.hasArg(true).withDescription("provide a fixed learning rate for the experiment").isRequired(false).create(CONSTANT_RATE);
 		Option userProfileUpdater=OptionBuilder.withArgName(USER_HYPOTHESIS)
@@ -158,7 +156,7 @@ public class RecommenderMainClass {
 		options.addOption(privacyBudgetOption);
 		options.addOption(privacyTimeBudgetOption);
 		options.addOption(errorReportOption);
-		options.addOption(numNeighborsOption);
+	
 		options.addOption(constantRateOption);
 		options.addOption(userProfileUpdater);
 		
@@ -292,20 +290,8 @@ public class RecommenderMainClass {
 
 		}
 		
-		//Convert numNeighbors
-		int numNeighbors = -1;
-		if (line.hasOption(NUM_NEIGHBORS)) {
-			String numNeighborsStr = line
-					.getOptionValue(NUM_NEIGHBORS);
-			try {
-				numNeighbors = Integer.parseInt(numNeighborsStr);
-			} catch (NumberFormatException e) {
-				throw new ParseException(
-						"Could not convert number number of niehgbors "
-								+ numNeighborsStr + " to Integer");
-			}
-
-		}
+		
+		
 			
 		
 		//Check if recommender is ok
@@ -347,7 +333,7 @@ public class RecommenderMainClass {
 			chosenRecommender=line.getOptionValue(RECOMMENDER);
 			if(chosenRecommender.equals(GRIDSEARCH)){
 				GridSearchParameter search= new GridSearchParameter(dataset,modelTrainerPredictor);
-				//TODO:Iterations should be a param...
+				
 				search.startSearch(4);
 				return null;
 			}
@@ -357,6 +343,13 @@ public class RecommenderMainClass {
 				search.startSearch(4);
 				return null;
 			}
+			else if(chosenRecommender.equals(PROBABILITYMETADATARECOMENDERTESTER)){
+				ProbabilityMetadataBlenderRecommenderTester blenderTester= new ProbabilityMetadataBlenderRecommenderTester(dataset, dimensions, new ProbabilityMetadataModelPredictor(new BaseModelPredictorWithItemRegularizationUpdate(0), new MetadataPredictor(-1)),0.75);
+				blenderTester.startTraining();
+				return null;
+			}
+			
+			
 			else if(chosenRecommender.equals(CONTINUAL_DIFFERENTIAL_PRIVACY_RECOMMENDER)){
 				
 				if(privacyBudget==-1 || privacyTimeBudget==-1){
@@ -393,11 +386,9 @@ public class RecommenderMainClass {
 			}
 			else if(chosenRecommender.equals(NO_PRIVACY_RECOMMENDER)){
 				AverageDataModel averageModel= null;
-				if(dataset.equals(this.datasetSemanticMovielens)){
-					averageModel=new AverageDataModel(new File(this.datasetSemanticMovielens.getAllDataset()));
-				}else{
-					averageModel=new AverageDataModel(new File(dataset.getTrainSet()));
-				}
+				
+				averageModel=new AverageDataModel(new File(dataset.getTrainSet()));
+				
 				tester= new OnlineRecommenderTester(dataset, dimensions);
 				FactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(averageModel, dataset.getScale(), dimensions,modelTrainerPredictor.getHyperParametersSize(),true);
 				modelTrainerPredictor.setModelRepresentation(representation);
@@ -409,23 +400,7 @@ public class RecommenderMainClass {
 				tester.setEventsReport(numErrorReport);
 			
 			}
-			else if(chosenRecommender.equals(SEMANTIC_ENHANCED_RECOMMENDER)){
-				if(numNeighbors==-1)
-					throw new ParseException("Semantic recommender needs numNeighbors");
-				
-				RSMetadataDataset dataset2=(RSMetadataDataset) dataset;
-				AverageDataModel averageModel= new AverageDataModel(new File(dataset2.getAllDataset()));
-				tester= new OnlineRecommenderTester(dataset2, dimensions);
-				FactorUserItemRepresentation representation= new DenseFactorUserItemRepresentationWithMetadata(averageModel, dataset.getScale(), dimensions,dataset2.getSpectralDataFile(),numNeighbors,true,modelTrainerPredictor.getHyperParametersSize());
-				modelTrainerPredictor.setModelRepresentation(representation);
-				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
-				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-				IUserItemAggregator agregator= new NoPrivacyAggregator();
-				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
-				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
-				tester.setEventsReport(numErrorReport);
 			
-			}
 			else{
 				throw new ParseException("Recommender "+chosenRecommender+" not found");
 			}
@@ -443,16 +418,16 @@ public class RecommenderMainClass {
 		try {
 			new RecommenderMainClass().startRecommender(args);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (TasteException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (PrivateRecsysException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

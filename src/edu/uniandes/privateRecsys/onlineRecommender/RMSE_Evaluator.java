@@ -26,7 +26,7 @@ public class RMSE_Evaluator implements Observer {
 	private RunningAverage maeAverage= new FullRunningAverage();
 	private RunningAverage averagePrediction= new FullRunningAverage();
 	private ThreadPoolExecutor executor ;
-	private RatingScale scale;
+	
 	
 	private AtomicLong numEvals=new AtomicLong(0);
 	
@@ -49,7 +49,7 @@ public class RMSE_Evaluator implements Observer {
 
 	public RMSE_Evaluator(UserModelTrainerPredictor predictor,RatingScale scale, int minTrains) {
 		this.predictor=predictor;
-		this.scale=scale;
+		
 		this.minTrains=minTrains;
 		LOG.info("RMSE evaluator asking for processors available");
 		int numProcessors=Runtime.getRuntime().availableProcessors();

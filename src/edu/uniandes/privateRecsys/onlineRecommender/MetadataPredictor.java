@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import javax.swing.Box.Filler;
-
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.DenseVector;
@@ -26,7 +24,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
  */
 public class MetadataPredictor implements UserModelTrainerPredictor {
 
-	private static int NUM_INCLUSION_ROLLING=3;
+	private static int NUM_INCLUSION_ROLLING=5;
 	
 	private int limitSize=10;
 	
@@ -47,8 +45,12 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 	@Override
 public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
 		
+		
 		long userId=event.getUserId();
 		long itemId=event.getItemId();
+		
+		if(event.getMetadata()==null)
+			return Prediction.createNoAblePrediction(userId, itemId);
 		
 		UserProfile user = model
 				.getPrivateUserProfile(userId);
@@ -103,6 +105,8 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 			UserMetadataInfo trainedMetadataProfiles,int numTrains) {
 		String rating=event.getRating();
 		
+		if(event.getMetadata()==null)
+			return trainedMetadataProfiles;
 		
 		double gamma= this.learningStrategy.getGammaFromK(this.model.getNumberTrainsUser(event.getUserId()));	
 		LinkedList<Long> profileConcepts=trainedMetadataProfiles.getIncludedConcepts();

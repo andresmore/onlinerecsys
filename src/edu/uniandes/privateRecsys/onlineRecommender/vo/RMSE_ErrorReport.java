@@ -4,6 +4,19 @@ import java.util.LinkedList;
 
 public class RMSE_ErrorReport implements ErrorReport {
 	
+	private double errorTrain;
+	private double errorTest;
+	private double errorCV;
+	private LinkedList<Double> partialErrors;
+	
+	public RMSE_ErrorReport(double errorTrain, double errorTest, double errorCV, LinkedList<Double> partialErrors) {
+		super();
+		this.errorTrain = errorTrain;
+		this.errorTest = errorTest;
+		this.errorCV = errorCV;
+		this.partialErrors=partialErrors;
+	}
+	
 	public double getErrorTrain() {
 		return errorTrain;
 	}
@@ -24,18 +37,9 @@ public class RMSE_ErrorReport implements ErrorReport {
 		return partialErrors;
 	}
 
-	private double errorTrain;
-	private double errorTest;
-	private double errorCV;
-	private LinkedList<Double> partialErrors;
 	
-	public RMSE_ErrorReport(double errorTrain, double errorTest, double errorCV, LinkedList<Double> partialErrors) {
-		super();
-		this.errorTrain = errorTrain;
-		this.errorTest = errorTest;
-		this.errorCV = errorCV;
-		this.partialErrors=partialErrors;
-	}
+	
+	
 	
 	@Override
 	public String toString() {

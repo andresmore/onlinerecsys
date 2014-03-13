@@ -12,37 +12,42 @@ public class ConceptBreaker {
 		metaDataSeparators.add('}');
 		metaDataSeparators.add(',');
 		metaDataSeparators.add(':');
+		metaDataSeparators.add('.');
 	}
 	
 	public static LinkedList<Long> breakConcepts(String metadataVector) {
 		HashSet<Long> concepts= new HashSet<Long>();
 		LinkedList<Long> conceptsRet=new LinkedList<>();
-		StringBuilder builder= new StringBuilder();
+		long endLong=-1;
+		final char[] charArray=metadataVector.toCharArray();
 		
 		for (int i = 0; i < metadataVector.length(); i++) {
-			char at= metadataVector.charAt(i);
+			char at= charArray[i];
 			if( metaDataSeparators.contains(at) ){
-				if(builder.length()>0){
-					try{
-					Long concept=Long.parseLong(new String(builder.toString()));
+				if(at==':'){
+					//TODO:take into account feature weight into calculations
+					i+=4;
 					
-					concepts.add(concept);
-					}catch(NumberFormatException e){};
+				}		
+				if(endLong>-1){
+					
+					concepts.add(endLong);
+					
 				}
-					builder= new StringBuilder();
+				endLong= -1;
 				
 			}
 			else{
-				builder.append(at);
+				if(endLong==-1)
+						endLong=0;
+				
+				endLong = endLong * 10 + (int)(at - '0');
+				
 			}
 			
 		}
-		if(builder.length()>0){
-			try{
-				Long concept=Long.parseLong(new String(builder.toString()));
-				
-				concepts.add(concept);
-				}catch(NumberFormatException e){};
+		if(endLong>-1){
+			concepts.add(endLong);
 		}
 		
 		conceptsRet.addAll(concepts);

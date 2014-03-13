@@ -30,7 +30,7 @@ public abstract class AbstractRecommenderTester  {
 	protected int numLimitEvents=-1;
 	protected int eventsReport=-1;
 	
-	//protected AverageDataModel model;
+	
 	protected RSDataset rsDataset;
 	protected UserModelTrainerPredictor predictor;
 	private final static Logger LOG = Logger.getLogger(AbstractRecommenderTester.class
@@ -99,6 +99,7 @@ public abstract class AbstractRecommenderTester  {
 					throw new TasteException("Training failed - not all tasks executed - Sumbited tasks: "+pstr.getNumSubmitedTasks()+" Executed tasks: "+pstr.numExecutedTasks());
 				}
 				LOG.info("Finished training, measuring errors ");
+				
 				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,10);
 				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,10);
 				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,10);

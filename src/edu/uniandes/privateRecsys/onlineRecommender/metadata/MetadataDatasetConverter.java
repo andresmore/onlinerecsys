@@ -82,8 +82,12 @@ public class MetadataDatasetConverter {
 		
 	}
 	
-	public static void main(String[] args) {
-		new MetadataDatasetConverter().convertDatasetFile("data/ml-1m/rb.test.cv", "data/ml-1m/mapFile.data", "data/ml-1m/rb.test.meta.cv");
+	public static void main(String[] args) throws IOException {
+		
+		String metadataMapFile="data/ml-10M100K/metadata/mapFileUpdatedFinal.data";
+		Matrix mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
+		System.out.println(mat.columnSize()+" "+mat.rowSize());
+		//new MetadataDatasetConverter().convertDatasetFile("data/ml-1m/rb.test.cv", "data/ml-1m/mapFile.data", "data/ml-1m/rb.test.meta.cv");
 	}
 
 }

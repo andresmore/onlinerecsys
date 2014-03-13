@@ -1,9 +1,11 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
@@ -13,7 +15,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 /**
- * Model that blends probability hypothesis, average beta estimators and metadata training for online training and prediction
+ * Model that blends a single-update probability hypothesis and metadata training for online training and prediction on an exponential weighted predictor
  * @author Andres M
  *
  */
@@ -239,6 +241,19 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	public void setMetadataModelModelLearningRateStrategy(LearningRateStrategy strategy) {
 		metadataModel.setLearningRateStrategy(strategy);
+		
+	}
+	
+	public Vector calculateRegretBaseExpert() throws TasteException{
+		
+		Vector vec= new DenseVector(this.getHyperParametersSize());
+		Set<Long> userIds=this.modelRepresentation.getUsersId();
+		for (Long userId : userIds) {
+			UserProfile user=this.modelRepresentation.getPrivateUserProfile(userId);
+			vec=vec.plus(user.getHyperParameters());
+		}
+		
+		return vec;
 		
 	}
 

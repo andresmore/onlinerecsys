@@ -109,7 +109,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	}
 	
 	@Override
-	public UserProfile getPrivateUserProfile(long userId) throws TasteException {
+	synchronized public UserProfile getPrivateUserProfile(long userId) throws TasteException {
 		if(isAllowed(userId)){
 			
 			
@@ -487,10 +487,11 @@ public class IncrementalFactorUserItemRepresentation implements
 	@Override
 	public void saveItemMetadata(long itemId, String metadataStr) {
 		if(!this.itemMetadata.containsKey(itemId)){
-			
-			LinkedList<Long>metadata=ConceptBreaker.breakConcepts(metadataStr);
-			Collections.sort(metadata);
-			this.itemMetadata.putIfAbsent(itemId, metadata);
+			if(metadataStr!=null){
+				LinkedList<Long>metadata=ConceptBreaker.breakConcepts(metadataStr);
+				Collections.sort(metadata);
+				this.itemMetadata.putIfAbsent(itemId, metadata);
+			}	
 		}
 	}
 

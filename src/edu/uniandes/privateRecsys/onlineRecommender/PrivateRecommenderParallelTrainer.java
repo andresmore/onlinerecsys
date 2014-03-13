@@ -175,7 +175,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	public boolean forceShutdown() throws InterruptedException {
 		
 		LOG.info("Awaiting termination of Parallel training:");
-		executor.awaitTermination(20, TimeUnit.MINUTES);
+		executor.awaitTermination(60, TimeUnit.MINUTES);
 		LOG.info("Finished termination of Parallel training: "+executor.isTerminated());
 		if(!executor.isTerminated())
 			executor.shutdownNow();
