@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 
+import org.jfree.util.Log;
+
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ReportErrorEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -34,6 +36,7 @@ public class FileEventCreator extends Observable{
 		
 		this.separators.add(":");
 		this.separators.add(",");
+		this.separators.add(""+'\t');
 		
 		
 				
@@ -107,8 +110,13 @@ public class FileEventCreator extends Observable{
 			 String timestampString = hasTimestamp ? new String(tokens.next()) : null;
 			 boolean hasMetadata = tokens.hasNext();
 			 String metadata=hasMetadata? new String(tokens.next()):null;
-			 
-		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString, Long.parseLong(timestampString),metadata);
+		try{	 
+		return new UserTrainEvent(Long.parseLong(userIDString), Long.parseLong(itemIDString), preferenceValueString,hasTimestamp? Long.parseLong(timestampString):0,metadata);
+		}
+		catch(Exception e){
+			System.err.println("for input "+line);
+			throw e;
+		}
 	}
 
 

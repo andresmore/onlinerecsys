@@ -100,9 +100,9 @@ public abstract class AbstractRecommenderTester  {
 				}
 				LOG.info("Finished training, measuring errors ");
 				
-				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,10);
-				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,10);
-				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,10);
+				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,3);
+				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,3);
+				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,3);
 				//System.out.println("Error at iteration "+iteration+" is: Train: "+errorTrain+" CV:"+errorCV+" Test:"+error);
 				LOG.info("Iteration "+iteration+" errors: "+errorTrain+'\t'+errorCV+'\t'+error);
 				partialErrors.addAll(pstr.getPartialEvaluations());

@@ -49,25 +49,25 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 		try {
 			
 			LinkedList<String> results= new LinkedList<>();
-			String trainSet=new String("data/dbBook/ra.train.meta");
+			//String trainSet=new String("data/dbBook/ra.train.meta");
 			//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
 			//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
 			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
+			String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
 			//String trainSet="data/netflix/rb.train.sorted";
 			
-			String testSet=new String("data/dbBook/ra.test.meta");
+			//String testSet=new String("data/dbBook/ra.test.meta");
 			//String testSet=new String("data/ml-10M100K/rb.test.test");
 			//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
 			//String testSet=new String("data/ml-1m/rb.test.test");
-			//String testSet=new String("data/ml-1m/rb.test.meta.test");
+			String testSet=new String("data/ml-1m/rb.test.meta.test");
 			//String testSet="data/netflix/rb.test.test";
 			
-			String testCV=new String("data/dbBook/ra.test.meta");
+			//String testCV=new String("data/dbBook/ra.test.meta");
 			//String testCV=new String("data/ml-10M100K/rb.test.cv");
 			//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
 			//String testCV=new String("data/ml-1m/rb.test.cv");
-			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
+			String testCV=new String("data/ml-1m/rb.test.meta.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			
@@ -86,9 +86,9 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 			
 			
-			int[] limitSizes={5,10,25,50,75,100};
+			int[] limitSizes={5,10,25,50};
 			double[] learningRates={0.01,0.05,0.15,0.25,0.3,0.4,0.5,0.6,0.75,0.9};
-			int[] trainLimits={5,10,25,50,75,100,150,200,-1};
+			//int[] trainLimits={5,10,25,50,75,100,150,200,-1};
 			LinkedList<UserModelTrainerPredictor> predictorsLinked= new LinkedList<UserModelTrainerPredictor>();
 			//predictorsLinked.add(new BayesAveragePredictor());	
 			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0);
@@ -98,66 +98,75 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//predictorsLinked.add(new BlendedModelPredictor());
 			//predictorsLinked.add(new  MetadataSimilarityPredictor());
 			MetadataPredictor metadataModel = new MetadataPredictor(50);
-			predictorsLinked.add(metadataModel);
+			//predictorsLinked.add(metadataModel);
 			
-			predictorsLinked.add(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
+			//predictorsLinked.add(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
 			//predictorsLinked.add(new BaseModelPredictorWithItemRegularizationUpdate(0));
 			
 			
 			Object[] predictors=  predictorsLinked.toArray();
 				
 			for (int i = 0; i < predictors.length; i++) {
-				
+
 				for (int j = 0; j < learningRates.length; j++) {
-					
-					int dimensions=limitSizes[0];
-						
+
+					for (int d = 0; d < limitSizes.length; d++) {
+
+						int dimensions = limitSizes[d];
+
 						UserModelTrainerPredictor trainerPredictor = (UserModelTrainerPredictor) predictors[i];
 						FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
 								scale, dimensions, false, trainerPredictor);
-						
+
 						trainerPredictor.setModelRepresentation(denseModel);
-						if(trainerPredictor instanceof ProbabilityMetadataModelPredictor){
-							LearningRateStrategy learningRateStrategy = LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]);
-							baseModelPredictor.setLearningRateStrategy(learningRateStrategy);
-							LearningRateStrategy tsCreator = LearningRateStrategy.createDecreasingRate(1e-6, 0.75);
+						if (trainerPredictor instanceof ProbabilityMetadataModelPredictor) {
+							LearningRateStrategy learningRateStrategy = LearningRateStrategy
+									.createDecreasingRate(1e-6,
+											learningRates[j]);
+							baseModelPredictor
+									.setLearningRateStrategy(learningRateStrategy);
+							LearningRateStrategy tsCreator = LearningRateStrategy
+									.createDecreasingRate(1e-6, 0.75);
 							metadataModel.setLearningRateStrategy(tsCreator);
-							
+
+						} else {
+							trainerPredictor
+									.setLearningRateStrategy(LearningRateStrategy
+											.createDecreasingRate(1e-6,
+													learningRates[j]));
 						}
-						else{
-							trainerPredictor.setLearningRateStrategy( LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]));
-						}
-						
 
 						OnlineRecommenderTester rest = new OnlineRecommenderTester(
 								data, dimensions);
 						// rest.setEventsReport(1000000);
 						UserProfileUpdater userUp = new UserProfileUpdater(
 								trainerPredictor);
-						//int limit=trainLimits[j];
+						// int limit=trainLimits[j];
 						IUserItemAggregator agregator = new NoPrivacyAggregator();
 						IItemProfileUpdater itemUpdater = new ItemProfileUpdater(
 								trainerPredictor);
 						rest.setModelAndUpdaters(denseModel, userUp, agregator,
 								itemUpdater);
 						rest.setModelPredictor(trainerPredictor);
-						ErrorReport result = rest.startExperiment(50);
-						String resultLine=predictors[i] + "" + '\t'
-								+ learningRates[j] + "" + '\t'
+						ErrorReport result = rest.startExperiment(1);
+						String resultLine = predictors[i] + "" + '\t'
+								+ learningRates[j] + "" + '\t'+ limitSizes[d] + "" + '\t'
 								+ result.toString();
-						if(trainerPredictor instanceof ProbabilityMetadataModelPredictor){
-							ProbabilityMetadataModelPredictor blender=(ProbabilityMetadataModelPredictor) trainerPredictor;
-							resultLine=resultLine+'\t'+blender.calculateRegretBaseExpert().toString(); 
+						if (trainerPredictor instanceof ProbabilityMetadataModelPredictor) {
+							ProbabilityMetadataModelPredictor blender = (ProbabilityMetadataModelPredictor) trainerPredictor;
+							resultLine = resultLine
+									+ '\t'
+									+ blender.calculateRegretBaseExpert()
+											.toString();
 						}
 						results.add(resultLine);
 						denseModel = null;
 
-				
+					}
+
 				}
 
 			}		
-						
-				
 				
 			
 			for (String string : results) {

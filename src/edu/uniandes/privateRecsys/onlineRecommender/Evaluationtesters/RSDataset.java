@@ -1,5 +1,12 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
+
+import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 
 public class RSDataset {
@@ -32,6 +39,14 @@ public class RSDataset {
 		this.testSet=testSet;
 		this.testCV=testCV;
 		this.scale=scale;
+	}
+	public static RSDataset fromPropertyFile(String file) throws FileNotFoundException, IOException {
+		Properties prop= new Properties();
+		prop.load(new FileInputStream(file));
+		String[] scaleStr=prop.getProperty("scale").split(",");
+		OrdinalRatingScale scale= new OrdinalRatingScale(scaleStr, new HashMap<String, String>());
+	
+		return new RSDataset(prop.getProperty("trainSet"), prop.getProperty("testSet"), prop.getProperty("testCV"),scale);
 	}
 	
 

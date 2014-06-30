@@ -68,7 +68,7 @@ public class BaseModelPredictorWithItemRegularizationUpdate extends
 	
 	@Override
 	public String toString(){
-		return "BaseModelPredictorWithItemRegularizationUpdate "+this.learningRateStrategy.toString();
+		return "BaseModelPredictorWithItemRegularizationUpdate "+this.learningRateStrategy.toString()+" dim="+modelRepresentation.getfDimensions();
 	}
 
 }

@@ -21,7 +21,7 @@ public class RMSE_Evaluator implements Observer {
 
 	
 	
-	private static final int LIMIT_SIZE_QUEUE = 100000;
+	private static final int LIMIT_SIZE_QUEUE = 500000;
 	private RunningAverage rmseAverage= new FullRunningAverage();
 	private RunningAverage maeAverage= new FullRunningAverage();
 	private RunningAverage averagePrediction= new FullRunningAverage();
@@ -39,6 +39,7 @@ public class RMSE_Evaluator implements Observer {
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
 
 	private UserModelTrainerPredictor predictor;
+	private RatingScale scale;
 	
 
 	private final static Logger LOG = Logger.getLogger(RMSE_Evaluator.class
@@ -49,7 +50,7 @@ public class RMSE_Evaluator implements Observer {
 
 	public RMSE_Evaluator(UserModelTrainerPredictor predictor,RatingScale scale, int minTrains) {
 		this.predictor=predictor;
-		
+		this.scale=scale;
 		this.minTrains=minTrains;
 		LOG.info("RMSE evaluator asking for processors available");
 		int numProcessors=Runtime.getRuntime().availableProcessors();
@@ -65,10 +66,10 @@ public class RMSE_Evaluator implements Observer {
 		UserTrainEvent event = (UserTrainEvent) arg;
 		PredictionEvaluationRunnable run= new PredictionEvaluationRunnable(event,this.predictor,this.minTrains,this);
 		if(executor.getQueue().size()>LIMIT_SIZE_QUEUE){
-			while (executor.getQueue().size() > LIMIT_SIZE_QUEUE/3) {
+			while (executor.getQueue().size() > LIMIT_SIZE_QUEUE/2) {
 				try {
 					//System.out.println("wating for RMSE eval "+executor.getQueue().size());
-					Thread.sleep(5000);
+					Thread.sleep(500);
 					//System.out.println("waited for RMSE eval "+executor.getQueue().size());
 				} catch (InterruptedException e) {
 					LOG.log(Level.SEVERE, "Interrupted exception", e);
@@ -138,11 +139,12 @@ public class RMSE_Evaluator implements Observer {
 			if(prediction.isHybrid())
 				this.hybridEvals.incrementAndGet();
 			
-			// TODO:Generalize limits
-			if (predictionValue < 1)
-				predictionValue = 1;
-			if (predictionValue > 5)
-				predictionValue = 5;
+			
+			double[] scaleAsValues = this.scale.scaleAsValues();
+			if (predictionValue < scaleAsValues[0])
+				predictionValue = scaleAsValues[0];
+			if (predictionValue > scaleAsValues[scaleAsValues.length-1])
+				predictionValue = scaleAsValues[scaleAsValues.length-1];
 
 			averagePrediction.addDatum(predictionValue);
 			float diff = (float) (Double.parseDouble(event.getRating()) - predictionValue);

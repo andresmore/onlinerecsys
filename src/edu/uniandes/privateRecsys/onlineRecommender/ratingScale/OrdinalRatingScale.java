@@ -6,9 +6,10 @@ import java.util.LinkedList;
 
 public class OrdinalRatingScale implements RatingScale {
 
-	private String[] scale;
-	private String[] publicScale;
-	private HashMap<String, String> translations;
+	private final String[] scale;
+	private final String[] publicScale;
+	private final double[] scaleAsValues;
+	private final HashMap<String, String> translations;
 
 	public OrdinalRatingScale(String[] strings, HashMap<String,String> translations) {
 		
@@ -23,7 +24,10 @@ public class OrdinalRatingScale implements RatingScale {
 				
 		}
 		publicScale=finalList.toArray(new String[finalList.size()]);
-		
+		this.scaleAsValues= new double[publicScale.length];
+		for (int i = 0; i < publicScale.length; i++) {
+			this.scaleAsValues[i]=Double.parseDouble(publicScale[i]);
+		}
 	
 	}
 
@@ -39,8 +43,8 @@ public class OrdinalRatingScale implements RatingScale {
 
 	@Override
 	public boolean hasScale(String rating) {
-		for (int i = 0; i < scale.length; i++) {
-			if(scale[i].equals(rating))
+		for (int i = 0; i < publicScale.length; i++) {
+			if(publicScale[i].equals(rating))
 				return true;
 		}
 		return false;
@@ -54,6 +58,21 @@ public class OrdinalRatingScale implements RatingScale {
 			return alias;
 		
 		return rating;
+	}
+
+	@Override
+	public double[] scaleAsValues() {
+		// TODO Auto-generated method stub
+		return scaleAsValues;
+	}
+
+	@Override
+	public int getIndexForPreference(String rating) {
+		for (int i = 0; i < publicScale.length; i++) {
+			if(publicScale[i].equals(rating))
+				return i;
+		}
+		return -1;
 	}
 
 	

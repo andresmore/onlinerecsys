@@ -164,7 +164,7 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 	
 	@Override
 	public String toString(){
-		return "BaseModelPredictor "+this.learningRateStrategy.toString();
+		return "BaseModelPredictor "+this.learningRateStrategy.toString()+" dim="+modelRepresentation.getfDimensions();
 	}
 	
 	@Override

@@ -21,7 +21,7 @@ public interface UserModelTrainerPredictor {
 
 	public  HashMap<String, Vector> calculateProbabilityUpdate(
 			UserTrainEvent event, String rating, Vector itemVector,
-			UserProfile oldUserPrivate, String[] ratingScale);
+			UserProfile oldUserPrivate, String[] ratingScale) throws TasteException;
 
 	public  HashMap<String, BetaDistribution> calculatePriorsUpdate(
 			UserTrainEvent event, HashMap<String, BetaDistribution> biasVector,

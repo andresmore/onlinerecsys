@@ -10,5 +10,7 @@ public interface RatingScale {
 	public String[] getScale();
 	public boolean hasScale(String rating);
 	public String getRatingAlias(String rating);
+	double[] scaleAsValues();
+	int getIndexForPreference(String rating);
 
 }
