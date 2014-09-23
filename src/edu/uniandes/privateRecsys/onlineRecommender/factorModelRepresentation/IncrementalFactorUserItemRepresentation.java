@@ -186,7 +186,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		for (int i = 0; i < scale.length; i++) {
 			
 			if(this.modelTrainerPredictor.hasProbabilityPrediction()){
-				Vector vec=PrivateRandomUtils.normalRandom(0, 1, this.fDimensions);
+				Vector vec=PrivateRandomUtils.normalRandom(0, 0.01, this.fDimensions);
 				userProfile.put(scale[i],vec);
 			}
 			
@@ -210,10 +210,11 @@ public class IncrementalFactorUserItemRepresentation implements
 		if (this.modelTrainerPredictor.hasMetadataPredictor()) {
 			this.privateUserConcepts.put(userId, new LinkedList<Long>());
 
-			this.privateUserSketch.put(userId, new SlidingWindowCountMinSketch(
+			this.privateUserSketch.put(userId,this.modelTrainerPredictor.buildMetadataSketch());
+			/* new SlidingWindowCountMinSketch(
 					UserProfile.SKETCH_DEPTH, UserProfile.SKETCH_WIDTH,
 					UserProfile.SEED, UserProfile.NUMBER_OF_SEGMENTS,
-					UserProfile.WINDOW_LENGHT, UserProfile.HASH_A));
+					UserProfile.WINDOW_LENGHT, UserProfile.HASH_A)*/
 		}
 
 		for (int i = 0; i < scale.length; i++) {

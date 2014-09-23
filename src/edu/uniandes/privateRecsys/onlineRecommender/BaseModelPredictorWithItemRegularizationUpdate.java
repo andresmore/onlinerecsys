@@ -29,9 +29,6 @@ public class BaseModelPredictorWithItemRegularizationUpdate extends
 					.getPrivateItemProfile(itemId);
 			Vector itemVector = itemProfile.getProbabilityVector();
 
-			double initPrediction = calculatePrediction(itemVector,
-					oldUserProfile, modelRepresentation.getRatingScale()
-							.getScale());
 
 			double sum = 0;
 
@@ -48,14 +45,12 @@ public class BaseModelPredictorWithItemRegularizationUpdate extends
 
 			Vector regularized = itemVector.times(
 					regulatizationConstant);
-			Vector toProject = itemVector.plus(regularized);
+			Vector toProject = itemVector.plus(mult).minus(regularized);
 
 			Vector projected = VectorProjector
 					.projectVectorIntoSimplex(toProject);
 
-			double endPrediction = calculatePrediction(projected,
-					oldUserProfile, modelRepresentation.getRatingScale()
-							.getScale());
+			
 
 			modelRepresentation.updateItemVector(itemId, projected);
 		} catch (TasteException e) {
@@ -68,7 +63,7 @@ public class BaseModelPredictorWithItemRegularizationUpdate extends
 	
 	@Override
 	public String toString(){
-		return "BaseModelPredictorWithItemRegularizationUpdate "+this.learningRateStrategy.toString()+" dim="+modelRepresentation.getfDimensions();
+		return "BaseModelPredictorWithItemRegularizationUpdate "+this.learningRateStrategy.toString()+" dim="+modelRepresentation.getfDimensions()+" reg "+this.regulatizationConstant ;
 	}
 
 }

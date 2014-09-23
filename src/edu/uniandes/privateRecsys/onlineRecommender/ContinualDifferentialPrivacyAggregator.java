@@ -12,7 +12,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregator {
+public class ContinualDifferentialPrivacyAggregator implements IUserMaskingStrategy {
 
 
 	private double sigma=0;
@@ -31,14 +31,11 @@ public class ContinualDifferentialPrivacyAggregator implements IUserItemAggregat
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public UserProfile aggregateEvent(UserProfile oldProfile,UserTrainEvent event,
+	public UserProfile maskProfile(UserProfile oldProfile,UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
-		long itemId=event.getItemId();
-		long userId=event.getUserId();
-		String rating=event.getRating();
-		long time=event.getTime();
 		
+		long userId=event.getUserId();
 		
 		int numNoises=(int) (Math.log(T)/Math.log(2));
 		

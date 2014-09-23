@@ -8,6 +8,7 @@ import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -51,6 +52,8 @@ public interface UserModelTrainerPredictor {
 	public void updateItemProbabilityVector(
 			UserTrainEvent gamma, UserProfile oldUserProfile,
 			long itemId, String rating);
+	public SlidingWindowCountMinSketch buildMetadataSketch();
+	
 
 	
 

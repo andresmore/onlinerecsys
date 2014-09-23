@@ -18,19 +18,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 public class UserProfile {
 
 	
-	/**
-	 * Depth of created sketches, 3 -> \delta \aprox 0.05
-	 */
-	public static int SKETCH_DEPTH=3;
-	/**
-	 * given t \aprox 500, for a expected distance of 3 between real and predicted count, E=0.006
-	 */
-	public static int SKETCH_WIDTH=455;
-	public static int WINDOW_LENGHT=100;
-	public static int NUMBER_OF_SEGMENTS=3;
-	public static long[] HASH_A;
-	public static final int SEED = new BigInteger(SecureRandom.getSeed(4)).intValue();
-	
 	
 	
 	private HashMap<String, Vector> userProfiles= new HashMap<>();
@@ -42,20 +29,6 @@ public class UserProfile {
 	private UserMetadataInfo metadataInfo;
 	
 	
-	static{
-		HASH_A= new long[SKETCH_DEPTH];
-		Random r = new Random(SEED);
-        // We're using a linear hash functions
-        // of the form (a*x+b) mod p.
-        // a,b are chosen independently for each hash function.
-        // However we can set b = 0 as all it does is shift the results
-        // without compromising their uniformity or independence with
-        // the other hashes.
-        for (int i = 0; i < SKETCH_DEPTH; ++i)
-        {
-            HASH_A[i] = r.nextInt(Integer.MAX_VALUE);
-        }
-	}
 	private UserProfile(){
 		
 		

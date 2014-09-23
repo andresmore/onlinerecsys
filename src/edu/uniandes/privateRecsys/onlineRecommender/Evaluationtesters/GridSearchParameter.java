@@ -11,11 +11,11 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
@@ -232,7 +232,7 @@ public class GridSearchParameter {
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions);
 		
 		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
-		IUserItemAggregator agregator= new NoPrivacyAggregator();
+		IUserMaskingStrategy agregator= new NoMaskingStrategy();
 		IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 		rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 		rest.setModelPredictor(modelTrainerPredictor);
@@ -279,7 +279,7 @@ public class GridSearchParameter {
 			GridSearchParameter paramSearch2=new GridSearchParameter(dataset, pred1);
 			paramSearch2.startSearch(1);
 			
-			GridSearchParameter paramSearch3=new GridSearchParameter(dataset, new MetadataPredictor(-1));
+			GridSearchParameter paramSearch3=new GridSearchParameter(dataset, new MetadataPredictor(-1,MetadataPredictor.SKETCH_DEPTH,MetadataPredictor.SKETCH_WIDTH, MetadataPredictor.WINDOW_LENGHT, MetadataPredictor.NUMBER_OF_SEGMENTS,MetadataPredictor.NUMROLLING));
 			paramSearch3.startSearch(1);
 		
 			

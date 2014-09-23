@@ -27,7 +27,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 	private FactorUserItemRepresentation userItemRep;
 	private IUserProfileUpdater userUpdater;
-	private IUserItemAggregator userAggregator;
+	private IUserMaskingStrategy userAggregator;
 	private IItemProfileUpdater itemProfileUpdater;
 	
 	private ThreadPoolExecutor executor;
@@ -49,7 +49,7 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 	public PrivateRecommenderParallelTrainer(FactorUserItemRepresentation userItemRep,
 			UserModelTrainerPredictor predictor,
 			IUserProfileUpdater userUpdater,
-			IUserItemAggregator userAggregator,
+			IUserMaskingStrategy userAggregator,
 			IItemProfileUpdater itemProfileUpdater, RSDataset dataset) {
 		this.userItemRep=userItemRep;
 		this.predictor = predictor;
@@ -140,9 +140,11 @@ public class PrivateRecommenderParallelTrainer implements Observer {
 
 		}
 		RatingScale rs = userItemRep.getRatingScale();
+		String ratingAlias = rs.getRatingAlias(event.getRating());
 		
-		if (rs.hasScale(event.getRating())) {
-			event.updateRating(rs.getRatingAlias(event.getRating()));
+		if (rs.hasScale(ratingAlias)) {
+			
+			event.updateRating(ratingAlias);
 			PrivateRecommenderStrategyRunner runner = new PrivateRecommenderStrategyRunner(
 					this.userItemRep, this.userUpdater, this.userAggregator,
 					this.itemProfileUpdater, event, this);

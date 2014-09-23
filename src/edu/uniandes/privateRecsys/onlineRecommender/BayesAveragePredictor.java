@@ -11,6 +11,7 @@ import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
@@ -203,6 +204,15 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	@Override
 	public void setLearningRateStrategy(LearningRateStrategy strategy) {
 			
+	}
+
+	@Override
+	/**
+	 * Doesn't handle metadata
+	 */
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+	
+		return null;
 	}
 
 	

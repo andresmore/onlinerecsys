@@ -154,7 +154,11 @@ public class MetadataMapFileLoader {
 		sparseItemRepresentation.setRowLabelBindings(bindings);
 		sparseItemRepresentation.setColumnLabelBindings(columnBindings);
 		fillInItemMatrix(sparseItemRepresentation,itemRepresentationMap,columnBindings, conceptFrequency, applyIDF,binary);
-		
+		for (String string : conceptFrequency.keySet()) {
+			if(string.startsWith("genre")){
+				System.out.println(string+" count:"+conceptFrequency.get(string));
+			}
+		}
 		
 		return sparseItemRepresentation;
 	}	
@@ -168,6 +172,7 @@ public class MetadataMapFileLoader {
 			for (String concept : translation.keySet()) {
 				double value=translation.get(concept);
 				int conceptPos=existingConcepts.get(concept);
+				
 				if(applyIDF){
 					//Apply idf to columns of matrix
 					int numValues=conceptFrequency.get(concept);

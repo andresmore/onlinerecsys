@@ -9,10 +9,10 @@ import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -201,7 +201,7 @@ public GridSearchParameterLearningRate(RSDataset data) throws IOException{
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions);
 		
 		UserProfileUpdater userUp= new UserProfileUpdater(modelTrainerPredictor);
-		IUserItemAggregator agregator= new NoPrivacyAggregator();
+		IUserMaskingStrategy agregator= new NoMaskingStrategy();
 		IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 		rest.setModelAndUpdaters(denseModel, userUp, agregator, itemUpdater);
 		rest.setModelPredictor(modelTrainerPredictor);

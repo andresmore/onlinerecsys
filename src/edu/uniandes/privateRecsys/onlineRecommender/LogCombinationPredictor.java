@@ -9,12 +9,13 @@ import org.apache.mahout.math.Vector;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 /**
- * Model that creates a join probability distribution from the base and average beta estimators for online training and prediction
+ * Model that creates a join probability distribution from the base and average beta estimators for online training
  * @author Andres M
  *
  */
@@ -41,7 +42,7 @@ public  class LogCombinationPredictor implements UserModelTrainerPredictor {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ModelPredictor#calculatePrediction(long, long, int)
 	 */
 	@Override
-public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
+	public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) throws TasteException{
 		
 		long userId=event.getUserId();
 		long itemId=event.getItemId();
@@ -78,6 +79,9 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		return Prediction.createPrediction(userId, itemId, prediction/sumProd);
 		
 	}
+	
+	
+	
 	
 	@Override
 	public void setModelRepresentation(FactorUserItemRepresentation model) {
@@ -128,7 +132,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	
 	@Override
 	public String toString(){
-		return "LogCombinationPredictor";
+		return "LogCombinationPredictor "+this.baseModel.toString();
 	}
 	
 	
@@ -175,6 +179,20 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public void setLearningRateStrategy(LearningRateStrategy strategy) {
 		baseModel.setLearningRateStrategy(strategy);
 				
+	}
+	/**
+	 * Doesn't handle metadata
+	 */
+	@Override
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+		
+		return null;
+	}
+	public BaseModelPredictorWithItemRegularizationUpdate getBaseModel() {
+		return baseModel;
+	}
+	public SimpleAveragePredictor getAverageModel() {
+		return averageModel;
 	}
 
 }

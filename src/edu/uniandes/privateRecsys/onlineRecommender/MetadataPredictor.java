@@ -1,9 +1,12 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -24,18 +27,70 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
  */
 public class MetadataPredictor implements UserModelTrainerPredictor {
 
-	private static int NUM_INCLUSION_ROLLING=5;
+	private  int numRolling=3;
+	
+	public static final int SEED = new BigInteger(SecureRandom.getSeed(4)).intValue();
+
+	public static final int NUMROLLING = 3;
 	
 	private int limitSize=10;
 	
 	private FactorUserItemRepresentation model;
 
 	private LearningRateStrategy learningStrategy;
+
+	private int depth;
+
+	private int width;
+
+	private int windowLenght;
+
+	private int numberOfSegments;
 	
-	public MetadataPredictor(int limitSize){
+	private long[] hash_a;
+	
+	public MetadataPredictor(int limitSize, int depth, int width, int windowLenght, int numberOfSegments, int numRolling){
 		this.limitSize=limitSize;
+		initSketchProperties(depth, width, windowLenght, numberOfSegments, numRolling);
+	}
+
+	
+	public void initSketchProperties(int depth, int width, int windowLenght,
+			int numberOfSegments,int numRolling) {
+		this.depth=depth;
+		this.width=width;
+		this.windowLenght=windowLenght;
+		this.numberOfSegments=numberOfSegments;
+		this.numRolling=numRolling;
+		hash_a= new long[depth];
+		Random r = new Random(SEED);
+	       // We're using a linear hash functions
+	       // of the form (a*x+b) mod p.
+	       // a,b are chosen independently for each hash function.
+	       // However we can set b = 0 as all it does is shift the results
+	       // without compromising their uniformity or independence with
+	       // the other hashes.
+	       for (int i = 0; i < SKETCH_DEPTH; ++i)
+	       {
+	    	   hash_a[i] = r.nextInt(Integer.MAX_VALUE);
+	       }
 	}
 	
+	
+	/**
+	 * Depth of created sketches, 3 -> \delta \aprox 0.05
+	 */
+	public static int SKETCH_DEPTH=3;
+	/**
+	 *  for \epsilon=0.006
+	 */
+	public static int SKETCH_WIDTH=450;
+	
+	
+	public static int WINDOW_LENGHT=100;
+	public static int NUMBER_OF_SEGMENTS=3;
+	
+		
 	@Override
 	public void setModelRepresentation(FactorUserItemRepresentation model) {
 		this.model=model;
@@ -137,7 +192,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 				Vector privateVectorMult = itemVector.times(multiplicator);
 				Vector result = privateVector.minus(privateVectorMult);
 
-				double dotProbEnd = Functions.SIGMOID.apply(result.dot(itemVector));
+				//double dotProbEnd = Functions.SIGMOID.apply(result.dot(itemVector));
 
 				profile.addMetadataVector(result, ratingKey);
 			}
@@ -241,7 +296,7 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 			
 			Long concept = (Long) iterator.next();
 			
-			if(sketch.estimateCount(concept)<NUM_INCLUSION_ROLLING)
+			if(sketch.estimateCount(concept)<this.numRolling)
 				iterator.remove();
 			
 		}
@@ -311,6 +366,15 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	@Override
 	public void setLearningRateStrategy(LearningRateStrategy strategy) {
 		this.learningStrategy=strategy;
+		
+	}
+
+	@Override
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+		return  new SlidingWindowCountMinSketch(
+					this.depth, this.width,
+					SEED, this.numberOfSegments,
+					this.windowLenght, this.hash_a);
 		
 	}
 

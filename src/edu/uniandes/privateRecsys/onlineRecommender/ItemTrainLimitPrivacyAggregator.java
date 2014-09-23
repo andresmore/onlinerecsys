@@ -13,7 +13,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class ItemTrainLimitPrivacyAggregator implements IUserItemAggregator {
+public class ItemTrainLimitPrivacyAggregator implements IUserMaskingStrategy {
 
 
 	private int T;
@@ -29,7 +29,7 @@ public class ItemTrainLimitPrivacyAggregator implements IUserItemAggregator {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public UserProfile aggregateEvent(UserProfile oldProfile,UserTrainEvent event,
+	public UserProfile maskProfile(UserProfile oldProfile,UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException {
 		
 		long itemId=event.getItemId();

@@ -12,6 +12,7 @@ import org.apache.mahout.math.Vector;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -233,6 +234,12 @@ public class MetadataSimilarityPredictor implements UserModelTrainerPredictor {
 	public void setLearningRateStrategy(LearningRateStrategy strategy) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+		
+		return null;
 	}
 
 }

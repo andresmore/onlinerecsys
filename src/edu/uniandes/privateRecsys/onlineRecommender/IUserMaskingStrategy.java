@@ -6,9 +6,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Fa
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public interface IUserItemAggregator {
+public interface IUserMaskingStrategy {
 
-	public abstract UserProfile aggregateEvent(UserProfile user, UserTrainEvent event,
+	public abstract UserProfile maskProfile(UserProfile user, UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException;
 
 }

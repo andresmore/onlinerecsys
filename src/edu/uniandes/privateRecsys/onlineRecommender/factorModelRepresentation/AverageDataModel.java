@@ -22,7 +22,7 @@ public class AverageDataModel {
 
 	private final static Logger LOG = Logger.getLogger(AverageDataModel.class
 		      .getName());
-
+	private FullRunningAverage globalAverage= new FullRunningAverage();
 	private HashMap<Long, FullRunningAverage> itemAverages= new HashMap<Long, FullRunningAverage>();
 	private HashMap<Long, FullRunningAverage> userAverages= new HashMap<Long, FullRunningAverage>();
 	
@@ -48,6 +48,8 @@ public class AverageDataModel {
 				long userId = Long.parseLong(userIDString);
 				double preferenceValue = Double
 						.parseDouble(preferenceValueString);
+				
+				this.globalAverage.addDatum(preferenceValue);
 				if (itemAverages.get(itemId) == null)
 					itemAverages.put(itemId, new FullRunningAverage());
 
@@ -73,13 +75,23 @@ public class AverageDataModel {
 
 	public double getAverageForItemId(long itemId) throws PrivateRecsysException {
 		if(itemAverages.get(itemId)==null)
-			throw new PrivateRecsysException("Could not find element "+itemId+" in model");
+			throw new PrivateRecsysException("Could not find item "+itemId+" in model");
 		return itemAverages.get(itemId).getAverage();
+	}
+	
+	public double getAverageForUserId(long userId) throws PrivateRecsysException {
+		if(userAverages.get(userId)==null)
+			throw new PrivateRecsysException("Could not find user "+userId+" in model");
+		return userAverages.get(userId).getAverage();
 	}
 
 	public Iterator<Long> getUserIDs() {
 		
 		return userAverages.keySet().iterator();
+	}
+	
+	public double getGlobalAverage(){
+		return this.globalAverage.getAverage();
 	}
 
 	public Iterator<Long> getItemIDs() {
@@ -96,5 +108,7 @@ public class AverageDataModel {
 		// TODO Auto-generated method stub
 		return itemAverages.keySet().size();
 	}
+
+	
 
 }

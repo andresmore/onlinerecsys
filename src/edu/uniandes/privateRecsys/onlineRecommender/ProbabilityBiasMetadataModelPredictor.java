@@ -8,6 +8,7 @@ import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -240,6 +241,11 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 	public void setLearningRateStrategy(LearningRateStrategy strategy) {
 		baseModel.setLearningRateStrategy(strategy);
 		metadataModel.setLearningRateStrategy(strategy);
+	}
+	@Override
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+		
+		return metadataModel.buildMetadataSketch();
 	}
 
 }

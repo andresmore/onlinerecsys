@@ -9,11 +9,11 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Fa
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class NoPrivacyAggregator implements IUserItemAggregator {
+public class NoMaskingStrategy implements IUserMaskingStrategy {
 
 	
 
-	public NoPrivacyAggregator() {
+	public NoMaskingStrategy() {
 		
 	}
 
@@ -21,7 +21,7 @@ public class NoPrivacyAggregator implements IUserItemAggregator {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator#aggregateEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
 	 */
 	@Override
-	public UserProfile aggregateEvent(UserProfile oldProfile,UserTrainEvent event,
+	public UserProfile maskProfile(UserProfile oldProfile,UserTrainEvent event,
 			FactorUserItemRepresentation userItemRep) throws TasteException {
 		return oldProfile;
 		/*if (userItemRep.hasPrivateStrategy()) {

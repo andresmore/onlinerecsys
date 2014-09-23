@@ -58,6 +58,7 @@ public class SlidingWindowCountMinSketch {
 		
 		queue.peek().add(datum, 1);
 	}
+	
 	public void updateCounter(int counter){
 		
 		if(counter%segmentLength==0){

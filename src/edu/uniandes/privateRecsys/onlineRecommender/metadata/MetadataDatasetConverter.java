@@ -4,28 +4,45 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+
+import javax.management.RuntimeErrorException;
 
 import org.apache.mahout.common.iterator.FileLineIterator;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
-public class MetadataDatasetConverter {
+import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
+import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
+
+public class MetadataDatasetConverter implements Observer {
 	
 	
-	public void convertDatasetFile(String inputDatasetFile, String metadataMapFile,String outputDatasetFile){
+	
+	
+	private PrintWriter writer;
+	private Matrix mat;
+	private Map<String, Integer> bindings;
+	
+
+	public void convertDatasetFile(String inputDatasetFile, String metadataMapFile,String outputDatasetFile) throws IOException, PrivateRecsysException{
+		this.writer= new PrintWriter(new FileWriter(outputDatasetFile));
+		this.mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
+		this.bindings=mat.getRowLabelBindings();
+	
+		
+		FileEventCreator fec=  new FileEventCreator(new File(inputDatasetFile), -1, -1);
+		fec.addObserver( this);
+		fec.startEvents();
 		
 		
-		
-		
-		FileLineIterator iterator = null;
-		PrintWriter writer=null;
 		int numLinesIterator=0;
 		try {
-			Matrix mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
-			Map<String, Integer> bindings=mat.getRowLabelBindings();
-			Map<String, Integer> colBindings=mat.getColumnLabelBindings();
 			/*int row186=bindings.get("2688");
 			Vector vectorTest=mat.viewRow(row186);
 			for (int i = 0; i < vectorTest.size(); i++) {
@@ -39,28 +56,13 @@ public class MetadataDatasetConverter {
 			}
 			*/
 			
-			iterator = new FileLineIterator(new File(inputDatasetFile));
-			writer= new PrintWriter(new FileWriter(outputDatasetFile));
 			
-			while (iterator.hasNext()) {
-				String line = new String(iterator.next());
-				numLinesIterator++;
-				//ItemId is in the second place
-				String[] array=line.split(",|:");
-				String itemId=array[1];
-				Integer row= bindings.get(itemId);
-				if(row!=null){
-					Vector vectorRow = mat.viewRow(row);
-					
-					line+=","+vectorRow.asFormatString();
-					writer.println(line);
-				}
-				else{
-					throw new Exception("Item id "+itemId+" not found ");
-				}
+		
+			
 			
 				
-			}
+			
+		
 			
 			
 			
@@ -70,10 +72,7 @@ public class MetadataDatasetConverter {
 			System.err.println(numLinesIterator);
 			e.printStackTrace();
 		}finally{
-			if(iterator!=null)
-				try {
-					iterator.close();
-				} catch (IOException e) {}
+			
 			if(writer!=null)
 				writer.close();
 		}
@@ -84,10 +83,34 @@ public class MetadataDatasetConverter {
 	
 	public static void main(String[] args) throws IOException {
 		
+		String originalFile="data/ml-10M100K/orderedRatings.dat";
 		String metadataMapFile="data/ml-10M100K/metadata/mapFileUpdatedFinal.data";
-		Matrix mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
-		System.out.println(mat.columnSize()+" "+mat.rowSize());
-		//new MetadataDatasetConverter().convertDatasetFile("data/ml-1m/rb.test.cv", "data/ml-1m/mapFile.data", "data/ml-1m/rb.test.meta.cv");
+		//Matrix mat=MetadataMapFileLoader.loadBinaryMetadataMap(metadataMapFile);
+		//System.out.println(mat.columnSize()+" "+mat.rowSize());
+		try {
+			new MetadataDatasetConverter().convertDatasetFile(originalFile, metadataMapFile, originalFile+".meta2");
+		} catch (PrivateRecsysException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		UserTrainEvent event = (UserTrainEvent) arg;
+		
+		String itemId=""+event.getItemId();
+		Integer row= bindings.get(itemId);
+		if(row!=null){
+			Vector vectorRow = mat.viewRow(row);
+			
+		
+			writer.println(event.getUserId()+","+event.getItemId()+","+event.getRating()+","+event.getTimestamp()+","+vectorRow.asFormatString());
+		}
+		else{
+			throw new RuntimeException("Item id "+itemId+" not found ");
+		}
+		
 	}
 
 }

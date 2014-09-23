@@ -344,7 +344,7 @@ public class RecommenderMainClass {
 				return null;
 			}
 			else if(chosenRecommender.equals(PROBABILITYMETADATARECOMENDERTESTER)){
-				ProbabilityMetadataBlenderRecommenderTester blenderTester= new ProbabilityMetadataBlenderRecommenderTester(dataset, dimensions, new ProbabilityMetadataModelPredictor(new BaseModelPredictorWithItemRegularizationUpdate(0), new MetadataPredictor(-1)),0.75);
+				ProbabilityMetadataBlenderRecommenderTester blenderTester= new ProbabilityMetadataBlenderRecommenderTester(dataset, dimensions, new ProbabilityMetadataModelPredictor(new BaseModelPredictorWithItemRegularizationUpdate(0), new MetadataPredictor(-1,MetadataPredictor.SKETCH_DEPTH,MetadataPredictor.SKETCH_WIDTH, MetadataPredictor.WINDOW_LENGHT, MetadataPredictor.NUMBER_OF_SEGMENTS, MetadataPredictor.NUMROLLING)),0.75);
 				blenderTester.startTraining();
 				return null;
 			}
@@ -362,7 +362,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
+				IUserMaskingStrategy agregator= new ContinualDifferentialPrivacyAggregator(privacyBudget,privacyTimeBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
@@ -379,7 +379,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-				IUserItemAggregator agregator= new DifferentialPrivacyAggregator(privacyBudget);
+				IUserMaskingStrategy agregator= new DifferentialPrivacyMaskingStrategy(privacyBudget);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);
@@ -394,7 +394,7 @@ public class RecommenderMainClass {
 				modelTrainerPredictor.setModelRepresentation(representation);
 				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				IUserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-				IUserItemAggregator agregator= new NoPrivacyAggregator();
+				IUserMaskingStrategy agregator= new NoMaskingStrategy();
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 				tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				tester.setEventsReport(numErrorReport);

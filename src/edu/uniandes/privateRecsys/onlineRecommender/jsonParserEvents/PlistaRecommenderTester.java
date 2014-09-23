@@ -13,11 +13,11 @@ import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
-import edu.uniandes.privateRecsys.onlineRecommender.NoPrivacyAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
 import edu.uniandes.privateRecsys.onlineRecommender.TopNRecommenderFactorModel;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
@@ -143,7 +143,7 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 			modelTrainerPredictor.setModelRepresentation(representation);
 			modelTrainerPredictor.setLearningRateStrategy(LearningRateStrategy.createWithConstantRate(0.2));
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);
-			IUserItemAggregator agregator= new NoPrivacyAggregator();
+			IUserMaskingStrategy agregator= new NoMaskingStrategy();
 			IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainerPredictor);
 			tester.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 			tester.setModelPredictor(modelTrainerPredictor);

@@ -10,6 +10,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Fa
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -270,6 +271,13 @@ public  class BaseModelPredictor implements UserModelTrainerPredictor {
 		}
 		return prediction;
 	}
+		/**
+		 * Doesn't handle metadata
+		 */
+		@Override
+		public SlidingWindowCountMinSketch buildMetadataSketch() {
+			return null;
+		}
 		
 	
 }

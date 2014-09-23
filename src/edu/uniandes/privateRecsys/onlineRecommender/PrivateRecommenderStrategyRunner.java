@@ -11,7 +11,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 public class PrivateRecommenderStrategyRunner implements Runnable {
 
 	private IUserProfileUpdater userUpdater;
-	private IUserItemAggregator userAggregator;
+	private IUserMaskingStrategy userAggregator;
 	private IItemProfileUpdater itemProfileUpdater;
 	private UserTrainEvent event;
 	private FactorUserItemRepresentation userItemRep;
@@ -23,7 +23,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 		      .getName());
 
 	public PrivateRecommenderStrategyRunner(FactorUserItemRepresentation userItemRep, IUserProfileUpdater userUpdater,
-			IUserItemAggregator userAggregator,
+			IUserMaskingStrategy userAggregator,
 			IItemProfileUpdater itemProfileUpdater, UserTrainEvent event, PrivateRecommenderParallelTrainer privateRecommenderParallelTrainer) {
 		this.userItemRep=userItemRep;
 		this.userUpdater=userUpdater;
@@ -79,7 +79,7 @@ public class PrivateRecommenderStrategyRunner implements Runnable {
 				userTime = System.nanoTime();
 				try {
 
-					user = userAggregator.aggregateEvent(user, event,
+					user = userAggregator.maskProfile(user, event,
 							userItemRep);
 					trainer.updateState(Thread.currentThread().getId(), event,
 							"LOCK-AGGREGATED");

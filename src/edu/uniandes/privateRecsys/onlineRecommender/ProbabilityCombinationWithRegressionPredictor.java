@@ -9,6 +9,7 @@ import org.apache.mahout.math.Vector;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
+import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
@@ -131,8 +132,19 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		
 		HashMap<String, BetaDistribution> dist=oldUserPrivate.getUserBias();
 		HashMap<String, Double> joinDistribution=getJoinDistribution(trainedProfiles,dist,itemVector);
+		HashMap<String, Double> distributionAvg = getDistributionFromAverageBetaDistribution(dist,
+				ratingScale);
+		double totalSum=0;
+		for (int i = 0; i < ratingScale.length; i++) {
+			Vector userVector = trainedProfiles
+					.get(ratingScale[i]);
+			
+			totalSum+=userVector.dot(itemVector)*distributionAvg.get(ratingScale[i]);
+		}
 		
 		for (int i = 0; i < ratingScale.length; i++) {	
+			Vector userVector = trainedProfiles
+					.get(ratingScale[i]);
 			Vector privateVector=oldUserPrivate.getProfileForScale(ratingScale[i]);
 			int prob=ratingScale[i].equals(rating)?1:0;
 			
@@ -141,15 +153,23 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 			double loss=prob-dotProb;
 			
 			double multiplicator=gamma*(loss);
-			Vector privateVectorMult=itemVector.times(multiplicator);
+			
+			
+			Double averageBiasO = distributionAvg.get(ratingScale[i]);
+			Vector part1=itemVector.times(averageBiasO).times(totalSum);
+			Vector part2= itemVector.times(userVector.dot(itemVector)*averageBiasO*averageBiasO);
+			Vector endFinal=part1.minus(part2).divide(totalSum);
+			
+			Vector privateVectorMult=endFinal.times(multiplicator);
 			Vector result=privateVector.plus(privateVectorMult);
 			
-			double endDotProb=result.dot(itemVector);
+			/*double endDotProb=result.dot(itemVector);
 			double stepLoss=prob-endDotProb;
 			
 			if(Math.abs(stepLoss)>Math.abs(loss)){
 				//	System.err.println("Model increased loss");
 			}
+			*/
 			trainedProfiles.put(ratingScale[i], result);
 			
 			
@@ -238,6 +258,11 @@ public  Prediction calculatePrediction(UserTrainEvent event, int minTrains) thro
 		this.learningRateStrategy=strategy;
 		baseModel.setLearningRateStrategy(strategy);
 				
+	}
+	@Override
+	public SlidingWindowCountMinSketch buildMetadataSketch() {
+		
+		return null;
 	}
 
 }

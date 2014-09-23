@@ -11,7 +11,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ContinualDifferentialPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
@@ -38,7 +38,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 	@Override
 	public void setModelAndUpdaters(
 			FactorUserItemRepresentation representation,
-			IUserProfileUpdater userUpdater, IUserItemAggregator agregator,
+			IUserProfileUpdater userUpdater, IUserMaskingStrategy agregator,
 			IItemProfileUpdater itemUpdater) throws TasteException {
 		if(!(agregator instanceof ContinualDifferentialPrivacyAggregator))
 			throw new TasteException("ContinualDifferentialPrivacyOnlineRecommenderTester has to have a ContinualDifferentialPrivacyAggregator as user-item agregator");
@@ -88,7 +88,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainer.getHyperParametersSize(),true);
 				modelTrainer.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainer);
-				IUserItemAggregator agregator= new ContinualDifferentialPrivacyAggregator(0.69,1000);
+				IUserMaskingStrategy agregator= new ContinualDifferentialPrivacyAggregator(0.69,1000);
 				IItemProfileUpdater itemUpdater= new ItemProfileUpdater(modelTrainer);
 				rest.setModelAndUpdaters(representation, userUpdater, agregator, itemUpdater);
 				rest.setModelPredictor(modelTrainer);

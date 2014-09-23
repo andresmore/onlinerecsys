@@ -9,7 +9,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.IUserItemAggregator;
+import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
@@ -25,7 +25,7 @@ public abstract class AbstractRecommenderTester  {
 	protected int fDimensions;
 	protected FactorUserItemRepresentation userItemRep;
 	protected IUserProfileUpdater userUpdater;
-	protected IUserItemAggregator userAggregator;
+	protected IUserMaskingStrategy userAggregator;
 	protected IItemProfileUpdater itemProfileUpdater;
 	protected int numLimitEvents=-1;
 	protected int eventsReport=-1;
@@ -46,7 +46,7 @@ public abstract class AbstractRecommenderTester  {
 	}
 	
 	public void setModelAndUpdaters(FactorUserItemRepresentation representation, IUserProfileUpdater userUpdater, 
-			IUserItemAggregator agregator,IItemProfileUpdater profileUpdater ) throws TasteException{
+			IUserMaskingStrategy agregator,IItemProfileUpdater profileUpdater ) throws TasteException{
 	
 		this.userItemRep= representation;
 		this.userUpdater= userUpdater;
