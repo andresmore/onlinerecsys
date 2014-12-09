@@ -3,15 +3,12 @@ package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Logger;
 
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
-import org.jfree.util.Log;
 
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -37,8 +34,9 @@ public class AveragePredictorTester implements Observer {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		
-		
-		RSDataset rsDat=RSDataset.fromPropertyFile("config/yMusic.properties");
+		RSDataset rsDat= RSDataset.fromPropertyFile("config/movielensLocation.properties");
+		//RSDataset rsDat=RSDataset.fromPropertyFile("config/dbbookLocation.properties");
+		//RSDataset rsDat=RSDataset.fromPropertyFile("config/yMusic.properties");
 		AveragePredictorTester tester= new AveragePredictorTester(rsDat);
 		try {
 			double rmse=tester.startExperiment();

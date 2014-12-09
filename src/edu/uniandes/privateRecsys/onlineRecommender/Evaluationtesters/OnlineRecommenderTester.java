@@ -85,8 +85,8 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			 translations.put(new String("4.5"), new String("5"));
 			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			
-			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
-			//RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 
+			//RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
+			RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 
 			//RSDataset data= RSDataset.fromPropertyFile("config/dbbookLocation.properties");
 			
 			
@@ -94,8 +94,8 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 			
 			
-			int[] limitSizes={5,10,15,20,25,30,35,40,45,50};
-			//int[] limitSizes={5};
+			//int[] limitSizes={5,10,15,20,25,30,35,40,45,50};
+			int[] limitSizes={5};
 			
 			double[] learningRates={0.001,0.01,0.05,0.15,0.25};
 			
@@ -103,9 +103,9 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//predictorsLinked.add(new BayesAveragePredictor());	
 			//BaseModelPredictor basemodel= new BaseModelPredictor();
 			//predictorsLinked.add(basemodel);
-			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.001);
-			//predictorsLinked.add(baseModelPredictor);
-			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor2 = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
+			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.001);
+			predictorsLinked.add(baseModelPredictor);
+			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor2 = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
 			//predictorsLinked.add(baseModelPredictor2);
 			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor3 = new BaseModelPredictorWithItemRegularizationUpdate(0.1);
 			//predictorsLinked.add(baseModelPredictor3);
@@ -120,8 +120,6 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			
 			//predictorsLinked.add(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
 			//predictorsLinked.add(new BaseModelPredictorWithItemRegularizationUpdate(0));
-			
-			predictorsLinked.add(new LogCombinationPredictor(baseModelPredictor2, new SimpleAveragePredictor()));
 			
 			int skips=0;
 			int iters=0;
@@ -242,7 +240,7 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 				
 				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,0);
 				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,0);
-				errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,0);
+				//errorTrain=ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,0);
 				//System.out.println("Error at iteration "+iteration+" is: Train: "+errorTrain+" CV:"+errorCV+" Test:"+error);
 				LOG.info(System.nanoTime()+" Iteration "+iteration+" errors: "+errorTrain+'\t'+errorCV+'\t'+error);
 				partialErrors.addAll(pstr.getPartialEvaluations());

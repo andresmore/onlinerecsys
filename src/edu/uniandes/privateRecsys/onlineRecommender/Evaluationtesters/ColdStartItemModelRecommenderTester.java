@@ -8,23 +8,18 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.ItemTrainLimitPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.LogCombinationPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
-import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityBiasMetadataModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityMetadataModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.RatingsFileSplitter;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
@@ -34,17 +29,29 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
-public class LogModelRecommenderTester extends AbstractRecommenderTester {
+public class ColdStartItemModelRecommenderTester extends AbstractRecommenderTester {
 
 	
 	
-	private final static Logger LOG = Logger.getLogger(LogModelRecommenderTester.class
+	private final static Logger LOG = Logger.getLogger(ColdStartItemModelRecommenderTester.class
 		      .getName());
+	
 
-	public LogModelRecommenderTester(RSDataset dataset, int fDimensions
-			)
+	
+	public ColdStartItemModelRecommenderTester(RSDataset data, int fDimensions)
 			throws IOException {
-		super(dataset, fDimensions);
+		super(data, fDimensions);
+		
+	}
+
+	private static RSDataset createDatasetFromFile(
+			String mainFile, RatingScale scale, double percentage) throws IOException, TasteException, PrivateRecsysException {
+		File trainFile=File.createTempFile("tempFileTrain"+percentage+"_", ".tmp");
+		File testFile=File.createTempFile("tempFileTest"+percentage+"_", ".tmp");
+		File cvFile=File.createTempFile("tempFileCV"+percentage+"_", ".tmp");
+		RatingsFileSplitter rfs= new RatingsFileSplitter(mainFile, testFile, cvFile, trainFile, 0.8, percentage);
+		rfs.split();
+		return new RSDataset(trainFile.getAbsolutePath(), testFile.getAbsolutePath(), cvFile.getAbsolutePath(), scale);
 		
 	}
 
@@ -56,25 +63,6 @@ public class LogModelRecommenderTester extends AbstractRecommenderTester {
 			
 			LinkedList<String> results= new LinkedList<>();
 			
-			String trainSet=new String("data/ml-10M100K/rb.train.sorted");
-			//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
-			//String trainSet="data/netflix/rb.train.sorted";
-			
-		
-			String testSet=new String("data/ml-10M100K/rb.test.test");
-			//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
-			//String testSet=new String("data/ml-1m/rb.test.test");
-			//String testSet=new String("data/ml-1m/rb.test.meta.test");
-			//String testSet="data/netflix/rb.test.test";
-			
-			
-			String testCV=new String("data/ml-10M100K/rb.test.cv");
-			//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
-			//String testCV=new String("data/ml-1m/rb.test.cv");
-			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
-			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
 			 HashMap<String,String> translations=new HashMap<String,String>();
 			 translations.put(new String("0"), new String("1"));
@@ -85,91 +73,66 @@ public class LogModelRecommenderTester extends AbstractRecommenderTester {
 			 translations.put(new String("4.5"), new String("5"));
 			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			
-			RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
-			//RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 
-			//RSDataset data= RSDataset.fromPropertyFile("config/dbbookLocation.properties");
 			
 			
 			
 			
+			double[] percentagesContent={0.05,0.1,0.15,0.2,0.25,0.30,0.35};
 			
 			
-			int[] limitSizes={5,10,15,20,25,30,35,40,45,50};
-			//int[] limitSizes={5};
-			
-			double[] learningRates={0.001,0.01,0.05,0.15,0.25};
-			
-			LinkedList<UserModelTrainerPredictor> predictorsLinked= new LinkedList<UserModelTrainerPredictor>();
-			//predictorsLinked.add(new BayesAveragePredictor());	
-			//BaseModelPredictor basemodel= new BaseModelPredictor();
-			//predictorsLinked.add(basemodel);
-			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.001);
-			//predictorsLinked.add(baseModelPredictor);
-			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor2 = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
-			//predictorsLinked.add(baseModelPredictor2);
-			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor3 = new BaseModelPredictorWithItemRegularizationUpdate(0.1);
-			//predictorsLinked.add(baseModelPredictor3);
-			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor4 = new BaseModelPredictorWithItemRegularizationUpdate(0);
-			//predictorsLinked.add(baseModelPredictor4);
+			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
+			MetadataPredictor metadataModel = new MetadataPredictor(-1,MetadataPredictor.SKETCH_DEPTH,MetadataPredictor.SKETCH_WIDTH, 60, MetadataPredictor.NUMBER_OF_SEGMENTS, MetadataPredictor.NUMROLLING);
 			
 			
-			//predictorsLinked.add(new BlendedModelPredictor());
-			//predictorsLinked.add(new  MetadataSimilarityPredictor());
-			
-			//predictorsLinked.add(metadataModel);
-			
-			//predictorsLinked.add(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
-			//predictorsLinked.add(new BaseModelPredictorWithItemRegularizationUpdate(0));
-			
-			predictorsLinked.add(new LogCombinationPredictor(baseModelPredictor2, new SimpleAveragePredictor()));
-			predictorsLinked.add(new LogCombinationPredictor(baseModelPredictor4, new SimpleAveragePredictor()));
-			
-			int skips=0;
+			ProbabilityMetadataModelPredictor hybrid=(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
+			String mainFile="data/ml-10M100K/orderedRatings.dat.meta2";
+			int skips=6;
 			int iters=0;
-			Object[] predictors=  predictorsLinked.toArray();
+			int dimensions=5;
+			double cfLearningRate=0.15;
+			double cbLearningRate=0.75;
+			
 				
-			for (int i = 0; i < predictors.length; i++) {
+			for (int i = 0; i < percentagesContent.length; i++) {
 
-				for (int j = 0; j < learningRates.length; j++) {
-
-					for (int d = 0; d < limitSizes.length  ; d++) {
-						
+									
 						if(iters>=skips){
-							int dimensions = limitSizes[d];
-
-							LogCombinationPredictor trainerPredictor = (LogCombinationPredictor) predictors[i];
+		
+							
+							
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-									data.getScale(), dimensions, false,
-									trainerPredictor);
+									scale, dimensions, false,
+									hybrid);
 
-							trainerPredictor.setModelRepresentation(denseModel);
+							hybrid.setModelRepresentation(denseModel);
 
-							trainerPredictor
+							baseModelPredictor
 									.setLearningRateStrategy(LearningRateStrategy
 											.createDecreasingRate(1e-6,
-													learningRates[j]));
+													cfLearningRate));
+							metadataModel.setLearningRateStrategy(LearningRateStrategy.createDecreasingRate(1e-6, cbLearningRate));
 
-							LogModelRecommenderTester rest = new LogModelRecommenderTester(
+							RSDataset data=createDatasetFromFile(mainFile, scale, percentagesContent[i]);
+							ColdStartItemModelRecommenderTester rest = new ColdStartItemModelRecommenderTester(
 									data, dimensions);
 							// rest.setEventsReport(1000000);
 							UserProfileUpdater userUp = new UserProfileUpdater(
-									trainerPredictor);
+									hybrid);
 							// int limit=trainLimits[j];
 							IUserMaskingStrategy agregator = new NoMaskingStrategy();
 							IItemProfileUpdater itemUpdater = new ItemProfileUpdater(
-									trainerPredictor);
+									hybrid);
 							rest.setModelAndUpdaters(denseModel, userUp,
 									agregator, itemUpdater);
-							rest.setModelPredictor(trainerPredictor);
+							rest.setModelPredictor(hybrid);
 							ErrorReport result = rest.startExperiment(1);
-							double errorCF=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),trainerPredictor.getBaseModel(),0);
-							double errorAverage=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),trainerPredictor.getAverageModel(),0);
+							double errorCF=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),baseModelPredictor,0);
+							double errorCB=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),metadataModel,0);
 							
-							String resultLine = predictors[i] + "" + '\t'
-									+ learningRates[j] + "" + '\t'
-									+ limitSizes[d] + "" + '\t'
+							String resultLine = hybrid + "" + '\t'
+									+ percentagesContent[i] + "" + '\t'
 									+ errorCF + "" + '\t'
-									+ errorAverage + "" + '\t'
+									+ errorCB + "" + '\t'
 									+ result.toString();
 
 							LOG.info(resultLine);
@@ -178,9 +141,6 @@ public class LogModelRecommenderTester extends AbstractRecommenderTester {
 						}
 						iters++;
 
-					}
-
-				}
 
 			}		
 				

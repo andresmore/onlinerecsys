@@ -33,8 +33,8 @@ public class RatingsFileSplitter implements Observer {
 	private final static Logger LOG = Logger.getLogger(RatingsFileSplitter.class
 		      .getName());
 	private String sourceFile;
-	private String testFile;
-	private String trainFile;
+	private File testFile;
+	private File trainFile;
 	private double trainPercentage;
 	private double contentBasedPercentage;
 	private PrintWriter trainFileWriter= null;
@@ -42,10 +42,14 @@ public class RatingsFileSplitter implements Observer {
 	private HashMap<Long, Integer> numTrainsUser= new HashMap<>();
 	private int countTrain=0;
 	private int countTest=0;
+	private int countCV=0;
 	private int forcedContent=0;
 	private HashSet<Long> candidateItems;
-	private Random rand;
+	private Random randTrainTest;
+	private Random randTestCV;
 	private int numTestRatings;
+	private File cvFile;
+	private PrintWriter cvFileWriter;
 	
 	
 	/**
@@ -57,12 +61,13 @@ public class RatingsFileSplitter implements Observer {
 	 * @param trainPercentage
 	 * @param contentBasedPercentage
 	 */
-	public RatingsFileSplitter(String sourceFile, String testFile,
-			String trainFile, double trainPercentage, double contentBasedPercentage) {
+	public RatingsFileSplitter(String sourceFile, File testFile, File cvFile,
+			File trainFile, double trainPercentage, double contentBasedPercentage) {
 		super();
 		this.sourceFile = sourceFile;
 		this.testFile = testFile;
 		this.trainFile = trainFile;
+		this.cvFile=cvFile;
 		this.trainPercentage=trainPercentage;
 		this.contentBasedPercentage=contentBasedPercentage;
 	}
@@ -73,7 +78,8 @@ public class RatingsFileSplitter implements Observer {
 		
 		
 		LineNumberReader lnr=null;
-		this.rand= new Random();
+		this.randTrainTest= new Random();
+		this.randTestCV= new Random();
 		
 		try {
 			
@@ -94,14 +100,16 @@ public class RatingsFileSplitter implements Observer {
 				
 				trainFileWriter=new PrintWriter(this.trainFile);
 				testFileWriter=new PrintWriter(this.testFile);
+				cvFileWriter= new PrintWriter(this.cvFile);
 				FileEventCreator fec = new FileEventCreator(new File(this.sourceFile), -1, -1);
 				fec.addObserver(this);
 				fec.startEvents();
 				//LongPrimitiveIterator iter=model.getItemIDs();
 				
-				LOG.info("Created file "+this.trainFile+" ("+countTrain+") "+this.testFile+"("+countTest+")"+forcedContent);
+				LOG.info("Created file "+this.trainFile+" ("+countTrain+") "+this.testFile+"("+countTest+") "+this.cvFile+"("+countCV+") pct:"+ forcedContent);
 				
 			}
+			model=null;
 			
 			
 		} catch (IOException e) {
@@ -115,6 +123,8 @@ public class RatingsFileSplitter implements Observer {
 				trainFileWriter.close();
 			if(testFileWriter!=null)
 				testFileWriter.close();
+			if(cvFileWriter!=null)
+				cvFileWriter.close();
 		}
 		
 		
@@ -143,15 +153,15 @@ public class RatingsFileSplitter implements Observer {
 			int weight=model.getNumUsersWithPreferenceFor(itemCandidate);
 			items.add(itemCandidate);
 			countRatings+=weight;
-			if(Math.abs(countRatings-numTestContent)<=1){
-				//solution found +-1 of desired weight
+			if(Math.abs(countRatings-numTestContent)<=10){
+				//solution found +-10 of desired weight
 				HashSet<Long> elements=new HashSet<Long>();
 				elements.addAll(items);
 				return elements;
 				
 			}
 			if(countRatings>numTestContent){
-				System.out.println("countRatings is "+countRatings+", starting over ...");
+				System.out.println("countRatings is "+countRatings+", desired is"+numTestContent+" starting over ...");
 				allItems.addAll(items);
 				items.clear();
 				countRatings=0;
@@ -159,7 +169,7 @@ public class RatingsFileSplitter implements Observer {
 				
 			}
 			if(numTries==100)
-				return null;
+				throw new TasteException("Exception Creating Datasets");
 				
 			
 		}
@@ -169,21 +179,7 @@ public class RatingsFileSplitter implements Observer {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		try {
-			new RatingsFileSplitter("data/DBBook_train_binary.tsv", "data/rbinary.test", "data/rbinary.train",0.7, 0.05).split();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TasteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PrivateRecsysException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		
@@ -214,9 +210,15 @@ public class RatingsFileSplitter implements Observer {
 						
 					numTrainsUser.put(userId, numTrains);
 					
-					if(numTrains>10 && countTest<=numTestRatings && rand.nextBoolean()==true){
-						testFileWriter.println(event.getUserId()+","+event.getItemId()+","+event.getRating()+","+event.getTimestamp()+","+event.getMetadata());
-						countTest++;
+					if(numTrains>10 && countTest<=numTestRatings && randTrainTest.nextBoolean()){
+						if(randTestCV.nextBoolean()){
+							testFileWriter.println(event.getUserId()+","+event.getItemId()+","+event.getRating()+","+event.getTimestamp()+","+event.getMetadata());
+							countTest++;
+						}
+						else{
+							cvFileWriter.println(event.getUserId()+","+event.getItemId()+","+event.getRating()+","+event.getTimestamp()+","+event.getMetadata());
+							countCV++;
+						}
 						
 					}else{
 						trainFileWriter.println(event.getUserId()+","+event.getItemId()+","+event.getRating()+","+event.getTimestamp()+","+event.getMetadata());
