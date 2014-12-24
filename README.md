@@ -49,7 +49,7 @@ Metadata info is a hash representation of a conceptId (must be int) followed by 
 Running an experiment
 ============
 
-The class edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.AbstractRecommenderTester runs an experiment, instantiate the class and in a method of that class do the following:
+The class edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.AbstractRecommenderTester runs an experiment, create a concrete class that extends AbstractRecommenderTester and in a method of that class do the following:
 
 ```Java
 //Create a dataset object, limiting the number of ratings in the set 1,2,3,4,5
