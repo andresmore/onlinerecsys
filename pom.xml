@@ -79,6 +79,9 @@
     </repository>
   </repositories>
   <build>
+  	<directory>target</directory>
+    <finalName>${artifactId}-${version}</finalName>
+    <sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
