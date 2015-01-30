@@ -1,0 +1,8 @@
+#NOTE: This is an internal implementation file, its format can be changed without prior notice.
+#Fri Jan 30 11:58:26 COT 2015
+stream-2.7.0-exec.jar>=
+stream-2.7.0.pom>=
+stream-2.7.0-tests.jar>=
+stream-2.7.0-sources.jar>=
+stream-2.7.0-javadoc.jar>=
+stream-2.7.0.jar>=
