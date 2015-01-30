@@ -10,21 +10,16 @@ URL http://dx.doi.org/10.1007/978-3-319-08786-3_33
 Instalation instructions
 ============
 
-The project uses maven for dependency management
-
-Install first into your local repository the stream-lib project
-```
-git clone https://github.com/addthis/stream-lib.git
-cd stream-lib
-mvn install 
-```
-Then clone and install this project 
+Clone and install this project 
 ```
 git clone https://github.com/andresmore/onlinerecsys.git
 cd onlinerecsys
 mvn install
 ```
 In the folder target the required libs for running the project are downloaded.
+
+This project uses version 2.7 of the stream-lib library, check their project at:
+https://github.com/addthis/stream-lib
 
 Configure datasets
 ============
