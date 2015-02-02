@@ -21,6 +21,8 @@ In the folder target the required libs for running the project are downloaded.
 This project uses version 2.7 of the stream-lib library, check their project at:
 https://github.com/addthis/stream-lib
 
+Use your favorite IDE, the project can be imported using the maven .pom file
+
 Configure datasets
 ============
 

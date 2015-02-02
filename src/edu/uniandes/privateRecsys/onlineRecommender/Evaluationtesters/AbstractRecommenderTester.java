@@ -60,7 +60,7 @@ public abstract class AbstractRecommenderTester  {
 	/***
 	 * 
 	 * @return The rmse of the experiment
-	 * @throws IOException If the files specified are not accesible
+	 * @throws IOException If the files specified are not accessible
 	 * @throws TasteException If the format of the file is not valid
 	 * @throws PrivateRecsysException
 	 */
