@@ -32,7 +32,7 @@ public class TopNRecommenderFactorModel implements TopNRecommender {
 		
 		for (Long itemId : ids) {
 			UserTrainEvent event= new UserTrainEvent(userID, itemId, "", 1, "");
-			Prediction p=predictor.calculatePrediction(event, 10);
+			Prediction p=predictor.calculatePrediction(event, 0);
 			predictions.add(p);
 			if(predictions.size()>size){
 				predictions.poll();
