@@ -55,36 +55,6 @@ public class CompareOnlineRecommenderTester extends AbstractRecommenderTester {
 		try {
 			LOG.info(""+System.nanoTime());
 			LinkedList<String> results= new LinkedList<>();
-			//String trainSet=new String("data/dbBook/ra.train.meta");
-			String trainSet=new String("data/ml-10M100K/rb.train.sorted");
-			//String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
-			//String trainSet="data/netflix/rb.train.sorted";
-			
-			//String testSet=new String("data/dbBook/ra.test.meta");
-			String testSet=new String("data/ml-10M100K/rb.test.test");
-			//String testSet=new String("data/ml-10M100K/rb.test.meta.test");
-			//String testSet=new String("data/ml-1m/rb.test.test");
-			//String testSet=new String("data/ml-1m/rb.test.meta.test");
-			//String testSet="data/netflix/rb.test.test";
-			
-			//String testCV=new String("data/dbBook/ra.test.meta");
-			String testCV=new String("data/ml-10M100K/rb.test.cv");
-			//String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
-			//String testCV=new String("data/ml-1m/rb.test.cv");
-			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
-			//String testCV="data/netflix/rb.test.CV";
-			LOG.info("Loading model");
-			
-			 HashMap<String,String> translations=new HashMap<String,String>();
-			 translations.put(new String("0"), new String("1"));
-			 translations.put(new String("0.5"), new String("1"));
-			 translations.put(new String("1.5"), new String("2"));
-			 translations.put(new String("2.5"), new String("3"));
-			 translations.put(new String("3.5"), new String("4"));
-			 translations.put(new String("4.5"), new String("5"));
-			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			
 			
 			RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 

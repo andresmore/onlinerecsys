@@ -30,7 +30,6 @@ public class TopNPredictorParallelCalculator {
 			.getLogger(TopNPredictorParallelCalculator.class.getName());
 	
 	private ThreadPoolExecutor executor;
-	private String[] states;
 	private TopNRecommender topNrecommender;
 	public TopNPredictorParallelCalculator(
 			HashMap<Long, HashSet<Long>> userId_positiveElements,
@@ -44,13 +43,10 @@ public class TopNPredictorParallelCalculator {
 		
 		LOG.info("Parallel trainer asking for number of available processors");
 		int numProcessors = Runtime.getRuntime().availableProcessors();
-		//int numProcessors=1;
 		LOG.info("Launching pool executor with " + numProcessors + " executors");
 		executor = new ThreadPoolExecutor(numProcessors, numProcessors, 0L,
 				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		executor.prestartAllCoreThreads();
-		int initPoolSize=executor.getPoolSize();
-		states = new String[initPoolSize];
 		LOG.info("Launched pool executor with " + numProcessors + " executors");
 		Profiler.reset();
 		

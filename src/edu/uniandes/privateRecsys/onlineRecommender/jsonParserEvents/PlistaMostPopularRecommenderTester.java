@@ -20,6 +20,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.PopularityObserver;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
+import edu.uniandes.privateRecsys.onlineRecommender.TopNPopularityRecommender;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.AbstractRecommenderTester;
