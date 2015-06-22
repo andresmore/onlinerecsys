@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,8 +18,8 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.IRPrecisionError;
 
 public class TopNPredictorParallelCalculator {
 
-	private HashMap<Long, HashSet<Long>> userId_positiveElements;
-	private HashSet<Long> users;
+
+	private Set<Long> users;
 	private FactorUserItemRepresentation userItemRep;
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
 	private AtomicLong numExecutedTasks=new AtomicLong(0);
@@ -31,14 +32,16 @@ public class TopNPredictorParallelCalculator {
 	
 	private ThreadPoolExecutor executor;
 	private TopNRecommender topNrecommender;
+	private String testFile;
 	public TopNPredictorParallelCalculator(
-			HashMap<Long, HashSet<Long>> userId_positiveElements,
-			HashSet<Long> users, FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender) {
+			
+			Set<Long> users, FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender, String testFile) {
 
-		this.userId_positiveElements=userId_positiveElements;
+	
 		this.users=users;
 		this.userItemRep=userItemRep;
 		this.topNrecommender=topNRecommender;
+		this.testFile=testFile;
 
 		
 		LOG.info("Parallel trainer asking for number of available processors");
@@ -58,7 +61,7 @@ public class TopNPredictorParallelCalculator {
 		
 		for (Long userID : users) {
 			
-			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,userId_positiveElements,this.topNrecommender);
+			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,this.topNrecommender, this.testFile);
 			while(executor.getQueue().size()>400000){
 				//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
 				try {

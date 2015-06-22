@@ -114,7 +114,7 @@ public class CompareOnlineRecommenderTester extends AbstractRecommenderTester {
 
 						UserModelTrainerPredictor trainerPredictor = (UserModelTrainerPredictor) predictors[i];
 						FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-								data.getScale(), dimensions, false, trainerPredictor);
+								data, dimensions, false, trainerPredictor);
 
 						trainerPredictor.setModelRepresentation(denseModel);
 						if (trainerPredictor instanceof ProbabilityMetadataModelPredictor) {

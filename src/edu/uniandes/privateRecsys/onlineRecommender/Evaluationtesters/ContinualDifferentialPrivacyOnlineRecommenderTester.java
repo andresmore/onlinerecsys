@@ -21,6 +21,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysExcep
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
@@ -85,7 +86,7 @@ public class ContinualDifferentialPrivacyOnlineRecommenderTester extends Abstrac
 				
 				ContinualDifferentialPrivacyOnlineRecommenderTester rest=new ContinualDifferentialPrivacyOnlineRecommenderTester(data, dimensions);
 				UserModelTrainerPredictor modelTrainer=new BaseModelPredictor();
-				DenseFactorUserItemRepresentation representation = new DenseFactorUserItemRepresentation(model, scale, dimensions,modelTrainer.getHyperParametersSize(),true);
+				IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(data,dimensions,true, modelTrainer);
 				modelTrainer.setModelRepresentation(representation);
 				UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainer);
 				IUserMaskingStrategy agregator= new ContinualDifferentialPrivacyAggregator(0.69,1000);

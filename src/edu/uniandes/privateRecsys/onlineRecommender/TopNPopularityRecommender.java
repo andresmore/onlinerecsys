@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -16,10 +17,13 @@ public class TopNPopularityRecommender implements TopNRecommender {
 
 	
 	@Override
-	public Prediction[] getTopRecommendationForUsers(Set<Long> ids,
+	public Prediction[] getTopRecommendationForUsers(Set<Long> ids,Set<Long> ratedItems,
 			Long userID, int size, int minTrains) throws TasteException {
 		// TODO Auto-generated method stub
 		return popObserver.mostPopularItemsPrediction();
 	}
+
+
+	
 
 }

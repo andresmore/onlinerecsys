@@ -52,5 +52,10 @@ public class IRPrecisionError implements ErrorReport {
 		}
 		return avg.getAverage();
 	}
+	
+	@Override
+	public String toString(){
+	   return "Average_precision="+getAveragePrecision()+" P@5="+getAveragePrecisionsAt5()+" P@10="+getAveragePrecisionsAt10()+" AUC="+getAverageAUC();	
+	}
 
 }

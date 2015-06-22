@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -8,7 +9,7 @@ import java.util.logging.Logger;
  * @author Andres M
  *
  */
-public class LearningRateStrategy {
+public class LearningRateStrategy implements Serializable{
 
 	/**
 	 * Constant for the learning rate	

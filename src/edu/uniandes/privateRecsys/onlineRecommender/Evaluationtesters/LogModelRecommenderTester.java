@@ -139,7 +139,7 @@ public class LogModelRecommenderTester extends AbstractRecommenderTester {
 
 							LogCombinationPredictor trainerPredictor = (LogCombinationPredictor) predictors[i];
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-									data.getScale(), dimensions, false,
+									data, dimensions, false,
 									trainerPredictor);
 
 							trainerPredictor.setModelRepresentation(denseModel);

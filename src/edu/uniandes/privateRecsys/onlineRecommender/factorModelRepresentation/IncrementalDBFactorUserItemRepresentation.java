@@ -311,6 +311,18 @@ public class IncrementalDBFactorUserItemRepresentation implements
 
 		
 	}
+
+	@Override
+	public Set<Long> getRatedItems(Long userID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<Long> getPositiveElements(Long userId, String file) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 
 }

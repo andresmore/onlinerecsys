@@ -31,7 +31,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingSca
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.IRPrecisionError;
-
+@Deprecated
 public class PlistaRecommenderTester extends AbstractRecommenderTester {
 	
 	private HashSet<Long> restrictedUserIds= new HashSet<Long>();
@@ -139,7 +139,7 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 		try {
 			PlistaRecommenderTester tester= new PlistaRecommenderTester(dataset, 10);
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(scale, 10, false, modelTrainerPredictor);
+			IncrementalFactorUserItemRepresentation representation = new IncrementalFactorUserItemRepresentation(dataset, 10, false, modelTrainerPredictor);
 			modelTrainerPredictor.setModelRepresentation(representation);
 			modelTrainerPredictor.setLearningRateStrategy(LearningRateStrategy.createWithConstantRate(0.2));
 			UserProfileUpdater userUpdater= new UserProfileUpdater(modelTrainerPredictor);

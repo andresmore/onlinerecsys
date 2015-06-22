@@ -72,7 +72,7 @@ double delta=0.1;
 			int eventsReport=100000;
 				
 			UserModelTrainerPredictor modelTrainerPredictor= new BaseModelPredictor();
-				IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(data.getScale(),dimensions,false,modelTrainerPredictor);
+				IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation(data,dimensions,false,modelTrainerPredictor);
 				modelTrainerPredictor.setModelRepresentation(denseModel);
 				modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 				OnlineRecommenderTesterPartialTests rest=new OnlineRecommenderTesterPartialTests(data,dimensions,eventsReport);

@@ -8,7 +8,8 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 
 public interface TopNRecommender {
 
-	public  Prediction[] getTopRecommendationForUsers(Set<Long> ids,Long userID,
+	public  Prediction[] getTopRecommendationForUsers(Set<Long> allIds,Set<Long> ratedItems,Long userID,
 			int size, int minTrains) throws TasteException;
+
 
 }

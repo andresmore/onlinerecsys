@@ -98,10 +98,10 @@ public class ColdStartItemModelRecommenderTester extends AbstractRecommenderTest
 									
 						if(iters>=skips){
 		
-							
+							RSDataset data=createDatasetFromFile(mainFile, scale, percentagesContent[i]);
 							
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-									scale, dimensions, false,
+									data, dimensions, false,
 									hybrid);
 
 							hybrid.setModelRepresentation(denseModel);
@@ -112,7 +112,7 @@ public class ColdStartItemModelRecommenderTester extends AbstractRecommenderTest
 													cfLearningRate));
 							metadataModel.setLearningRateStrategy(LearningRateStrategy.createDecreasingRate(1e-6, cbLearningRate));
 
-							RSDataset data=createDatasetFromFile(mainFile, scale, percentagesContent[i]);
+							
 							ColdStartItemModelRecommenderTester rest = new ColdStartItemModelRecommenderTester(
 									data, dimensions);
 							// rest.setEventsReport(1000000);

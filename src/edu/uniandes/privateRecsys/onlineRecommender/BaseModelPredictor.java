@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
@@ -22,7 +23,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
  * @author Andres M
  *
  */
-public  class BaseModelPredictor implements UserModelTrainerPredictor {
+public  class BaseModelPredictor implements UserModelTrainerPredictor,Serializable {
 	
 	protected FactorUserItemRepresentation modelRepresentation;
 	protected LearningRateStrategy learningRateStrategy;

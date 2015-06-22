@@ -131,7 +131,7 @@ public class MetadataOnlineRecommenderTester extends AbstractRecommenderTester {
 							
 						
 						FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-								data.getScale(), 5, false, metadataModel);
+								data, 5, false, metadataModel);
 
 						metadataModel.setModelRepresentation(denseModel);
 					

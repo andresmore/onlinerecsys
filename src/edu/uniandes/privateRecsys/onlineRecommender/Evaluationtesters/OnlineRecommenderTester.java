@@ -136,7 +136,7 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 
 							UserModelTrainerPredictor trainerPredictor = (UserModelTrainerPredictor) predictors[i];
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-									data.getScale(), dimensions, false,
+									data, dimensions, false,
 									trainerPredictor);
 
 							trainerPredictor.setModelRepresentation(denseModel);

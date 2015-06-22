@@ -1,5 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.Serializable;
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
@@ -9,7 +11,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class BaseModelPredictorWithItemRegularizationUpdate extends
-		BaseModelPredictor {
+		BaseModelPredictor implements Serializable {
 	
 	
 	private double regulatizationConstant;

@@ -1,8 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
@@ -13,17 +12,18 @@ public class TopNPredictorParallelRunner implements Runnable {
 
 	private TopNPredictorParallelCalculator parent;
 	private Long userID;
-	private HashMap<Long, HashSet<Long>> userId_positiveElements;
+
 	private TopNRecommender topRecommender;
 	private FactorUserItemRepresentation userItemRep;
+	private String testFile;
 
 	public TopNPredictorParallelRunner(
 			TopNPredictorParallelCalculator topNPredictorParallelCalculator,
-			Long userID, FactorUserItemRepresentation userItemRep, HashMap<Long, HashSet<Long>> userId_positiveElements, TopNRecommender topRecommender) {
+			Long userID, FactorUserItemRepresentation userItemRep, TopNRecommender topRecommender, String testFile) {
 		this.parent=topNPredictorParallelCalculator;
 		this.userItemRep=userItemRep;
 		this.userID=userID;
-		this.userId_positiveElements=userId_positiveElements;
+		this.testFile=testFile;
 		this.topRecommender=topRecommender;
 	}
 
@@ -32,14 +32,13 @@ public class TopNPredictorParallelRunner implements Runnable {
 		if (userID != 0 && userID != -1) {
 			Prediction[] topNPrediction = null;
 			try {
-				topNPrediction = topRecommender.getTopRecommendationForUsers(userItemRep.getItemsId(10),
+				topNPrediction = topRecommender.getTopRecommendationForUsers(userItemRep.getItemsId(10),userItemRep.getRatedItems(userID),
 						userID,  10, 10);
 			} catch (TasteException e) {
 
 			}
 			if (topNPrediction != null) {
-				HashSet<Long> positiveRecommendations = userId_positiveElements
-						.get(userID);
+				Set<Long> positiveRecommendations = userItemRep.getPositiveElements(userID, testFile);
 				int truePosLocal = 0;
 				int falsePosLocal = 0;
 				LinkedList<Double> precisionsAt = new LinkedList<Double>();

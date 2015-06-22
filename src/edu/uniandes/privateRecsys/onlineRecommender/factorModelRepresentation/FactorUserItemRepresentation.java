@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 
 
-public interface FactorUserItemRepresentation {
+public interface FactorUserItemRepresentation extends Serializable {
 
 	UserProfile getPrivateUserProfile(long userId) throws TasteException;
 
@@ -53,6 +54,10 @@ public interface FactorUserItemRepresentation {
 	void addUserEvent(long userId, long itemId, String rating);
 
 	void saveItemMetadata(long itemId, String linkedList);
+
+	Set<Long> getRatedItems(Long userID);
+
+	Set<Long> getPositiveElements(Long userId, String file);
 
 	
 

@@ -75,6 +75,12 @@
     	<artifactId>rival-evaluate</artifactId>
     	<version>0.1</version>
    	</dependency>
+	<dependency>
+    <groupId>org.postgresql</groupId>
+    	<artifactId>postgresql</artifactId>
+    	<version>9.4-1201-jdbc41</version>
+	</dependency>
+   	
 
    	
    	
@@ -95,7 +101,7 @@
       <name>Central Repository</name>
       <url>http://repo.maven.apache.org/maven2</url>
     </repository>
-    
+    <!--  
     <repository>
         <id>onlinerecsys-mvn-repo</id>
         <url>https://raw.github.com/andresmore/onlinerecsys/mvn-repo/</url>
@@ -104,6 +110,7 @@
             <updatePolicy>always</updatePolicy>
         </snapshots>
     </repository>
+    -->
   </repositories>
   <build>
   	<directory>target</directory>

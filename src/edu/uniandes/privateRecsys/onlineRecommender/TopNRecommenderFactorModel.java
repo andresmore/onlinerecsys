@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,7 +12,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class TopNRecommenderFactorModel implements TopNRecommender {
+public class TopNRecommenderFactorModel implements TopNRecommender,Serializable {
 
 	
 	
@@ -26,16 +27,19 @@ public class TopNRecommenderFactorModel implements TopNRecommender {
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.TopNRecommender#getTopRecommendationForUsers(java.lang.Long, int, int)
 	 */
 	@Override
-	public Prediction[] getTopRecommendationForUsers(Set<Long> ids,Long userID, int size, int minTrains) throws TasteException {
-		PriorityQueue<Prediction> predictions= new PriorityQueue<>(11);
+	public Prediction[] getTopRecommendationForUsers( Set<Long> availableItems,Set<Long> ratedItems,Long userID, int size, int minTrains) throws TasteException {
+		PriorityQueue<Prediction> predictions= new PriorityQueue<>(size+1);
 		
 		
-		for (Long itemId : ids) {
-			UserTrainEvent event= new UserTrainEvent(userID, itemId, "", 1, "");
-			Prediction p=predictor.calculatePrediction(event, 0);
-			predictions.add(p);
-			if(predictions.size()>size){
-				predictions.poll();
+		for (Long itemId : availableItems) {
+			if (!ratedItems.contains(itemId)) {
+				UserTrainEvent event = new UserTrainEvent(userID, itemId, "",
+						1, "");
+				Prediction p = predictor.calculatePrediction(event, 0);
+				predictions.add(p);
+				if (predictions.size() > size) {
+					predictions.poll();
+				}
 			}
 		}
 		

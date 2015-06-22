@@ -396,6 +396,18 @@ public class DenseFactorUserItemRepresentation implements
 		
 	}
 
+	@Override
+	public Set<Long> getRatedItems(Long userID) {
+		
+		return null;
+	}
+
+	@Override
+	public Set<Long> getPositiveElements(Long userId, String file) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 
 	

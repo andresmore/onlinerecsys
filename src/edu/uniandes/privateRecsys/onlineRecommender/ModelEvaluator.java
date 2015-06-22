@@ -2,8 +2,8 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -67,7 +67,7 @@ LOG.info("RMSE Error for model with file "+testSet+" is "+rmseEval.getRMSE()+" w
 return rmseEval.getRMSE();
 }
 
-
+	@Deprecated
 	public static IRPrecisionError evaluatePlistaModel(
 			PlistaDataset plistaDataset, RatingScale scale,
 			
@@ -86,12 +86,30 @@ return rmseEval.getRMSE();
 			PListaEventCollector collector = new PListaEventCollector(users,
 					plistaEventCreator);
 			plistaEventCreator.startEvents();
-			HashMap<Long, HashSet<Long>> userId_positiveElements = collector
-					.getPositiveElementsForUsers();
+		
+		
 			
-			//TODO: agregar semantic
+			TopNPredictorParallelCalculator parallel= new TopNPredictorParallelCalculator(users,userItemRep,topNRecommender,null);
+			return parallel.calculateIRMetrics();
+		}
+		return null;
+	}
+	
+	public static IRPrecisionError evaluateModelIR(String testSet, RatingScale scale,
 			
-			TopNPredictorParallelCalculator parallel= new TopNPredictorParallelCalculator(userId_positiveElements,users,userItemRep,topNRecommender);
+			
+			FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender) throws IOException,
+			TasteException {
+		
+		Log.info("Evaluating IR errors ");
+		
+
+		Set<Long> users = userItemRep.getUsersId();
+		if (users != null) {
+			
+		
+			
+			TopNPredictorParallelCalculator parallel= new TopNPredictorParallelCalculator(users,userItemRep,topNRecommender,testSet);
 			return parallel.calculateIRMetrics();
 		}
 		return null;

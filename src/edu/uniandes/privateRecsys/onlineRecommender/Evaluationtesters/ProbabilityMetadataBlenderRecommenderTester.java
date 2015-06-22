@@ -57,7 +57,7 @@ public class ProbabilityMetadataBlenderRecommenderTester extends AbstractRecomme
 		for (int j = 0; j < learningRates.length; j++) {
 			LearningRateStrategy learningRateStrategy = LearningRateStrategy.createDecreasingRate(1e-6, learningRates[j]);
 			FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-					dataset.getScale(), dimensions, false, trainerPredictor);
+					dataset, dimensions, false, trainerPredictor);
 			
 			this.trainerPredictor.setBaseModelLearningRateStrategy(learningRateStrategy);
 			

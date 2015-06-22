@@ -1,29 +1,35 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
-import org.apache.commons.math3.util.Pair;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ConceptBreaker;
+import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
+import edu.uniandes.privateRecsys.onlineRecommender.FilterElement;
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
+import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 
 public class IncrementalFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {
@@ -52,26 +58,28 @@ public class IncrementalFactorUserItemRepresentation implements
 	private boolean hasPrivateInfo;
 	private HashSet<Long> restrictedUserIds;
 	private UserModelTrainerPredictor modelTrainerPredictor;
+	protected RSDataset dataSet;
 
 	public HashSet<Long> getRestrictedUserIds() {
 		return restrictedUserIds;
 	}
 
 	@SuppressWarnings("unchecked")
-	public IncrementalFactorUserItemRepresentation(RatingScale scale, int fDimensions, boolean hasPrivateStrategy, UserModelTrainerPredictor trainerPredictor){
-		this.ratingScale=scale;
+	public IncrementalFactorUserItemRepresentation(RSDataset data, int fDimensions, boolean hasPrivateStrategy, UserModelTrainerPredictor trainerPredictor){
+		this.dataSet=data;
+		this.ratingScale=data.getScale();
 		this.fDimensions=fDimensions;
 		this.modelTrainerPredictor=trainerPredictor;
 		this.hasPrivateInfo=hasPrivateStrategy;
 		
 		if(this.modelTrainerPredictor.hasProbabilityPrediction()){
 			this.itemFactors= new ConcurrentHashMap<>();
-			this.privateUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+			this.privateUserFactors= new ConcurrentHashMap[ratingScale.getRatingSize()];
 			for (int i = 0; i < privateUserFactors.length; i++) {
 				privateUserFactors[i]= new ConcurrentHashMap<>();
 			}
 			if(this.hasPrivateInfo){
-				this.publicUserFactors= new ConcurrentHashMap[scale.getRatingSize()];
+				this.publicUserFactors= new ConcurrentHashMap[ratingScale.getRatingSize()];
 				for (int i = 0; i < publicUserFactors.length; i++) {
 					publicUserFactors[i]= new ConcurrentHashMap<>();
 				}
@@ -83,7 +91,7 @@ public class IncrementalFactorUserItemRepresentation implements
 		}
 		
 		if(this.modelTrainerPredictor.hasMetadataPredictor()){
-			this.privateUserMetadataFactors= new ConcurrentHashMap[scale.getRatingSize()];
+			this.privateUserMetadataFactors= new ConcurrentHashMap[ratingScale.getRatingSize()];
 			this.privateUserConcepts= new ConcurrentHashMap<>();
 			this.privateUserSketch= new ConcurrentHashMap<Long, SlidingWindowCountMinSketch>();
 			for (int i = 0; i < privateUserMetadataFactors.length; i++) {
@@ -495,6 +503,21 @@ public class IncrementalFactorUserItemRepresentation implements
 			}	
 		}
 	}
+
+	@Override
+	public Set<Long> getRatedItems(Long userId) {
+		HashSet<Long> itemIds= new FilterElement(userId,this.dataSet.getTrainSet()).getElementsFromFile();
+		return itemIds;
+	}
+	
+
+	@Override
+	public Set<Long> getPositiveElements(Long userId, String file) {
+		HashSet<Long> itemIds= new FilterElement(userId,file).getElementsFromFile();
+		return itemIds;
+	}
+	
+	
 
 	
 

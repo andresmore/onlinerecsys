@@ -1,9 +1,15 @@
 package edu.uniandes.privateRecsys.onlineRecommender.vo;
 
+import java.io.Serializable;
 
 
-public class UserTrainEvent implements FileEvent{
+
+public class UserTrainEvent implements FileEvent,Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private long userId;
 	private long itemId;
 	private String rating;

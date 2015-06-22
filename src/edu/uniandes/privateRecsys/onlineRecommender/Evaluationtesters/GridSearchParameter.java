@@ -226,7 +226,7 @@ public class GridSearchParameter {
 		this.tsCreator= LearningRateStrategy.createDecreasingRate(alpha, initialGamma);
 		int dimensions=(int) dim;
 		
-		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data.getScale(), dimensions, false,modelTrainerPredictor);
+		IncrementalFactorUserItemRepresentation denseModel= new IncrementalFactorUserItemRepresentation( data, dimensions, false,modelTrainerPredictor);
 		modelTrainerPredictor.setModelRepresentation(denseModel);
 		modelTrainerPredictor.setLearningRateStrategy(tsCreator);
 		OnlineRecommenderTester rest=new OnlineRecommenderTester(data, dimensions);

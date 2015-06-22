@@ -126,7 +126,7 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 									double epsilon=epsilonArr[m];
 									String itemUpdModel=itemUpdaters[n];
 									FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-											scale, dimensions, false, hybrid);
+											data, dimensions, false, hybrid);
 
 									hybrid.setModelRepresentation(denseModel);
 

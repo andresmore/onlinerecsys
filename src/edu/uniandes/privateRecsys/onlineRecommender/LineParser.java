@@ -1,12 +1,17 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
-public class LineParser {
+public class LineParser implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1910340241593499292L;
 	private HashSet<String> separators;
 
 	public LineParser() {

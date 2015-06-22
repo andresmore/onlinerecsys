@@ -120,7 +120,7 @@ public class HybridModelRecommenderTester extends AbstractRecommenderTester {
 							//double cbLearningRate = cfLearningRate;
 
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-									scale, dimensions, false, hybrid);
+									data, dimensions, false, hybrid);
 
 							hybrid.setModelRepresentation(denseModel);
 
