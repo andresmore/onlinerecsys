@@ -21,6 +21,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityMetadataModelPredictor;
+import edu.uniandes.privateRecsys.onlineRecommender.ThresholdItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
@@ -33,14 +34,14 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
-public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommenderTester {
+public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends AbstractRecommenderTester {
 
 
 	
-	private final static Logger LOG = Logger.getLogger(DifferentialPrivacyOnlineRecommenderTester.class
+	private final static Logger LOG = Logger.getLogger(DifferentialPrivacyOnlineRecommenderTesterWithThreshold.class
 		      .getName());
 
-	public DifferentialPrivacyOnlineRecommenderTester(RSDataset data, int fDimensions) throws IOException {
+	public DifferentialPrivacyOnlineRecommenderTesterWithThreshold(RSDataset data, int fDimensions) throws IOException {
 		super(data, fDimensions);
 		
 	}
@@ -94,41 +95,40 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
 			LOG.info("Loading model");
 			RSDataset data= new RSDataset(trainSet,testCV,testSet,scale);
-			double[] cfLearningRate={0.15};
-			double[] cbRates={0.75};
-			int[] dimensionsArr={5};
-			int[] windowSizeArr={60};
+			double[] cfLearningRate={0,001,0.15,0.25,0.4};
+			
+			int[] dimensionsArr={5,10,15,20,25,30,35,40,45,50};
+			
 			double[] epsilonArr={0,0.01,0.1,0.25,0.5,0.75,1,1.25};
+			double[] thresholds={0.5,0.75,0.8,0.9};
+			
 			//double[] epsilonArr={0};
-			String[] itemUpdaters={"ItemProfileUpdater","BlackListedMetadata"};  
+			String[] itemUpdaters={"ItemProfileUpdater","ThresholdItemProfileUpdater"};  
 	
 			
 			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
-			MetadataPredictor metadataModel = new MetadataPredictor(-1,MetadataPredictor.SKETCH_DEPTH,MetadataPredictor.SKETCH_WIDTH, MetadataPredictor.WINDOW_LENGHT, MetadataPredictor.NUMBER_OF_SEGMENTS, MetadataPredictor.NUMROLLING);
 			
 			
-			ProbabilityMetadataModelPredictor hybrid=(new ProbabilityMetadataModelPredictor(baseModelPredictor,metadataModel));
-			HashSet<Long> blacklistedConcepts = new HashSet<Long>();
 			
-			//Concept genre:Horror count: 1013, id: 461
-			blacklistedConcepts.add(461L);
 			
 			for (int i = 0; i < cfLearningRate.length; i++) {
-				for (int j = 0; j < cbRates.length; j++) {
+			 for (int j = 0; j < thresholds.length; j++) {
+				
+			
 					for (int k = 0; k < dimensionsArr.length; k++) {
-						for (int l = 0; l < windowSizeArr.length; l++) {
+			
 							for (int m = 0; m < epsilonArr.length; m++) {
 								for (int n = 0; n < itemUpdaters.length; n++) {
 									double cflearn=cfLearningRate[i];
-									double cblearn=cbRates[j];
+									double threshold=thresholds[j];
 									int dimensions=dimensionsArr[k];
-									int windowSize=windowSizeArr[l];
+									
 									double epsilon=epsilonArr[m];
 									String itemUpdModel=itemUpdaters[n];
 									FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-											data, dimensions, false, hybrid);
+											data, dimensions, false, baseModelPredictor);
 
-									hybrid.setModelRepresentation(denseModel);
+									baseModelPredictor.setModelRepresentation(denseModel);
 
 									
 									LearningRateStrategy cfLearningRateStrategy = LearningRateStrategy
@@ -136,45 +136,37 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 									baseModelPredictor
 									.setLearningRateStrategy(cfLearningRateStrategy);
 									
-									LearningRateStrategy cbLearningRateStrategy = LearningRateStrategy
-											.createDecreasingRate(1e-6,cblearn);
 									
-									metadataModel.setLearningRateStrategy(cbLearningRateStrategy);
-									metadataModel.initSketchProperties(
-											MetadataPredictor.SKETCH_DEPTH,
-											MetadataPredictor.SKETCH_WIDTH, windowSize,
-											5, 5);
 									
-									DifferentialPrivacyOnlineRecommenderTester rest=new DifferentialPrivacyOnlineRecommenderTester(data, dimensions);
-									UserProfileUpdater userUp = new UserProfileUpdater(hybrid);
+									DifferentialPrivacyOnlineRecommenderTesterWithThreshold rest=new DifferentialPrivacyOnlineRecommenderTesterWithThreshold(data, dimensions);
+									UserProfileUpdater userUp = new UserProfileUpdater(baseModelPredictor);
 									IUserMaskingStrategy agregator= new DifferentialPrivacyMaskingStrategy(epsilon);
 									IItemProfileUpdater itemUpdater= null;
 									if(itemUpdModel.equals("ItemProfileUpdater")){
-										itemUpdater= new ItemProfileUpdater(hybrid);
+										itemUpdater= new ItemProfileUpdater(baseModelPredictor);
 									}else{
 										
-										itemUpdater= new BlackListedMetadataItemProfileUpdater(hybrid, blacklistedConcepts);
+										itemUpdater= new ThresholdItemProfileUpdater(baseModelPredictor, threshold);
 									}
 									
 									rest.setModelAndUpdaters(denseModel, userUp,
 											agregator, itemUpdater);
-									rest.setModelPredictor(hybrid);
+									rest.setModelPredictor(baseModelPredictor);
 									ErrorReport result = rest.startExperiment(1);
 									
 									double cfRMSETest=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),baseModelPredictor,0);
-									double cbRMSETest=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),metadataModel,0);
+									
 									String resultLine = "DiffPrivate predictor"
 											+ '\t'
 											+ cflearn
 											+ ""
 											+ '\t'
-											+ cblearn
+											+ threshold
 											+ ""
 											+ '\t'
 											+ dimensions
 											+ ""
 											+ '\t'
-											+ windowSize
 											+ ""
 											+ '\t'
 											+ epsilon
@@ -183,11 +175,9 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 											+ itemUpdModel
 											+ ""
 											+ '\t'
-											+ hybrid.calculateRegretBaseExpert()
-													.toString() + "" + '\t'
 											+ result.toString() + '\t'
 											+""+cfRMSETest+'\t'
-											+""+cbRMSETest+'\t'
+											
 											;
 									LOG.info("Finished: "+resultLine);
 									results.add(resultLine);
@@ -198,11 +188,9 @@ public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommen
 		
 						}
 					}
-	
-				}		
 			}
-
 			
+	
 			
 			//int eventsReport=100000;
 				

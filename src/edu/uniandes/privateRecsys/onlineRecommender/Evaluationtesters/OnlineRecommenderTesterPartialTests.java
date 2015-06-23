@@ -28,7 +28,7 @@ public class OnlineRecommenderTesterPartialTests extends AbstractRecommenderTest
 
 	
 	
-	private final static Logger LOG = Logger.getLogger(ContinualDifferentialPrivacyOnlineRecommenderTester.class
+	private final static Logger LOG = Logger.getLogger(OnlineRecommenderTesterPartialTests.class
 		      .getName());
 
 
