@@ -29,7 +29,7 @@ public class MetadataPredictor implements UserModelTrainerPredictor {
 
 	private  int numRolling=3;
 	
-	public static final int SEED = new BigInteger(SecureRandom.getSeed(4)).intValue();
+	public static final int SEED = PrivateRandomUtils.getSeed();
 
 	public static final int NUMROLLING = 3;
 	

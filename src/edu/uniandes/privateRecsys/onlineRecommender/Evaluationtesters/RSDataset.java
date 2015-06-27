@@ -40,9 +40,20 @@ public class RSDataset {
 		this.testCV=testCV;
 		this.scale=scale;
 	}
-	public static RSDataset fromPropertyFile(String file) throws FileNotFoundException, IOException {
+	public static RSDataset fromPropertyFile(String file) throws IOException{
 		Properties prop= new Properties();
-		prop.load(new FileInputStream(file));
+		FileInputStream fileInputStream = new FileInputStream(file);
+		try {
+			prop.load(fileInputStream);
+		} catch (IOException e) {
+			throw e;
+		}
+		finally{
+			if(fileInputStream!=null)
+				try {
+					fileInputStream.close();
+				} catch (IOException e) {}
+		}
 		String[] scaleStr=prop.getProperty("scale").split(",");
 		OrdinalRatingScale scale= new OrdinalRatingScale(scaleStr, new HashMap<String, String>());
 	

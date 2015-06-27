@@ -16,7 +16,7 @@ public class DifferentialPrivacyMaskingStrategy implements IUserMaskingStrategy 
 
 	
 	private double sigma=0;
-	private XORShiftRNG rand=new XORShiftRNG();
+	
 
 	public DifferentialPrivacyMaskingStrategy( double epsilon) {
 		if(epsilon==0){
@@ -60,7 +60,7 @@ public class DifferentialPrivacyMaskingStrategy implements IUserMaskingStrategy 
 			if(metadataInfo!=null)
 				trainedMetadataProfiles.add(metadataInfo.getTrainedProfiles().get(rating));
 			if(scale.equals(event.getRating())){
-					Vector randVector=PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector.size());
+					Vector randVector=PrivateRandomUtils.laplaceRandom(0, sigma, privateVector.size());
 					privateVector=privateVector.plus(randVector);
 					
 			}

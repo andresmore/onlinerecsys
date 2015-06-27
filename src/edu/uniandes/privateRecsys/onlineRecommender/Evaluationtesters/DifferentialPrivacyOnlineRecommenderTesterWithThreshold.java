@@ -61,30 +61,12 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 
 	public static void main(String[] args) {
 		try {
-			//new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 10).startRecommendations();
+		
 			LinkedList<String> results= new LinkedList<>();
 			
 			
-			//String trainSet=new String("data/dbBook/ra.train.meta");
-			//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
-			String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
-			//String trainSet="data/netflix/rb.train.sorted";
-			
-			//String testSet=new String("data/dbBook/ra.test.meta");
-			//String testSet=new String("data/ml-10M100K/rb.test.test");
-			String testSet=new String("data/ml-10M100K/rb.test.meta.test");
-			//String testSet=new String("data/ml-1m/rb.test.test");
-			//String testSet=new String("data/ml-1m/rb.test.meta.test");
-			//String testSet="data/netflix/rb.test.test";
-			
-			//String testCV=new String("data/dbBook/ra.test.meta");
-			//String testCV=new String("data/ml-10M100K/rb.test.cv");
-			String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
-			//String testCV=new String("data/ml-1m/rb.test.cv");
-			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
-			//String testCV="data/netflix/rb.test.CV";
+		
+		
 			 HashMap<String,String> translations=new HashMap<String,String>();
 			 translations.put("0.5", "1");
 			 translations.put("1.5", "2");
@@ -94,102 +76,112 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
 			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
 			LOG.info("Loading model");
-			RSDataset data= new RSDataset(trainSet,testCV,testSet,scale);
-			double[] cfLearningRate={0,001,0.15,0.25,0.4};
+		
+			RSDataset data=RSDataset.fromPropertyFile("config/movielensLocation.properties");
+			double[] cfLearningRate={0.001, 0.15,0.25,0.4};
+			double[] regularizations={0.001,0.01,0.1};
 			
-			int[] dimensionsArr={5,10,15,20,25,30,35,40,45,50};
+			int[] dimensionsArr={5,10,15};
 			
-			double[] epsilonArr={0,0.01,0.1,0.25,0.5,0.75,1,1.25};
+			double[] epsilonArr={0,0.01,0.1,0.25,0.5,0.75,1};
 			double[] thresholds={0.5,0.75,0.8,0.9};
 			
 			//double[] epsilonArr={0};
 			String[] itemUpdaters={"ItemProfileUpdater","ThresholdItemProfileUpdater"};  
 	
 			
-			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
 			
 			
 			
 			
 			for (int i = 0; i < cfLearningRate.length; i++) {
-			 for (int j = 0; j < thresholds.length; j++) {
+				for (int n = 0; n < itemUpdaters.length; n++) {
+					
 				
-			
+
 					for (int k = 0; k < dimensionsArr.length; k++) {
-			
+						for (int k2 = 0; k2 < regularizations.length; k2++) {
+
 							for (int m = 0; m < epsilonArr.length; m++) {
-								for (int n = 0; n < itemUpdaters.length; n++) {
-									double cflearn=cfLearningRate[i];
-									double threshold=thresholds[j];
-									int dimensions=dimensionsArr[k];
+								boolean needsThresholdsIteration=true;
+								for (int j = 0; j < thresholds.length && needsThresholdsIteration; j++) {
+
+									double threshold = thresholds[j];
+
+									double cflearn = cfLearningRate[i];
 									
-									double epsilon=epsilonArr[m];
-									String itemUpdModel=itemUpdaters[n];
+									int dimensions = dimensionsArr[k];
+									double regularization=regularizations[k2];
+									double epsilon = epsilonArr[m];
+									String itemUpdModel = itemUpdaters[n];
+									BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(
+											regularization);
 									FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
-											data, dimensions, false, baseModelPredictor);
+											data, dimensions, false,
+											baseModelPredictor);
 
-									baseModelPredictor.setModelRepresentation(denseModel);
-
-									
-									LearningRateStrategy cfLearningRateStrategy = LearningRateStrategy
-											.createDecreasingRate(1e-6,cflearn);	
 									baseModelPredictor
-									.setLearningRateStrategy(cfLearningRateStrategy);
-									
-									
-									
-									DifferentialPrivacyOnlineRecommenderTesterWithThreshold rest=new DifferentialPrivacyOnlineRecommenderTesterWithThreshold(data, dimensions);
-									UserProfileUpdater userUp = new UserProfileUpdater(baseModelPredictor);
-									IUserMaskingStrategy agregator= new DifferentialPrivacyMaskingStrategy(epsilon);
-									IItemProfileUpdater itemUpdater= null;
-									if(itemUpdModel.equals("ItemProfileUpdater")){
-										itemUpdater= new ItemProfileUpdater(baseModelPredictor);
-									}else{
+											.setModelRepresentation(denseModel);
+
+									LearningRateStrategy cfLearningRateStrategy = LearningRateStrategy
+											.createDecreasingRate(1e-6, cflearn);
+									baseModelPredictor
+											.setLearningRateStrategy(cfLearningRateStrategy);
+
+									DifferentialPrivacyOnlineRecommenderTesterWithThreshold rest = new DifferentialPrivacyOnlineRecommenderTesterWithThreshold(
+											data, dimensions);
+									UserProfileUpdater userUp = new UserProfileUpdater(
+											baseModelPredictor);
+									IUserMaskingStrategy agregator = new DifferentialPrivacyMaskingStrategy(
+											epsilon);
+									IItemProfileUpdater itemUpdater = null;
+									if (itemUpdModel
+											.equals("ItemProfileUpdater")) {
+										itemUpdater = new ItemProfileUpdater(
+												baseModelPredictor);
+										needsThresholdsIteration=false;
+										threshold=-1;
+									} else {
 										
-										itemUpdater= new ThresholdItemProfileUpdater(baseModelPredictor, threshold);
+										itemUpdater = new ThresholdItemProfileUpdater(
+												baseModelPredictor, threshold);
+									}
+
+									rest.setModelAndUpdaters(denseModel,
+											userUp, agregator, itemUpdater);
+									rest.setModelPredictor(baseModelPredictor);
+									ErrorReport result = rest
+											.startExperiment(1);
+									String events = "";
+									if (itemUpdModel
+											.equals("ThresholdItemProfileUpdater")) {
+										events = ""
+												+ ((ThresholdItemProfileUpdater) itemUpdater)
+														.getNumEventsThreshold();
 									}
 									
-									rest.setModelAndUpdaters(denseModel, userUp,
-											agregator, itemUpdater);
-									rest.setModelPredictor(baseModelPredictor);
-									ErrorReport result = rest.startExperiment(1);
-									
-									double cfRMSETest=ModelEvaluator.evaluateModel(new File(data.getTestSet()),data.getScale(),baseModelPredictor,0);
-									
 									String resultLine = "DiffPrivate predictor"
-											+ '\t'
-											+ cflearn
-											+ ""
-											+ '\t'
-											+ threshold
-											+ ""
-											+ '\t'
-											+ dimensions
-											+ ""
-											+ '\t'
-											+ ""
-											+ '\t'
-											+ epsilon
-											+ ""
-											+ '\t'
-											+ itemUpdModel
-											+ ""
-											+ '\t'
+											+ '\t' + cflearn + "" + '\t'
+											+ '\t' + regularization + "" + '\t'
+											+ threshold + "" + '\t'
+											+ dimensions + "" + '\t' + ""
+											+ '\t' + epsilon + "" + '\t'
+											+ itemUpdModel + "" + '\t'
 											+ result.toString() + '\t'
-											+""+cfRMSETest+'\t'
-											
-											;
-									LOG.info("Finished: "+resultLine);
+
+											+ events + '\t'
+
+									;
+									LOG.info("Finished: " + resultLine);
 									results.add(resultLine);
 									denseModel = null;
 								}
-								
+
 							}
-		
 						}
 					}
+				}
 			}
-			
 	
 			
 			//int eventsReport=100000;

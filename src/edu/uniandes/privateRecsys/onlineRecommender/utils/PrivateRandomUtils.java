@@ -11,21 +11,22 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 
 public class PrivateRandomUtils {
 
+	private static int SEED=0;
 	
-	private static UncommonsRandomGeneratorAdaptor genRand= new UncommonsRandomGeneratorAdaptor();
+	private static final RandomGeneratorConsumer genRand=new RandomGeneratorConsumer (new UncommonsRandomGeneratorAdaptor(SEED))	;
+	private static final UncommonsRandomGeneratorAdaptor nonParallelGEnerator=new UncommonsRandomGeneratorAdaptor(SEED);
 	/**
-	 * Randomizes a Matrix based with values taken from a normal distribution between [0,1) using Rand.nextDouble()
+	 * Randomizes a Matrix based with values taken from a normal distribution between [0,1) using Rand.nextGaussian()
 	 * @param matrix
 	 * @param projectRows 
 	 */
 	public static void randomizeMatrix(Matrix matrix, boolean projectRows) {
 		
-		XORShiftRNG rand= new XORShiftRNG();
 		
 		//Random rand=RandomUtils.getRand000om();
 		for (int row = 0; row < matrix.rowSize(); row++) {
 			for (int column = 0; column < matrix.columnSize(); column++) {
-				matrix.setQuick(row, column, rand.nextDouble());
+				matrix.setQuick(row, column, genRand.nextGaussian());
 			}
 			if(projectRows){
 				Vector projected=VectorProjector.projectVectorIntoSimplex(matrix.viewRow(row));
@@ -49,7 +50,7 @@ public class PrivateRandomUtils {
 		return retVector;
 	}
 	 
-	public static Vector laplaceRandom(Random m, double mu, double sigma, int size){
+	public static Vector laplaceRandom(double mu, double sigma, int size){
 		Vector retVector= new DenseVector(size);
 		
 		
@@ -57,7 +58,7 @@ public class PrivateRandomUtils {
 		for (int i = 0; i < retVector.size(); i++) {
 			double value;
 			do{
-				value=-0.5+m.nextGaussian();
+				value=-0.5+genRand.nextGaussian();
 			}while(value<=-0.5||value>0.5);
 			//u = rand(m, n)-0.5;
 			double valueU=value;
@@ -76,7 +77,12 @@ public class PrivateRandomUtils {
 	}
 	
 	public static UncommonsRandomGeneratorAdaptor getCurrentRandomGenerator(){
-		return genRand;
+		return nonParallelGEnerator;
+	}
+
+	public static int getSeed() {
+
+		return SEED;
 	}
 
 }

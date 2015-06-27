@@ -1,10 +1,31 @@
 package edu.uniandes.privateRecsys.onlineRecommender.utils;
 
+import java.lang.Thread.State;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
+
 import org.apache.commons.math3.random.RandomGenerator;
 import org.uncommons.maths.random.XORShiftRNG;
 
+import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.DifferentialPrivacyOnlineRecommenderTesterWithThreshold;
+/**
+ * An adaptor for producing/consuming random numbers from XORShiftRGN and adapting to the commons random generator interface
+ * @author AndresM
+ *
+ */
+@SuppressWarnings("serial")
 public class UncommonsRandomGeneratorAdaptor extends XORShiftRNG implements RandomGenerator {
 
+	
+	
+	public UncommonsRandomGeneratorAdaptor(int seed){
+		super();
+		super.setSeed(seed);
+		
+		
+		
+	}
+	
 	@Override
 	public void setSeed(int seed) {
 		super.setSeed(seed);
@@ -26,6 +47,5 @@ public class UncommonsRandomGeneratorAdaptor extends XORShiftRNG implements Rand
 		
 	}
 
-	
 
 }

@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -26,6 +27,10 @@ public class ThresholdItemProfileUpdater implements IItemProfileUpdater {
 
 	private double threshold;
 
+
+
+	private AtomicInteger numEventsThreshold;
+
 	public ThresholdItemProfileUpdater(UserModelTrainerPredictor predictor, double threshold) throws PrivateRecsysException{
 		this.predictor=predictor;
 		
@@ -36,6 +41,7 @@ public class ThresholdItemProfileUpdater implements IItemProfileUpdater {
 			throw new PrivateRecsysException("Predictor is invalid with no probability predictor");
 		}
 		this.threshold=threshold;
+		this.numEventsThreshold=new AtomicInteger(0);
 	}
 	/* (non-Javadoc)
 	 * @see edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater#processEvent(edu.uniandes.privateRecsys.onlineRecommender.vo.EventVO, edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation)
@@ -53,6 +59,7 @@ public class ThresholdItemProfileUpdater implements IItemProfileUpdater {
 		ItemProfile itemProfile=userItemRep.getPrivateItemProfile(itemId);
 		
 		if(userProfile.getProfileForScale(rating).dot(itemProfile.getProbabilityVector())>threshold){
+			this.numEventsThreshold.incrementAndGet();
 			return;
 		}
 		if (predictor.saveItemMetadata())
@@ -64,6 +71,10 @@ public class ThresholdItemProfileUpdater implements IItemProfileUpdater {
 					itemId, rating);
 
 		}
+	}
+	
+	public int getNumEventsThreshold(){
+		return numEventsThreshold.get();
 	}
 	
 	

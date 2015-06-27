@@ -16,7 +16,7 @@ public class ContinualDifferentialPrivacyAggregator implements IUserMaskingStrat
 
 
 	private double sigma=0;
-	private XORShiftRNG rand=new XORShiftRNG();
+
 	private int T;
 	private double lapDesv;
 
@@ -51,7 +51,7 @@ public class ContinualDifferentialPrivacyAggregator implements IUserMaskingStrat
 			Vector privateVector=privateUserProfile.getProfileForScale(ratingScale[i]);
 			Vector randVector=privateVector.like();
 			for (int j = 0; j < numNoises; j++) {
-				randVector.plus(PrivateRandomUtils.laplaceRandom(this.rand,0, sigma, privateVector.size()));
+				randVector.plus(PrivateRandomUtils.laplaceRandom(0, sigma, privateVector.size()));
 			}
 			
 			Vector noiseVector=privateVector.plus(randVector) ;
