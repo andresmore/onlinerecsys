@@ -5,16 +5,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.DifferentialPrivacyOnlineRecommenderTesterWithThreshold;
 /**
- * An adaptor for producing/consuming random numbers from XORShiftRGN and adapting to the commons random generator interface
+ * An adaptor for producing/consuming random numbers from MersenneTwisterRNG and adapting to the commons random generator interface
  * @author AndresM
  *
  */
 @SuppressWarnings("serial")
-public class UncommonsRandomGeneratorAdaptor extends XORShiftRNG implements RandomGenerator {
+public class UncommonsRandomGeneratorAdaptor extends MersenneTwisterRNG implements RandomGenerator {
 
 	
 	

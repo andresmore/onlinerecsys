@@ -1,38 +1,25 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
-import edu.uniandes.privateRecsys.onlineRecommender.BlackListedMetadataItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.DifferentialPrivacyMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
-import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityMetadataModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ThresholdItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
-import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
 public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends AbstractRecommenderTester {
 
@@ -73,8 +60,7 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			 translations.put("2.5", "3");
 			 translations.put("3.5", "4");
 			 translations.put("4.5", "5");
-			RatingScale scale= new OrdinalRatingScale(new String[] {"0.5","1","1.5","2","2.5","3","3.5","4","4.5","5"},translations);
-			//RatingScale scale= new OrdinalRatingScale(new String[] {"1","2","3","4","5"});
+	
 			LOG.info("Loading model");
 		
 			RSDataset data=RSDataset.fromPropertyFile("config/movielensLocation.properties");
@@ -86,7 +72,7 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			double[] epsilonArr={0,0.01,0.1,0.25,0.5,0.75,1};
 			double[] thresholds={0.5,0.75,0.8,0.9};
 			
-			//double[] epsilonArr={0};
+			
 			String[] itemUpdaters={"ItemProfileUpdater","ThresholdItemProfileUpdater"};  
 	
 			
@@ -184,7 +170,7 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			}
 	
 			
-			//int eventsReport=100000;
+		
 				
 				
 			for (String string : results) {
@@ -193,21 +179,8 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			}
 				
 	
-			
-				
-				
-				
-			
-				
-			
-				
-			
-			
-		
-			
-			//OnlineRecommenderTester rest=new OnlineRecommenderTester("data/ml-100k/ua.base", "data/ml-100k/testingFile", 5, 1*24*60*60);
-			//double result=rest.startRecommendations();
-			//System.out.println(result);
+			System.exit(0);
+
 		} catch (IOException e) {
 			
 			e.printStackTrace();

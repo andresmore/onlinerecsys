@@ -1,5 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender.ratingScale;
 
+import java.util.HashMap;
+
 public interface RatingScale {
     
 	/**
@@ -12,5 +14,6 @@ public interface RatingScale {
 	public String getRatingAlias(String rating);
 	double[] scaleAsValues();
 	int getIndexForPreference(String rating);
+	public HashMap<String,String> getTranslations();
 
 }

@@ -75,6 +75,12 @@ public class OrdinalRatingScale implements RatingScale {
 		return -1;
 	}
 
+	@Override
+	public HashMap<String, String> getTranslations() {
+		// TODO Auto-generated method stub
+		return translations;
+	}
+
 	
 
 }

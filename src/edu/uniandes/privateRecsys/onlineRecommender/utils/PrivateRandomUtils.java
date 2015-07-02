@@ -11,7 +11,7 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.Ve
 
 public class PrivateRandomUtils {
 
-	private static int SEED=0;
+	private static int SEED=1;
 	
 	private static final RandomGeneratorConsumer genRand=new RandomGeneratorConsumer (new UncommonsRandomGeneratorAdaptor(SEED))	;
 	private static final UncommonsRandomGeneratorAdaptor nonParallelGEnerator=new UncommonsRandomGeneratorAdaptor(SEED);
