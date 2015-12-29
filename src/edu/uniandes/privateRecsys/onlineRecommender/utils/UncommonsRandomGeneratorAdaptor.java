@@ -1,14 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender.utils;
 
-import java.lang.Thread.State;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Logger;
-
 import org.apache.commons.math3.random.RandomGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
-import org.uncommons.maths.random.XORShiftRNG;
-
-import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.DifferentialPrivacyOnlineRecommenderTesterWithThreshold;
 /**
  * An adaptor for producing/consuming random numbers from MersenneTwisterRNG and adapting to the commons random generator interface
  * @author AndresM

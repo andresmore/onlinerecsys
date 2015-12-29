@@ -1,7 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,13 +8,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.collections.map.HashedMap;
-import org.jfree.util.Log;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;

@@ -7,7 +7,6 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.math.Vector;
-import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;

@@ -5,13 +5,10 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class BlackListedMetadataItemProfileUpdater implements IItemProfileUpdater {

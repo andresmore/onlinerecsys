@@ -1,6 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 
 import org.apache.mahout.math.Vector;

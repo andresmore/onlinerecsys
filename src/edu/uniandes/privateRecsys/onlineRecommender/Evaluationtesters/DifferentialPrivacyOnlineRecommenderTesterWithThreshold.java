@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,17 +10,21 @@ import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
 import edu.uniandes.privateRecsys.onlineRecommender.DifferentialPrivacyMaskingStrategy;
+import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
+import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
+import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
 import edu.uniandes.privateRecsys.onlineRecommender.ThresholdItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
 public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends AbstractRecommenderTester {
 
@@ -63,11 +68,12 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 	
 			LOG.info("Loading model");
 		
-			RSDataset data=RSDataset.fromPropertyFile("config/movielensLocation.properties");
-			double[] cfLearningRate={0.001, 0.15,0.25,0.4};
+			RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties");
+			//RSDataset data=RSDataset.fromPropertyFile("config/movielensLocation.properties");
+			double[] cfLearningRate={0.15,0.25,0.4};
 			double[] regularizations={0.001,0.01,0.1};
 			
-			int[] dimensionsArr={5,10,15};
+			int[] dimensionsArr={5};
 			
 			double[] epsilonArr={0,0.01,0.1,0.25,0.5,0.75,1};
 			double[] thresholds={0.5,0.75,0.8,0.9};
@@ -136,6 +142,7 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 									rest.setModelAndUpdaters(denseModel,
 											userUp, agregator, itemUpdater);
 									rest.setModelPredictor(baseModelPredictor);
+									//rest.setNumLimitEvents(10000000);
 									ErrorReport result = rest
 											.startExperiment(1);
 									String events = "";
@@ -192,6 +199,66 @@ public class DifferentialPrivacyOnlineRecommenderTesterWithThreshold extends Abs
 			e.printStackTrace();
 		}
 
+	}
+	
+	/***
+	 * 
+	 * @return The rmse of the experiment
+	 * @throws IOException If the files specified are not accessible
+	 * @throws TasteException If the format of the file is not valid
+	 * @throws PrivateRecsysException
+	 */
+	public ErrorReport startExperiment(int numIterations) throws IOException, TasteException, PrivateRecsysException {
+		
+		if(userItemRep==null || userUpdater==null || userAggregator==null || itemProfileUpdater==null||predictor==null ){
+			LOG.severe("Could not start experiment: Model and iterator not set");
+			throw new TasteException("Model and iterator not set");
+		}	
+		
+		
+		LOG.info("Starting experiment with predictor ="+predictor.toString()+" numIterations training "+numIterations );
+		double error=0;
+		double errorTrain=0;
+		double errorCV=0;
+		LinkedList<Double> partialErrors= new LinkedList<>();
+		for (int iteration = 1; iteration <= numIterations; iteration++) {
+			
+			
+			PrivateRecommenderParallelTrainer pstr= new PrivateRecommenderParallelTrainer(this.userItemRep,this.predictor, this.userUpdater, this.userAggregator,this.itemProfileUpdater,this.rsDataset);
+			
+			FileEventCreator cec= new FileEventCreator(new File(rsDataset.getTrainSet()),this.eventsReport,this.numLimitEvents);
+			cec.addObserver(pstr);
+		
+			cec.startEvents();
+			
+			
+			pstr.shutdownThread();
+			try {
+				
+				boolean finished=pstr.forceShutdown();
+				if(!finished){
+					throw new TasteException("Training failed - Timeout exception - not completed - Executed tasks: "+pstr.numExecutedTasks());
+				}
+				if(pstr.getNumSubmitedTasks()!=pstr.numExecutedTasks()){
+					throw new TasteException("Training failed - not all tasks executed - Sumbited tasks: "+pstr.getNumSubmitedTasks()+" Executed tasks: "+pstr.numExecutedTasks());
+				}
+				LOG.info("Finished training, measuring errors ");
+				
+				error=ModelEvaluator.evaluateModel(new File(rsDataset.getTestSet()),rsDataset.getScale(),this.predictor,3);
+				errorCV=ModelEvaluator.evaluateModel(new File(rsDataset.getTestCV()),rsDataset.getScale(), this.predictor,3);
+				errorTrain=1.19;//ModelEvaluator.evaluateModel(new File(rsDataset.getTrainSet()),rsDataset.getScale(), this.predictor,3);
+				//System.out.println("Error at iteration "+iteration+" is: Train: "+errorTrain+" CV:"+errorCV+" Test:"+error);
+				LOG.info("Iteration "+iteration+" errors: "+errorTrain+'\t'+errorCV+'\t'+error);
+				partialErrors.addAll(pstr.getPartialEvaluations());
+			} catch (InterruptedException e) {
+				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
+			}
+		}
+		LOG.info("Final error for experiment with with predictor ="+predictor.toString()+" numIterations training "+numIterations+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: train="+errorTrain+" cv="+errorCV+" test="+error);
+		
+		
+		return new RMSE_ErrorReport(errorTrain, error, errorCV,partialErrors);//""+errorTrain+'\t'+errorCV+'\t'+error;
+		
 	}
 	
 

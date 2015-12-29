@@ -1,13 +1,9 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Random;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
-import org.apache.commons.math3.util.Pair;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.math.Vector;
 

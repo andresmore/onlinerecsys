@@ -1,11 +1,8 @@
 package edu.uniandes.privateRecsys.onlineRecommender.utils;
 
-import java.util.Random;
-
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 

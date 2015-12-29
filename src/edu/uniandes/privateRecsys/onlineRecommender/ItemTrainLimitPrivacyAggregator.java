@@ -1,16 +1,10 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
-import java.util.HashMap;
-
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.math.Vector;
-import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.StopTrainingException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
-import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class ItemTrainLimitPrivacyAggregator implements IUserMaskingStrategy {

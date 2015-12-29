@@ -17,7 +17,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 

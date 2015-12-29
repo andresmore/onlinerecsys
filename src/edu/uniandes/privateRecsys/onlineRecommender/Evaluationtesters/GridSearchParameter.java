@@ -9,14 +9,12 @@ import org.apache.commons.math.util.MathUtils;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.BlendedModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;

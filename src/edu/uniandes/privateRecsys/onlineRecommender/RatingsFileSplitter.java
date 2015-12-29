@@ -7,18 +7,15 @@ import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.model.Preference;
 
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;

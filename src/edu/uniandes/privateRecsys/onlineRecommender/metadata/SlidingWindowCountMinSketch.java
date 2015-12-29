@@ -2,9 +2,6 @@ package edu.uniandes.privateRecsys.onlineRecommender.metadata;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Random;
-
-import com.clearspring.analytics.stream.frequency.CountMinSketch;
 
 /**
  * Implementation of the sliding window sketch data structure as described in:<br>

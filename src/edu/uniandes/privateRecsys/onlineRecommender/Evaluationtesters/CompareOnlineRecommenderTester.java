@@ -2,7 +2,6 @@ package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
@@ -16,7 +15,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.LogCombinationPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.LogProbabilityMetadataModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
@@ -29,8 +27,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
-import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
-import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 

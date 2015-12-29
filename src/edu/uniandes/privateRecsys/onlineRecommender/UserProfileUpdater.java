@@ -4,14 +4,12 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
-import org.apache.hadoop.hdfs.server.datanode.FSDatasetInterface.MetaDataInputStream;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.ItemProfile;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;
-import edu.uniandes.privateRecsys.onlineRecommender.metadata.MetadataDatasetConverter;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class UserProfileUpdater implements IUserProfileUpdater {

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.math.Vector;
-import org.uncommons.maths.random.XORShiftRNG;
 
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.UserProfile;

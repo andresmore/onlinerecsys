@@ -21,7 +21,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Random;
 
 import com.clearspring.analytics.stream.frequency.FrequencyMergeException;
 import com.clearspring.analytics.stream.frequency.IFrequency;

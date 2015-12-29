@@ -14,13 +14,10 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.VectorProjector;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;

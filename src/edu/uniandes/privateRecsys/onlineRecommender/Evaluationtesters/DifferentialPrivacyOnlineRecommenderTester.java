@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
 import edu.uniandes.privateRecsys.onlineRecommender.BlackListedMetadataItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.DifferentialPrivacyMaskingStrategy;
@@ -21,17 +20,13 @@ import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityMetadataModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.AverageDataModel;
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.DenseFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.IncrementalFactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
 public class DifferentialPrivacyOnlineRecommenderTester extends AbstractRecommenderTester {
 

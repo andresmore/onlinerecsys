@@ -8,22 +8,15 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
-import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ItemProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.ItemTrainLimitPrivacyAggregator;
 import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
-import edu.uniandes.privateRecsys.onlineRecommender.LogCombinationPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.MetadataPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.NoMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
-import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityBiasMetadataModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.ProbabilityMetadataModelPredictor;
-import edu.uniandes.privateRecsys.onlineRecommender.SimpleAveragePredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.UserProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;

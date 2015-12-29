@@ -1,6 +1,5 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.mahout.cf.taste.common.TasteException;

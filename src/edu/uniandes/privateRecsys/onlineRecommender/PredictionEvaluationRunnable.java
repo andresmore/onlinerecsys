@@ -3,7 +3,6 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 

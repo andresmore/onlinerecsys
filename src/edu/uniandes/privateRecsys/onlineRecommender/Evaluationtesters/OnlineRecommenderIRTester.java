@@ -27,7 +27,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingSca
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.ErrorReport;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.IRPrecisionError;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.RMSE_ErrorReport;
 
 public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 

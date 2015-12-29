@@ -1,13 +1,9 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,16 +16,13 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ConceptBreaker;
-import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.FilterElement;
 import edu.uniandes.privateRecsys.onlineRecommender.UserMetadataInfo;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;
 import edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters.RSDataset;
-import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
-import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 
 public class IncrementalFactorUserItemRepresentation implements
 		FactorUserItemRepresentation {

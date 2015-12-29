@@ -5,7 +5,6 @@ import java.util.LinkedList;
 
 import org.apache.mahout.math.Vector;
 
-import edu.uniandes.privateRecsys.onlineRecommender.metadata.ResetableCountMinSketch;
 import edu.uniandes.privateRecsys.onlineRecommender.metadata.SlidingWindowCountMinSketch;
 
 public class UserMetadataInfo {

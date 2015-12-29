@@ -4,15 +4,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.management.RuntimeErrorException;
-
-import org.apache.mahout.common.iterator.FileLineIterator;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 

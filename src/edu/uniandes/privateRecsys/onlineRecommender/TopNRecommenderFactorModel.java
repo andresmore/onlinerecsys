@@ -3,7 +3,6 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Set;
 

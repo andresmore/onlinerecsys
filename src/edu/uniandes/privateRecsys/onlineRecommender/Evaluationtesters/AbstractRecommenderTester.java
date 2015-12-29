@@ -11,7 +11,6 @@ import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserProfileUpdater;
-import edu.uniandes.privateRecsys.onlineRecommender.LearningRateStrategy;
 import edu.uniandes.privateRecsys.onlineRecommender.ModelEvaluator;
 import edu.uniandes.privateRecsys.onlineRecommender.PrivateRecommenderParallelTrainer;
 import edu.uniandes.privateRecsys.onlineRecommender.UserModelTrainerPredictor;

@@ -1,7 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.utils;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 public class RandomGeneratorThread extends Thread {
