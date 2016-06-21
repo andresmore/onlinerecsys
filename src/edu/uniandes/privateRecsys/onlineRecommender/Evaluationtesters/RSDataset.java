@@ -1,6 +1,8 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,10 +41,16 @@ public class RSDataset {
 	
 
 	public RSDataset(String trainSet, String testSet, String testCV,
-			RatingScale scale) {
+			RatingScale scale) throws FileNotFoundException{
 		this.trainSet=trainSet;
+		if(!new File(this.trainSet).exists())
+			throw new FileNotFoundException(this.trainSet+ "file not found");
 		this.testSet=testSet;
+		if(!new File(this.testSet).exists())
+			throw new FileNotFoundException(this.testSet+ "file not found");
 		this.testCV=testCV;
+		if(!new File(this.testCV).exists())
+			throw new FileNotFoundException(this.testCV+ "file not found");
 		this.scale=scale;
 	}
 	public static RSDataset fromPropertyFile(String file) throws IOException{

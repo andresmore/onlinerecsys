@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -239,7 +240,7 @@ public class GridSearchParameter {
 		return result;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		 HashMap<String,String> translations=new HashMap<String,String>();
 		 translations.put("0.5", "1");
 		 translations.put("1.5", "2");

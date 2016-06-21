@@ -1,5 +1,6 @@
 package edu.uniandes.privateRecsys.onlineRecommender.Evaluationtesters;
 
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
@@ -11,7 +12,7 @@ public class PlistaDataset extends RSDataset {
 	private LinkedList<String> prefixes;
 
 	public PlistaDataset(String userFile,String directory,LinkedList<String> prefixes,
-			RatingScale scale) {
+			RatingScale scale) throws FileNotFoundException {
 		
 		super(null, null, null, scale);
 		this.userFile=userFile;

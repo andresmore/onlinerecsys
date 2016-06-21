@@ -1,6 +1,7 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -90,7 +91,7 @@ public class RecommenderMainClass {
 	
 	
 	@SuppressWarnings("static-access")
-	public RecommenderMainClass(){
+	public RecommenderMainClass() throws FileNotFoundException{
 		
 		
 		String trainSetMovieLens="data/ml-10M100K/rb.train.sorted";

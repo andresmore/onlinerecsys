@@ -146,7 +146,7 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 		
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		LinkedList<String> trainPrefixes= new LinkedList<>();
 		trainPrefixes.add("click");
 		trainPrefixes.add("impression");
