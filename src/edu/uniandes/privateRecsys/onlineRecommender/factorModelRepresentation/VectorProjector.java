@@ -1,7 +1,9 @@
 package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
+import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Sorting;
@@ -10,7 +12,9 @@ import org.apache.mahout.math.function.DoubleComparator;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 
+import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.OrdinalRatingScale;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
+import edu.uniandes.privateRecsys.onlineRecommender.utils.PrivateRandomUtils;
 
 public class VectorProjector {
 
@@ -84,11 +88,64 @@ public class VectorProjector {
 	}
 	
 	public static void main(String[] args) {
-		double[] test={0.053126975515139674,0.017844574472162367,0.3610358097220433, 0.14267489776184894, 0,0,0.327, 0.3780798180862419};
-		Vector testVector= new DenseVector(test);
-		Vector result=VectorProjector.projectVectorIntoSimplex(testVector);
-		System.out.println(result);
+		double[] test={0.053126975515139674,0.017844574472162367,0.3610358097220433, 0.14267489776184894,  0.3780798180862419};
+		Vector itemVector= new DenseVector(test);
+		itemVector=VectorProjector.projectVectorIntoSimplex(itemVector);
+		System.out.println("item vector is");
+		System.out.println(itemVector);
+		HashMap<String, Vector> trainedProfiles= new HashMap<>();
+		String[] ratingScaleV={"1","2","3","4","5"};
+		String rating="5";
+		HashMap<String, Vector> userProfile= new HashMap<String, Vector>();
+		for (int i = 0; i < ratingScaleV.length; i++) {
+			Vector vec=PrivateRandomUtils.normalRandom(0, 0.01, 5);
+			userProfile.put(ratingScaleV[i],vec);
+		}
 		
+		userProfile=VectorProjector.projectUserProfileIntoSimplex(userProfile, ratingScaleV, 5);
+		LinkedList<BetaDistribution> dist= new LinkedList<>();
+		Vector emptyHyperParams=null;
+		double gamma=0.1;
+		 HashMap<String,String> translations=new HashMap<String,String>();
+		 translations.put(new String("0"), new String("1"));
+		 translations.put(new String("0.5"), new String("1"));
+		 translations.put(new String("1.5"), new String("2"));
+		 translations.put(new String("2.5"), new String("3"));
+		 translations.put(new String("3.5"), new String("4"));
+		 translations.put(new String("4.5"), new String("5"));
+
+		
+		
+		
+		for (int i = 0; i < ratingScaleV.length; i++) {	
+			Vector privateVector=userProfile.get(ratingScaleV[i]);
+			System.out.println("original "+ratingScaleV[i]+" "+privateVector);
+			int prob=ratingScaleV[i].equals(rating)?1:0;
+			
+			double dotProb=privateVector.dot(itemVector);
+			System.out.println("dot product:" +dotProb);
+			double loss=prob-dotProb;
+			
+			double multiplicator=gamma*(loss);
+			Vector privateVectorMult=itemVector.times(multiplicator);
+			Vector result=privateVector.plus(privateVectorMult);
+			System.out.println("end vector:" +result);
+			double endDotProb=result.dot(itemVector);
+			System.out.println("enddot product:" +endDotProb);
+			double stepLoss=prob-endDotProb;
+			
+			if(Math.abs(stepLoss)>Math.abs(loss)){
+				//	System.err.println("Model increased loss");
+			}
+			trainedProfiles.put(ratingScaleV[i], result);
+			
+			
+		}
+		
+		trainedProfiles=VectorProjector.projectUserProfileIntoSimplex(trainedProfiles,ratingScaleV, itemVector.size());
+		for (int i = 0; i < ratingScaleV.length; i++) {
+			System.out.println("final "+ratingScaleV[i]+" "+trainedProfiles.get(ratingScaleV[i]));
+		}
 		
 	}
 

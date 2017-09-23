@@ -15,7 +15,7 @@ public class OrdinalRatingScale implements RatingScale {
 		
 		
 		this.scale=strings;
-		this.translations=translations;
+		this.translations=translations==null?new HashMap<String, String>():translations;
 		LinkedList<String> finalList= new LinkedList<String>();
 		for (int i = 0; i < scale.length; i++) {
 			if(!translations.keySet().contains(scale[i])){

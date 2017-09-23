@@ -3,7 +3,10 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -16,7 +19,9 @@ import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.In
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PListaEventCollector;
 import edu.uniandes.privateRecsys.onlineRecommender.jsonParserEvents.PlistaJsonEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.ratingScale.RatingScale;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.IRPrecisionError;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 
 public class ModelEvaluator {
@@ -58,47 +63,18 @@ public class ModelEvaluator {
 		}
 
 	
-//System.out.println("RMSE is :"+rmseEval.getRMSE());
-//System.out.println("NumEvals total "+rmseEval.getNumEvals());
-//System.out.println("RandomEvaluations total "+rmseEval.getRandEvals());
 		PredictionProfiler.getInstance().printStats();
 LOG.info("MAE Error for model with file "+testSet+" is "+rmseEval.getMAE()+" with "+rmseEval.getNumEvals()+" predictions (rand: "+rmseEval.getRandEvals()+", hybrid: "+rmseEval.getNumHybridEvals()+")");
 LOG.info("RMSE Error for model with file "+testSet+" is "+rmseEval.getRMSE()+" with "+rmseEval.getNumEvals()+" predictions (rand: "+rmseEval.getRandEvals()+", hybrid: "+rmseEval.getNumHybridEvals()+")");
 return rmseEval.getRMSE();
 }
-
-	@Deprecated
-	public static IRPrecisionError evaluatePlistaModel(
-			PlistaDataset plistaDataset, RatingScale scale,
-			
-			FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender) throws IOException,
-			TasteException {
-		
-		Log.info("Evaluating IR error for plista files ");
-		
-
-		HashSet<Long> users = ((IncrementalFactorUserItemRepresentation) userItemRep)
-				.getRestrictedUserIds();
-		if (users != null) {
-			PlistaJsonEventCreator plistaEventCreator = new PlistaJsonEventCreator(
-					plistaDataset.getDirectory(), 26, 30,
-					plistaDataset.getPrefixes());
-			PListaEventCollector collector = new PListaEventCollector(users,
-					plistaEventCreator);
-			plistaEventCreator.startEvents();
-		
-		
-			
-			TopNPredictorParallelCalculator parallel= new TopNPredictorParallelCalculator(users,userItemRep,topNRecommender,null);
-			return parallel.calculateIRMetrics();
-		}
-		return null;
-	}
+	
+	
 	
 	public static IRPrecisionError evaluateModelIR(String testSet, RatingScale scale,
 			
 			
-			FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender) throws IOException,
+			FactorUserItemRepresentation userItemRep, TopNRecommender topNRecommender, int numMinTrains, int N, boolean preloadTest) throws IOException,
 			TasteException {
 		
 		Log.info("Evaluating IR errors ");
@@ -110,7 +86,8 @@ return rmseEval.getRMSE();
 		
 			
 			TopNPredictorParallelCalculator parallel= new TopNPredictorParallelCalculator(users,userItemRep,topNRecommender,testSet);
-			return parallel.calculateIRMetrics();
+			
+			return parallel.calculateIRMetrics(numMinTrains, N,preloadTest);
 		}
 		return null;
 	}

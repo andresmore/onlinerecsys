@@ -1,6 +1,12 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -11,8 +17,11 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
+import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.IRPrecisionError;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class TopNPredictorParallelCalculator {
 
@@ -25,6 +34,7 @@ public class TopNPredictorParallelCalculator {
 	private ConcurrentLinkedQueue <Double> precisionsAt5 = new ConcurrentLinkedQueue <Double>();
 	private ConcurrentLinkedQueue <Double> precisionsAt10 = new ConcurrentLinkedQueue <Double>();
 	private ConcurrentLinkedQueue <Double> aucs = new ConcurrentLinkedQueue <Double>();
+	private ConcurrentLinkedQueue <Integer> posFirstHit = new ConcurrentLinkedQueue <Integer>();
 	private final static Logger LOG = Logger
 			.getLogger(TopNPredictorParallelCalculator.class.getName());
 	
@@ -53,13 +63,43 @@ public class TopNPredictorParallelCalculator {
 		
 		
 	}
-
-	public IRPrecisionError calculateIRMetrics() throws TasteException {
+	private ConcurrentHashMap<Long, Set<Long>> preloadTestFile() throws TasteException {
+		final ConcurrentHashMap<Long, Set<Long>> testPreferences= new ConcurrentHashMap<Long, Set<Long>>();
 		
+		
+		try {
+			FileEventCreator fileEv= new FileEventCreator(new File(testFile),-1,-1);
+			fileEv.addObserver(new Observer() {
+				
+				@Override
+				public void update(Observable o, Object arg) {
+					FileEvent ev=(FileEvent)arg;
+					UserTrainEvent event=ev.convertToTrainEvent();
+					testPreferences.putIfAbsent(event.getUserId(), new HashSet<Long>());
+					testPreferences.get(event.getUserId()).add(event.getItemId());
+					
+					
+				}
+			});
+			fileEv.startEvents();
+		} catch (IOException | PrivateRecsysException e) {
+			
+			e.printStackTrace();
+			throw new TasteException(e);
+		}
+		return testPreferences;
+	}
+
+	public IRPrecisionError calculateIRMetrics(int minNumTrains, int listSize, boolean preloadTest) throws TasteException {
+		ConcurrentHashMap<Long, Set<Long>> preloadedTest=null;
+		
+		if(preloadTest) {
+			preloadedTest=preloadTestFile();
+		}
 		
 		for (Long userID : users) {
 			
-			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,this.topNrecommender, this.testFile);
+			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,this.topNrecommender, this.testFile, minNumTrains, listSize, preloadedTest);
 			while(executor.getQueue().size()>400000){
 				//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
 				try {
@@ -95,7 +135,7 @@ public class TopNPredictorParallelCalculator {
 		
 
 	return new IRPrecisionError(precisions, precisionsAt5, precisionsAt10,
-			aucs);
+			aucs,posFirstHit);
 	
 	}
 
@@ -119,6 +159,11 @@ public class TopNPredictorParallelCalculator {
 
 	public void incrementNumExecutedTasks() {
 		this.numExecutedTasks.incrementAndGet();
+	}
+
+	public void addFirstHit(int posFirstHit) {
+		this.posFirstHit.add(posFirstHit);
+		
 	}
 
 }

@@ -69,14 +69,14 @@ public class OnlineRecommenderTester extends AbstractRecommenderTester {
 			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
 			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
-			 HashMap<String,String> translations=new HashMap<String,String>();
+			/* HashMap<String,String> translations=new HashMap<String,String>();
 			 translations.put(new String("0"), new String("1"));
 			 translations.put(new String("0.5"), new String("1"));
 			 translations.put(new String("1.5"), new String("2"));
 			 translations.put(new String("2.5"), new String("3"));
 			 translations.put(new String("3.5"), new String("4"));
-			 translations.put(new String("4.5"), new String("5"));
-			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
+			 translations.put(new String("4.5"), new String("5"));*/
+			//RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			
 			//RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
 			RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 

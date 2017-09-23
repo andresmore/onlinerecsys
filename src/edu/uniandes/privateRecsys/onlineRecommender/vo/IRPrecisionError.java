@@ -10,14 +10,16 @@ public class IRPrecisionError implements ErrorReport {
 	private ConcurrentLinkedQueue <Double> precisionsAt5= new ConcurrentLinkedQueue <Double>();
 	private ConcurrentLinkedQueue <Double> precisionsAt10= new ConcurrentLinkedQueue <Double>();
 	private ConcurrentLinkedQueue <Double> aucs= new ConcurrentLinkedQueue <Double>();
+	private ConcurrentLinkedQueue<Integer> posFirstHit;
 	public IRPrecisionError(ConcurrentLinkedQueue <Double> precisions,
 			ConcurrentLinkedQueue <Double> precisionsAt5,
-			ConcurrentLinkedQueue <Double> precisionsAt10, ConcurrentLinkedQueue <Double> aucs) {
+			ConcurrentLinkedQueue <Double> precisionsAt10, ConcurrentLinkedQueue <Double> aucs, ConcurrentLinkedQueue<Integer> posFirstHit) {
 		super();
 		this.precisions = precisions;
 		this.precisionsAt5 = precisionsAt5;
 		this.precisionsAt10 = precisionsAt10;
 		this.aucs = aucs;
+		this.posFirstHit=posFirstHit;
 	}
 	@Override
 	public double getErrorTest() {
@@ -53,9 +55,39 @@ public class IRPrecisionError implements ErrorReport {
 		return avg.getAverage();
 	}
 	
+	public double getHitRate() {
+		FullRunningAverage avg= new FullRunningAverage();
+		for(Integer first: this.posFirstHit) {
+			if(first!=0) {
+				avg.addDatum(1);
+			}
+			else {
+				avg.addDatum(0);
+			}
+		}
+		return avg.getAverage();
+	}
+	public double getAverageReciprocalHitRate() {
+		FullRunningAverage avg= new FullRunningAverage();
+		for(Integer first: this.posFirstHit) {
+			
+			if(first!=0) {
+				avg.addDatum(1/first);
+			}
+			else {
+				avg.addDatum(0);
+			}
+			
+		}
+		return avg.getAverage();
+	}
+	
+	
+	
+	
 	@Override
 	public String toString(){
-	   return "Average_precision="+getAveragePrecision()+" P@5="+getAveragePrecisionsAt5()+" P@10="+getAveragePrecisionsAt10()+" AUC="+getAverageAUC();	
+	   return "HitRate="+getHitRate()+" ARHR="+getAverageReciprocalHitRate()+" Average_precision="+getAveragePrecision()+" P@5="+getAveragePrecisionsAt5()+" P@10="+getAveragePrecisionsAt10()+" AUC="+getAverageAUC();	
 	}
 
 }

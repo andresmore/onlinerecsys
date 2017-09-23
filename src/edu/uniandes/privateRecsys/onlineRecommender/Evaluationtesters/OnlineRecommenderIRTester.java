@@ -8,7 +8,9 @@ import java.util.logging.Logger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
+import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithHistory;
 import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdate;
+import edu.uniandes.privateRecsys.onlineRecommender.BaseModelPredictorWithItemRegularizationUpdateWithHistory;
 import edu.uniandes.privateRecsys.onlineRecommender.FileEventCreator;
 import edu.uniandes.privateRecsys.onlineRecommender.IItemProfileUpdater;
 import edu.uniandes.privateRecsys.onlineRecommender.IUserMaskingStrategy;
@@ -50,37 +52,9 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			
 			LinkedList<String> results= new LinkedList<>();
 			
-			//String trainSet=new String("data/ml-10M100K/rb.train.sorted");
-			String trainSet=new String("data/ml-10M100K/rb.train.meta.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.sorted");
-			//String trainSet=new String("data/ml-1m/rb.train.meta.sorted");
-			//String trainSet="data/netflix/rb.train.sorted";
 			
-		
-			//String testSet=new String("data/ml-10M100K/rb.test.test");
-			String testSet=new String("data/ml-10M100K/rb.test.meta.test");
-			//String testSet=new String("data/ml-1m/rb.test.test");
-			//String testSet=new String("data/ml-1m/rb.test.meta.test");
-			//String testSet="data/netflix/rb.test.test";
-			
-			
-			//String testCV=new String("data/ml-10M100K/rb.test.cv");
-			String testCV=new String("data/ml-10M100K/rb.test.meta.cv");
-			//String testCV=new String("data/ml-1m/rb.test.cv");
-			//String testCV=new String("data/ml-1m/rb.test.meta.cv");
-			//String testCV="data/netflix/rb.test.CV";
 			LOG.info("Loading model");
-			 HashMap<String,String> translations=new HashMap<String,String>();
-			 translations.put(new String("0"), new String("1"));
-			 translations.put(new String("0.5"), new String("1"));
-			 translations.put(new String("1.5"), new String("2"));
-			 translations.put(new String("2.5"), new String("3"));
-			 translations.put(new String("3.5"), new String("4"));
-			 translations.put(new String("4.5"), new String("5"));
-			RatingScale scale= new OrdinalRatingScale(new String[] {new String("0"),new String("0.5"),new String("1"),new String("1.5"),new String("2"),new String("2.5"),new String("3"),new String("3.5"),new String("4"),new String("4.5"),new String("5")},translations);
 			
-			//RSDataset data= new RSDataset(trainSet,testSet,testCV,scale);
-			//RSDataset data=RSDataset.fromPropertyFile("config/yMusic.properties"); 
 			RSDataset data= RSDataset.fromPropertyFile("config/dbbookLocation.properties");
 			
 			
@@ -95,14 +69,14 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			
 			LinkedList<UserModelTrainerPredictor> predictorsLinked= new LinkedList<UserModelTrainerPredictor>();
 			//predictorsLinked.add(new BayesAveragePredictor());	
-			//BaseModelPredictor basemodel= new BaseModelPredictor();
-			//predictorsLinked.add(basemodel);
-			BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdate(0.001);
+			BaseModelPredictorWithHistory basemodel= new BaseModelPredictorWithHistory();
+			predictorsLinked.add(basemodel);
+			BaseModelPredictorWithItemRegularizationUpdateWithHistory baseModelPredictor = new BaseModelPredictorWithItemRegularizationUpdateWithHistory(0.001);
 			predictorsLinked.add(baseModelPredictor);
-			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor2 = new BaseModelPredictorWithItemRegularizationUpdate(0.01);
-			//predictorsLinked.add(baseModelPredictor2);
-			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor3 = new BaseModelPredictorWithItemRegularizationUpdate(0.1);
-			//predictorsLinked.add(baseModelPredictor3);
+			BaseModelPredictorWithItemRegularizationUpdateWithHistory baseModelPredictor2 = new BaseModelPredictorWithItemRegularizationUpdateWithHistory(0.01);
+			predictorsLinked.add(baseModelPredictor2);
+			BaseModelPredictorWithItemRegularizationUpdateWithHistory baseModelPredictor3 = new BaseModelPredictorWithItemRegularizationUpdateWithHistory(0.1);
+			predictorsLinked.add(baseModelPredictor3);
 			//BaseModelPredictorWithItemRegularizationUpdate baseModelPredictor4 = new BaseModelPredictorWithItemRegularizationUpdate(0);
 			//predictorsLinked.add(baseModelPredictor4);
 			
@@ -231,8 +205,8 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 				}
 				LOG.info(System.nanoTime()+" Finished training, measuring errors ");
 				TopNRecommenderFactorModel topNRecommender= new TopNRecommenderFactorModel(this.predictor);
-				error=ModelEvaluator.evaluateModelIR(rsDataset.getTestSet(),rsDataset.getScale(),this.userItemRep, topNRecommender);
-				errorCV=ModelEvaluator.evaluateModelIR(rsDataset.getTestCV(),rsDataset.getScale(),this.userItemRep, topNRecommender);
+				error=ModelEvaluator.evaluateModelIR(rsDataset.getTestSet(),rsDataset.getScale(),this.userItemRep, topNRecommender,0,10, true);
+				errorCV=ModelEvaluator.evaluateModelIR(rsDataset.getTestCV(),rsDataset.getScale(),this.userItemRep, topNRecommender,0,10, true);
 				
 				LOG.info(System.nanoTime()+" Iteration "+iteration+" errors: "+error.toString());
 				partialErrors.addAll(pstr.getPartialEvaluations());

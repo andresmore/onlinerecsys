@@ -117,8 +117,8 @@ public class PlistaRecommenderTester extends AbstractRecommenderTester {
 				LOG.info("Finished training, measuring errors ");
 				this.plistaDataset.getPrefixes().add("create");
 				this.plistaDataset.getPrefixes().add("update");
-				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(), this.userItemRep, new TopNRecommenderFactorModel(this.predictor));
-				return error;
+				//IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(), this.userItemRep, new TopNRecommenderFactorModel(this.predictor));
+				return null;
 			} catch (InterruptedException e) {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 			}

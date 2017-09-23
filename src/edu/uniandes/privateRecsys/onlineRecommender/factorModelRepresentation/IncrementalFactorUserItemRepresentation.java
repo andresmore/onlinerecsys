@@ -3,6 +3,7 @@ package edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +53,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	private HashSet<Long> restrictedUserIds;
 	private UserModelTrainerPredictor modelTrainerPredictor;
 	protected RSDataset dataSet;
+	
 
 	public HashSet<Long> getRestrictedUserIds() {
 		return restrictedUserIds;
@@ -474,7 +476,7 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void addUserEvent(long userId, long itemId, String rating) {
-		if(this.modelTrainerPredictor.saveItemMetadata()){
+		if(this.modelTrainerPredictor.hasUserHistory()){
 			LinkedList<Preference> userHistory=privateUserHistory.get(userId);
 			if(userHistory==null)
 				userHistory= new LinkedList<>();
@@ -488,19 +490,33 @@ public class IncrementalFactorUserItemRepresentation implements
 
 	@Override
 	public void saveItemMetadata(long itemId, String metadataStr) {
-		if(!this.itemMetadata.containsKey(itemId)){
-			if(metadataStr!=null){
-				LinkedList<Long>metadata=ConceptBreaker.breakConcepts(metadataStr);
-				Collections.sort(metadata);
-				this.itemMetadata.putIfAbsent(itemId, metadata);
-			}	
+
+		if (this.modelTrainerPredictor.saveItemMetadata()) {
+			if (!this.itemMetadata.containsKey(itemId)) {
+				if (metadataStr != null) {
+					LinkedList<Long> metadata = ConceptBreaker.breakConcepts(metadataStr);
+					Collections.sort(metadata);
+					this.itemMetadata.putIfAbsent(itemId, metadata);
+				}
+			}
 		}
 	}
 
 	@Override
 	public Set<Long> getRatedItems(Long userId) {
+		if(! this.modelTrainerPredictor.hasUserHistory()) {
 		HashSet<Long> itemIds= new FilterElement(userId,this.dataSet.getTrainSet()).getElementsFromFile();
 		return itemIds;
+		}
+		else {
+			LinkedList<Preference> preferences=privateUserHistory.get(userId);
+			
+			HashSet<Long> itemIds=new HashSet<>();
+			for (Preference pref : preferences) {
+				itemIds.add(pref.getItemID());
+			}
+			return itemIds;
+		}
 	}
 	
 

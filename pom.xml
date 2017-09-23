@@ -54,36 +54,43 @@
   		<artifactId>commons-math3</artifactId>
   		<version>3.2</version>
   	</dependency>
-  	<dependency>
-    	<groupId>net.recommenders.rival</groupId>
-    	<artifactId>rival</artifactId>
-    	<version>0.1</version>
-    	<type>pom</type>
-	</dependency>
-	<dependency>
-	<groupId>net.recommenders.rival</groupId>
-    	<artifactId>rival-core</artifactId>
-    	<version>0.1</version>
-   	</dependency>
-   	<dependency>
-	<groupId>net.recommenders.rival</groupId>
-    	<artifactId>rival-split</artifactId>
-    	<version>0.1</version>
-   	</dependency>
-   	<dependency>
-	<groupId>net.recommenders.rival</groupId>
-    	<artifactId>rival-evaluate</artifactId>
-    	<version>0.1</version>
-   	</dependency>
 	<dependency>
     <groupId>org.postgresql</groupId>
     	<artifactId>postgresql</artifactId>
     	<version>9.4-1201-jdbc41</version>
 	</dependency>
    	
-
-   	
-   	
+	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival</artifactId>
+    <version>0.2</version>
+    <type>pom</type>
+	</dependency>
+	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival-core</artifactId>
+    <version>0.2</version>
+	</dependency>
+	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival-split</artifactId>
+    <version>0.2</version>
+	</dependency>
+   	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival-split</artifactId>
+    <version>0.2</version>
+	</dependency>
+   	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival-evaluate</artifactId>
+    <version>0.2</version>
+	</dependency>
+   	<dependency>
+    <groupId>net.recommenders.rival</groupId>
+    <artifactId>rival-examples</artifactId>
+    <version>0.2</version>
+	</dependency>
   	<dependency>
   		<groupId>com.clearspring.analytics</groupId>
   		<artifactId>stream</artifactId>

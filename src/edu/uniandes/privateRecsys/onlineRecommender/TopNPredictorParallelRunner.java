@@ -1,12 +1,21 @@
 package edu.uniandes.privateRecsys.onlineRecommender;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
+import edu.uniandes.privateRecsys.onlineRecommender.exception.PrivateRecsysException;
 import edu.uniandes.privateRecsys.onlineRecommender.factorModelRepresentation.FactorUserItemRepresentation;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.FileEvent;
 import edu.uniandes.privateRecsys.onlineRecommender.vo.Prediction;
+import edu.uniandes.privateRecsys.onlineRecommender.vo.UserTrainEvent;
 
 public class TopNPredictorParallelRunner implements Runnable {
 
@@ -16,38 +25,64 @@ public class TopNPredictorParallelRunner implements Runnable {
 	private TopNRecommender topRecommender;
 	private FactorUserItemRepresentation userItemRep;
 	private String testFile;
+	private int minTrainsForItem;
+	private int N;
+	private boolean preloadedTest=false;
+	private ConcurrentHashMap<Long, Set<Long>> testPreferences;
 
 	public TopNPredictorParallelRunner(
 			TopNPredictorParallelCalculator topNPredictorParallelCalculator,
-			Long userID, FactorUserItemRepresentation userItemRep, TopNRecommender topRecommender, String testFile) {
+			Long userID, FactorUserItemRepresentation userItemRep, TopNRecommender topRecommender, String testFile, int minTrainsForItem, int N,ConcurrentHashMap<Long, Set<Long>> testPreferences) {
 		this.parent=topNPredictorParallelCalculator;
 		this.userItemRep=userItemRep;
 		this.userID=userID;
 		this.testFile=testFile;
 		this.topRecommender=topRecommender;
+		this.minTrainsForItem=minTrainsForItem;
+		this.N=N;
+		this.testPreferences=testPreferences;
+		if(testPreferences!=null)
+			preloadedTest=true;
+		
 	}
+	
+	
 
 	@Override
 	public void run() {
 		if (userID != 0 && userID != -1) {
 			Prediction[] topNPrediction = null;
 			try {
-				topNPrediction = topRecommender.getTopRecommendationForUsers(userItemRep.getItemsId(10),userItemRep.getRatedItems(userID),
-						userID,  10, 10);
+				topNPrediction = topRecommender.getTopRecommendationForUsers(userItemRep.getItemsId(minTrainsForItem),userItemRep.getRatedItems(userID),
+						userID,  N, this.minTrainsForItem);
 			} catch (TasteException e) {
 
 			}
 			if (topNPrediction != null) {
-				Set<Long> positiveRecommendations = userItemRep.getPositiveElements(userID, testFile);
+				
+				Set<Long> positiveRecommendations =null;
+				if(!preloadedTest) {
+					positiveRecommendations = userItemRep.getPositiveElements(userID, testFile);
+				}
+				else {
+					positiveRecommendations =testPreferences.get(userID);
+				}
+				
 				int truePosLocal = 0;
 				int falsePosLocal = 0;
 				LinkedList<Double> precisionsAt = new LinkedList<Double>();
 				LinkedList<Integer> aucCurve = new LinkedList<Integer>();
+				boolean hit=false;
+				int posFirstHit=0;
 				for (Prediction recMovieId : topNPrediction) {
 					if (positiveRecommendations
 							.contains(recMovieId.getItemId())) {
 						truePosLocal++;
 						aucCurve.add(1);
+						if(!hit) {
+							posFirstHit=aucCurve.size();
+						}
+						hit=true;
 					} else {
 						falsePosLocal++;
 						aucCurve.add(0);
@@ -67,11 +102,11 @@ public class TopNPredictorParallelRunner implements Runnable {
 				parent.addNewPrecision(averagePR);
 				
 				// Precision@5 for user
-				if (precisionsAt.size() >= 5)
+				if (precisionsAt.size() == 5)
 					parent.addNewPrecisionAt5(precisionsAt.get(4));
 				
 				// Precision@10 for user
-				if (precisionsAt.size() >= 10)
+				if (precisionsAt.size() == 10)
 					parent.addNewPrecisionAt10(precisionsAt.get(9));
 				
 				// AUC curve per user
@@ -88,6 +123,7 @@ public class TopNPredictorParallelRunner implements Runnable {
 				}
 				trapezoidSum = (double) trapezoidSum / (double) aucCurve.size();
 				parent.addNewAUC(trapezoidSum);
+				parent.addFirstHit(posFirstHit);
 				parent.incrementNumExecutedTasks();
 				
 			}

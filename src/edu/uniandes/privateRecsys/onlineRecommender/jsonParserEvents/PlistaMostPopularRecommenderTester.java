@@ -133,8 +133,8 @@ public class PlistaMostPopularRecommenderTester extends AbstractRecommenderTeste
 					
 				}
 				
-				IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(),this.userItemRep, new TopNPopularityRecommender(popObserver));
-				return error;
+				//IRPrecisionError error=ModelEvaluator.evaluatePlistaModel(this.plistaDataset,rsDataset.getScale(),this.userItemRep, new TopNPopularityRecommender(popObserver));
+				return null;
 			} catch (InterruptedException e) {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 			}
