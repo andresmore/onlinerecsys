@@ -72,7 +72,7 @@ public class IRPrecisionError implements ErrorReport {
 		for(Integer first: this.posFirstHit) {
 			
 			if(first!=0) {
-				avg.addDatum(1/first);
+				avg.addDatum(1.0/first);
 			}
 			else {
 				avg.addDatum(0);

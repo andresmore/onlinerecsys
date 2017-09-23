@@ -2,6 +2,7 @@ package edu.uniandes.privateRecsys.onlineRecommender;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
@@ -63,8 +64,8 @@ public class TopNPredictorParallelCalculator {
 		
 		
 	}
-	private ConcurrentHashMap<Long, Set<Long>> preloadTestFile() throws TasteException {
-		final ConcurrentHashMap<Long, Set<Long>> testPreferences= new ConcurrentHashMap<Long, Set<Long>>();
+	private HashMap<Long, Set<Long>> preloadTestFile() throws TasteException {
+		final HashMap<Long, Set<Long>> testPreferences= new HashMap<Long, Set<Long>>();
 		
 		
 		try {
@@ -91,10 +92,12 @@ public class TopNPredictorParallelCalculator {
 	}
 
 	public IRPrecisionError calculateIRMetrics(int minNumTrains, int listSize, boolean preloadTest) throws TasteException {
-		ConcurrentHashMap<Long, Set<Long>> preloadedTest=null;
+		HashMap<Long, Set<Long>> preloadedTest=null;
 		
 		if(preloadTest) {
+			LOG.info("Preloading test file");
 			preloadedTest=preloadTestFile();
+			LOG.info("Test file loaded");
 		}
 		
 		for (Long userID : users) {

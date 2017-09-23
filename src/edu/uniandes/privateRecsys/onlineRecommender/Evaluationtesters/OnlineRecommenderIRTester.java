@@ -55,15 +55,15 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			
 			LOG.info("Loading model");
 			
-			RSDataset data= RSDataset.fromPropertyFile("config/dbbookLocation.properties");
+			RSDataset data= RSDataset.fromPropertyFile("config/movielens10M.properties");
 			
 			
 			
 			
 			
 			
-			//int[] limitSizes={5,10,15,20,25,30,35,40,45,50};
-			int[] limitSizes={5};
+			int[] limitSizes={5,10,15,20,25,30,35,40,45,50};
+			//int[] limitSizes={5};
 			
 			double[] learningRates={0.001,0.01,0.05,0.15,0.25};
 			
@@ -206,7 +206,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 				LOG.info(System.nanoTime()+" Finished training, measuring errors ");
 				TopNRecommenderFactorModel topNRecommender= new TopNRecommenderFactorModel(this.predictor);
 				error=ModelEvaluator.evaluateModelIR(rsDataset.getTestSet(),rsDataset.getScale(),this.userItemRep, topNRecommender,0,10, true);
-				errorCV=ModelEvaluator.evaluateModelIR(rsDataset.getTestCV(),rsDataset.getScale(),this.userItemRep, topNRecommender,0,10, true);
+				//errorCV=ModelEvaluator.evaluateModelIR(rsDataset.getTestCV(),rsDataset.getScale(),this.userItemRep, topNRecommender,0,10, true);
 				
 				LOG.info(System.nanoTime()+" Iteration "+iteration+" errors: "+error.toString());
 				partialErrors.addAll(pstr.getPartialEvaluations());
@@ -214,7 +214,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 				throw new TasteException("Training failed - not completed Executed tasks: "+pstr.numExecutedTasks());
 			}
 		}
-		LOG.info("Final error for experiment with with predictor ="+predictor.toString()+" numIterations training "+numIterations+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: cv="+errorCV+" test="+error);
+		LOG.info("Final error for experiment"+rsDataset.getTestSet()+" with predictor ="+predictor.toString()+" numIterations training "+numIterations+" UserProfiler: "+userUpdater.toString()+" numIterations training "+numIterations +" is: cv="+errorCV+" test="+error);
 		return error;
 		
 		

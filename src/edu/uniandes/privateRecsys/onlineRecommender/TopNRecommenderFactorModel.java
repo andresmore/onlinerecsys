@@ -43,7 +43,9 @@ public class TopNRecommenderFactorModel implements TopNRecommender,Serializable 
 		}
 		
 		Prediction[] ret= predictions.toArray(new Prediction[predictions.size()]);
-		Arrays.sort(ret, Collections.reverseOrder());
+		for(int i=ret.length-1;i>=0;i--) {
+			ret[i]=predictions.poll();
+		}
 		
 		return ret;
 	}
