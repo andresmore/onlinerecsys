@@ -80,7 +80,7 @@ return rmseEval.getRMSE();
 		Log.info("Evaluating IR errors ");
 		
 
-		Set<Long> users = userItemRep.getUsersId();
+		HashSet<Long> users = new HashSet<Long>(userItemRep.getUsersId());
 		if (users != null) {
 			
 		
@@ -90,6 +90,7 @@ return rmseEval.getRMSE();
 			return parallel.calculateIRMetrics(numMinTrains, N,preloadTest);
 		}
 		return null;
+		
 	}
 
 }

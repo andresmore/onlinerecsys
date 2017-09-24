@@ -112,7 +112,7 @@ public class IncrementalFactorUserItemRepresentation implements
 	}
 	
 	@Override
-	synchronized public UserProfile getPrivateUserProfile(long userId) throws TasteException {
+	 public UserProfile getPrivateUserProfile(long userId) throws TasteException {
 		if(isAllowed(userId)){
 			
 			

@@ -55,9 +55,13 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			
 			LOG.info("Loading model");
 			
-			RSDataset data= RSDataset.fromPropertyFile("config/movielens10M.properties");
+			RSDataset dataF= RSDataset.fromPropertyFile("config/movielens10M.properties");
+			RSDataset data0= RSDataset.fromPropertyFile("config/movielens10M_0.properties");
+			RSDataset data1= RSDataset.fromPropertyFile("config/movielens10M_1.properties");
+			RSDataset data2= RSDataset.fromPropertyFile("config/movielens10M_2.properties");
 			
-			
+			RSDataset data3= RSDataset.fromPropertyFile("config/movielens10M_3.properties");
+			RSDataset data4= RSDataset.fromPropertyFile("config/movielens10M_4.properties");
 			
 			
 			
@@ -66,6 +70,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			//int[] limitSizes={5};
 			
 			double[] learningRates={0.001,0.01,0.05,0.15,0.25};
+			RSDataset[] datasets= {dataF,data0,data1,data2,data3,data4};
 			
 			LinkedList<UserModelTrainerPredictor> predictorsLinked= new LinkedList<UserModelTrainerPredictor>();
 			//predictorsLinked.add(new BayesAveragePredictor());	
@@ -92,7 +97,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 			int skips=0;
 			int iters=0;
 			Object[] predictors=  predictorsLinked.toArray();
-				
+			for(int dat=0;dat<datasets.length;dat++) {	
 			for (int i = 0; i < predictors.length; i++) {
 
 				for (int j = 0; j < learningRates.length; j++) {
@@ -101,7 +106,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 						
 						if(iters>=skips){
 							int dimensions = limitSizes[d];
-
+							RSDataset data=datasets[dat];
 							UserModelTrainerPredictor trainerPredictor = (UserModelTrainerPredictor) predictors[i];
 							FactorUserItemRepresentation denseModel = new IncrementalFactorUserItemRepresentation(
 									data, dimensions, false,
@@ -116,10 +121,10 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 
 							OnlineRecommenderIRTester rest = new OnlineRecommenderIRTester(
 									data, dimensions);
-							// rest.setEventsReport(1000000);
+							
 							UserProfileUpdater userUp = new UserProfileUpdater(
 									trainerPredictor);
-							// int limit=trainLimits[j];
+							
 							IUserMaskingStrategy agregator = new NoMaskingStrategy();
 							IItemProfileUpdater itemUpdater = new ItemProfileUpdater(
 									trainerPredictor);
@@ -127,7 +132,9 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 									agregator, itemUpdater);
 							rest.setModelPredictor(trainerPredictor);
 							ErrorReport result = rest.startExperiment(1);
-							String resultLine = predictors[i] + "" + '\t'
+							String resultLine = 
+									datasets[dat].getTrainSet() + "" + '\t'
+									+predictors[i] + "" + '\t'
 									+ learningRates[j] + "" + '\t'
 									+ limitSizes[d] + "" + '\t'
 									+ result.toString();
@@ -144,7 +151,7 @@ public class OnlineRecommenderIRTester extends AbstractRecommenderTester {
 
 			}		
 				
-			
+			}
 			for (String string : results) {
 				LOG.info(string);
 				
