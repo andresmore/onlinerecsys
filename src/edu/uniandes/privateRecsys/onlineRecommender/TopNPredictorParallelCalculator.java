@@ -31,11 +31,11 @@ public class TopNPredictorParallelCalculator {
 	private FactorUserItemRepresentation userItemRep;
 	private AtomicLong numSubmitedTasks=new AtomicLong(0);
 	private AtomicLong numExecutedTasks=new AtomicLong(0);
-	private ConcurrentLinkedQueue <Double> precisions = new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> precisionsAt5 = new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> precisionsAt10 = new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> aucs = new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Integer> posFirstHit = new ConcurrentLinkedQueue <Integer>();
+	private double[] precisions ;
+	private double[] precisionsAt5;
+	private double[] precisionsAt10 ;
+	private double[] aucs;
+	private int[] posFirstHit ;
 	private final static Logger LOG = Logger
 			.getLogger(TopNPredictorParallelCalculator.class.getName());
 	
@@ -99,12 +99,18 @@ public class TopNPredictorParallelCalculator {
 			preloadedTest=preloadTestFile();
 			LOG.info("Test file loaded");
 		}
+		precisions = new double[users.size()];
+		precisionsAt5= new double[users.size()];;
+		precisionsAt10 = new double[users.size()];;
+		aucs= new double[users.size()];
+		posFirstHit = new int[users.size()];;
 		
+		int idx=0;
 		for (Long userID : users) {
 			
-			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,this.topNrecommender, this.testFile, minNumTrains, listSize, preloadedTest);
+			TopNPredictorParallelRunner run=new TopNPredictorParallelRunner(this,userID,userItemRep,this.topNrecommender, this.testFile, minNumTrains, listSize, preloadedTest,idx);
 			while(executor.getQueue().size()>400000){
-				//System.out.println("Waiting on queue, size is "+executor.getQueue().size());
+				System.out.println("Waiting on queue, size is "+executor.getQueue().size());
 				try {
 					Thread.sleep(50);
 					System.out.println("Waited, queue size is now "+executor.getQueue().size());
@@ -115,7 +121,7 @@ public class TopNPredictorParallelCalculator {
 			}
 			executor.submit(run);
 			numSubmitedTasks.incrementAndGet();
-		
+			idx++;
 
 			
 	
@@ -126,6 +132,7 @@ public class TopNPredictorParallelCalculator {
 			LOG.info("Awaiting termination of TopNIR eval");
 			executor.awaitTermination(15, TimeUnit.MINUTES);
 			LOG.info("Finished termination of TopNIR eval terminated: "+executor.isTerminated());
+			LOG.info("Excecuted "+this.numSubmitedTasks+" evs");
 			if(!executor.isTerminated())
 				executor.shutdownNow();
 		} catch (InterruptedException e) {
@@ -142,30 +149,34 @@ public class TopNPredictorParallelCalculator {
 	
 	}
 
-	public void addNewPrecision(double averagePR) {
-		precisions.add(averagePR);
+	public void addNewPrecision(double averagePR, int idx) {
+		precisions[idx]=averagePR;
 		
 	}
 
-	public void addNewPrecisionAt5(Double pAt5) {
-		precisionsAt5.add(pAt5);
+	public void addNewPrecisionAt5(double pAt5, int idx) {
+		precisionsAt5[idx]=(pAt5);
 	}
 
-	public void addNewPrecisionAt10(Double pAt10) {
-		precisionsAt10.add(pAt10);
+	public void addNewPrecisionAt10(double pAt10,int idx) {
+		precisionsAt10[idx]=(pAt10);
 		
 	}
 
-	public void addNewAUC(double trapezoidSum) {
-		aucs.add(trapezoidSum);
+	public void addNewAUC(double trapezoidSum, int idx) {
+		aucs[idx]=(trapezoidSum);
 	}
 
 	public void incrementNumExecutedTasks() {
-		this.numExecutedTasks.incrementAndGet();
+		long num=this.numExecutedTasks.incrementAndGet();
+		
+		if(num%10000==0) {
+			LOG.info("Excecuted "+num+" evs");
+		}
 	}
 
-	public void addFirstHit(int posFirstHit) {
-		this.posFirstHit.add(posFirstHit);
+	public void addFirstHit(int posFirstHit, int idx) {
+		this.posFirstHit[idx]=(posFirstHit);
 		
 	}
 

@@ -22,10 +22,11 @@ public class TopNPredictorParallelRunner implements Runnable {
 	private int N;
 	private boolean preloadedTest=false;
 	private HashMap<Long, Set<Long>> testPreferences;
+	private int idx;
 
 	public TopNPredictorParallelRunner(
 			TopNPredictorParallelCalculator topNPredictorParallelCalculator,
-			Long userID, FactorUserItemRepresentation userItemRep, TopNRecommender topRecommender, String testFile, int minTrainsForItem, int N,HashMap<Long, Set<Long>> testPreferences) {
+			Long userID, FactorUserItemRepresentation userItemRep, TopNRecommender topRecommender, String testFile, int minTrainsForItem, int N,HashMap<Long, Set<Long>> testPreferences, int idx) {
 		this.parent=topNPredictorParallelCalculator;
 		this.userItemRep=userItemRep;
 		this.userID=userID;
@@ -36,6 +37,7 @@ public class TopNPredictorParallelRunner implements Runnable {
 		this.testPreferences=testPreferences;
 		if(testPreferences!=null)
 			preloadedTest=true;
+		this.idx=idx;
 		
 	}
 	
@@ -93,15 +95,15 @@ public class TopNPredictorParallelRunner implements Runnable {
 					averagePR += precsAt;
 				}
 				averagePR = (double) averagePR / (double) precisionsAt.size();
-				parent.addNewPrecision(averagePR);
+				parent.addNewPrecision(averagePR,idx);
 				
 				// Precision@5 for user
 				if (precisionsAt.size() >= 5)
-					parent.addNewPrecisionAt5(precisionsAt.get(4));
+					parent.addNewPrecisionAt5(precisionsAt.get(4),idx);
 				
 				// Precision@10 for user
 				if (precisionsAt.size() >= 10)
-					parent.addNewPrecisionAt10(precisionsAt.get(9));
+					parent.addNewPrecisionAt10(precisionsAt.get(9),idx);
 				
 				// AUC curve per user
 				double trapezoidSum = 0.0;
@@ -116,8 +118,8 @@ public class TopNPredictorParallelRunner implements Runnable {
 
 				}
 				trapezoidSum = (double) trapezoidSum / (double) aucCurve.size();
-				parent.addNewAUC(trapezoidSum);
-				parent.addFirstHit(posFirstHit);
+				parent.addNewAUC(trapezoidSum,idx);
+				parent.addFirstHit(posFirstHit,idx);
 				parent.incrementNumExecutedTasks();
 				
 			}

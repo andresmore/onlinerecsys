@@ -6,14 +6,14 @@ import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 
 public class IRPrecisionError implements ErrorReport {
 
-	private ConcurrentLinkedQueue <Double> precisions= new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> precisionsAt5= new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> precisionsAt10= new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue <Double> aucs= new ConcurrentLinkedQueue <Double>();
-	private ConcurrentLinkedQueue<Integer> posFirstHit;
-	public IRPrecisionError(ConcurrentLinkedQueue <Double> precisions,
-			ConcurrentLinkedQueue <Double> precisionsAt5,
-			ConcurrentLinkedQueue <Double> precisionsAt10, ConcurrentLinkedQueue <Double> aucs, ConcurrentLinkedQueue<Integer> posFirstHit) {
+	private double[] precisions;
+	private double[]  precisionsAt5;
+	private double[]  precisionsAt10;
+	private double[]  aucs;
+	private int[] posFirstHit;
+	public IRPrecisionError(double[]  precisions,
+			double[] precisionsAt5,
+			double[]  precisionsAt10, double[]  aucs, int[]  posFirstHit) {
 		super();
 		this.precisions = precisions;
 		this.precisionsAt5 = precisionsAt5;
